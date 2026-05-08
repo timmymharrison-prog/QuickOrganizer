@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Planner</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1921,8 +1922,8 @@
                 <div class="calendar-nav">
                     <div class="calendar-month" id="calendarMonth"></div>
                     <div class="nav-btns">
-                        <button class="nav-btn" onclick="previousMonth()">â€¹</button>
-                        <button class="nav-btn" onclick="nextMonth()">â€º</button>
+                        <button class="nav-btn" onclick="previousMonth()">&lsaquo;</button>
+                        <button class="nav-btn" onclick="nextMonth()">&rsaquo;</button>
                     </div>
                 </div>
 
@@ -1960,7 +1961,7 @@
                     </div>
                     <div class="day-view-header-actions">
                         <button class="add-btn" onclick="toggleDayEventInput()" id="dayAddEventBtn">+ Add Event</button>
-                        <button class="close-modal-btn" onclick="closeDayView()">Ã—</button>
+                        <button class="close-modal-btn" onclick="closeDayView()">&times;</button>
                     </div>
                 </div>
                 
@@ -1999,7 +2000,7 @@
             <div class="task-detail-content" onclick="event.stopPropagation()">
                 <div class="task-detail-header">
                     <div class="task-detail-title" id="taskDetailTitle"></div>
-                    <button class="close-modal-btn" onclick="closeTaskDetail()">Ã—</button>
+                    <button class="close-modal-btn" onclick="closeTaskDetail()">&times;</button>
                 </div>
 
                 <div class="notes-section">
@@ -2036,7 +2037,7 @@
                 <!-- Reminder Section -->
                 <div class="notes-section">
                     <label class="notes-section-label">Set Reminder</label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
                         <div>
                             <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Date</label>
                             <input type="date" id="taskReminderDate" class="task-input">
@@ -2046,6 +2047,7 @@
                             <input type="time" id="taskReminderTime" class="task-input" step="300">
                         </div>
                     </div>
+                    <button class="save-note-btn" onclick="saveTaskReminder()">Save Reminder</button>
                 </div>
 
                 <!-- Event Scheduling Section -->
@@ -2082,7 +2084,7 @@
             <div class="settings-modal-content" onclick="event.stopPropagation()">
                 <div class="settings-modal-header">
                     <div class="settings-modal-title">Settings</div>
-                    <button class="close-modal-btn" onclick="closeSettingsModal()">Ã—</button>
+                    <button class="close-modal-btn" onclick="closeSettingsModal()">&times;</button>
                 </div>
 
                 <div class="settings-section">
@@ -2100,7 +2102,7 @@
             <div class="note-detail-content" onclick="event.stopPropagation()">
                 <div class="note-detail-header">
                     <div class="note-detail-timestamp" id="noteDetailTimestamp"></div>
-                    <button class="close-modal-btn" onclick="closeNoteDetail()">Ã—</button>
+                    <button class="close-modal-btn" onclick="closeNoteDetail()">&times;</button>
                 </div>
 
                 <div class="note-detail-text" id="noteDetailText"></div>
@@ -2173,7 +2175,7 @@
                     <div class="meetings-panel-title">Meetings</div>
                     <div style="display: flex; gap: 0.5rem; align-items: center;">
                         <button class="add-btn" onclick="openCreateMeetingForm()">+ New Meeting</button>
-                        <button class="close-modal-btn" onclick="closeMeetingsPanel()">Ã—</button>
+                        <button class="close-modal-btn" onclick="closeMeetingsPanel()">&times;</button>
                     </div>
                 </div>
 
@@ -2291,7 +2293,7 @@
             <div class="meeting-detail-content" onclick="event.stopPropagation()">
                 <div class="meeting-detail-header">
                     <div class="meeting-detail-title" id="meetingDetailTitle"></div>
-                    <button class="close-modal-btn" onclick="closeMeetingDetail()">Ã—</button>
+                    <button class="close-modal-btn" onclick="closeMeetingDetail()">&times;</button>
                 </div>
 
                 <div class="meeting-info-section">
@@ -2456,7 +2458,7 @@
                            onchange="toggleTask(${task.id})"
                            onclick="event.stopPropagation()">
                     <span class="task-text">${task.text}</span>
-                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">Ã—</button>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">&times;</button>
                 </div>
             `).join('');
         }
@@ -2512,7 +2514,7 @@
                     <div class="note-item" ondblclick="openNoteDetail(${note.id})">
                         <div class="note-header">
                             <span class="note-time">${timeStr}</span>
-                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">Ã—</button>
+                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">&times;</button>
                         </div>
                         <div class="note-text">${note.text}</div>
                     </div>
@@ -3037,7 +3039,7 @@
                     <div class="event-item">
                         <div class="note-header">
                             <div class="event-date">${dateStr}</div>
-                            <button class="delete-btn" onclick="deleteEvent(${event.id})">Ã—</button>
+                            <button class="delete-btn" onclick="deleteEvent(${event.id})">&times;</button>
                         </div>
                         <div class="event-title">${event.title}</div>
                         ${timeStr ? `<div class="event-time">${timeStr}</div>` : ''}
@@ -3129,7 +3131,7 @@
                                     ${timeStr ? `<div class="day-event-time">${timeStr}</div>` : ''}
                                     ${durationStr ? `<div class="day-event-duration">${durationStr}</div>` : ''}
                                 </div>
-                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">Ã—</button>
+                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">&times;</button>
                             </div>
                             ${event.description ? `<div class="day-event-description">${event.description}</div>` : ''}
                         </div>
@@ -4038,7 +4040,7 @@
                                 <div class="meeting-task-count">${incompleteTasks} of ${totalTasks} tasks pending</div>
                             </div>
                             <div class="meeting-actions-quick">
-                                <button class="meeting-action-icon" onclick="event.stopPropagation(); deleteMeeting(${meeting.id})" title="Delete">Ã—</button>
+                                <button class="meeting-action-icon" onclick="event.stopPropagation(); deleteMeeting(${meeting.id})" title="Delete">&times;</button>
                             </div>
                         </div>
                     </div>
@@ -4195,7 +4197,7 @@
                            onchange="toggleMeetingTask(${task.id})"
                            onclick="event.stopPropagation()">
                     <span class="task-text" style="flex: 1;">${task.text}</span>
-                    <button class="delete-btn" onclick="event.stopPropagation(); deleteMeetingTask(${task.id})">Ã—</button>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteMeetingTask(${task.id})">&times;</button>
                 </div>
             `).join('');
         }
