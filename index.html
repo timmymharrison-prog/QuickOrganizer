@@ -3,291 +3,4403 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Jefferson v4.3.9 - Rebuilt Elite</title>
-    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Daily Planner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; margin: 0; height: 100vh; overflow: hidden; }
-        .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
-        .animate-pop { animation: pop 0.2s ease-out; }
-        @keyframes pop { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
-        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .rich-editor { min-height: 100px; outline: none; }
-        .rich-editor ul { list-style-type: disc; padding-left: 1.5rem; }
-    </style>
-</head>
-<body class="p-4">
-    <div id="root" class="h-full"></div>
-
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
-
-        const formatKey = (d) => {
-            const dateObj = d instanceof Date ? d : new Date(d);
-            return `${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}/${dateObj.getFullYear()}`;
-        };
-
-        const toDateTimeLocal = (date) => {
-            const offset = date.getTimezoneOffset();
-            const adjustedDate = new Date(date.getTime() - (offset * 60 * 1000));
-            return adjustedDate.toISOString().slice(0, 16);
-        };
-
-        function CalendarApp() {
-            // --- DATA PERSISTENCE ---
-            const [reminders, setReminders] = useState(() => JSON.parse(localStorage.getItem('jeff-rem')) || {});
-            const [scratchNotes, setScratchNotes] = useState(() => JSON.parse(localStorage.getItem('jeff-scratch')) || []);
-            const [quickWins, setQuickWins] = useState(() => JSON.parse(localStorage.getItem('jeff-wins')) || []);
-            
-            // --- UI STATE ---
-            const [selectedDate, setSelectedDate] = useState(new Date());
-            const [navDate, setNavDate] = useState(new Date());
-            const [isCreatingEvent, setIsCreatingEvent] = useState(false);
-            const [editingId, setEditingId] = useState(null);
-            
-            // --- FORM STATE ---
-            const [tempTitle, setTempTitle] = useState("");
-            const [tempNotes, setTempNotes] = useState("");
-            const [startTime, setStartTime] = useState("");
-            const [endTime, setEndTime] = useState("");
-            const [newWinText, setNewWinText] = useState("");
-
-            const editorRef = useRef(null);
-
-            useEffect(() => { localStorage.setItem('jeff-rem', JSON.stringify(reminders)); }, [reminders]);
-            useEffect(() => { localStorage.setItem('jeff-scratch', JSON.stringify(scratchNotes)); }, [scratchNotes]);
-            useEffect(() => { localStorage.setItem('jeff-wins', JSON.stringify(quickWins)); }, [quickWins]);
-
-            const execCommand = (cmd) => { document.execCommand(cmd, false, null); if (editorRef.current) editorRef.current.focus(); };
-
-            // --- CALENDAR LOGIC ---
-            const handleDayDoubleClick = (date) => {
-                const start = new Date(date);
-                start.setHours(new Date().getHours(), 0, 0, 0);
-                const end = new Date(start);
-                end.setHours(start.getHours() + 1);
-
-                setSelectedDate(date);
-                setStartTime(toDateTimeLocal(start));
-                setEndTime(toDateTimeLocal(end));
-                setTempTitle("");
-                setTempNotes("");
-                setIsCreatingEvent(true);
-            };
-
-            const saveCalendarEvent = () => {
-                if (!tempTitle) return;
-                const dateKey = formatKey(new Date(startTime));
-                const newEntry = {
-                    id: Date.now(),
-                    text: tempTitle,
-                    notes: tempNotes,
-                    start: startTime,
-                    end: endTime,
-                    type: 'note'
-                };
-                const updated = { ...reminders };
-                updated[dateKey] = [...(updated[dateKey] || []), newEntry];
-                updated[dateKey].sort((a, b) => new Date(a.start) - new Date(b.start));
-                setReminders(updated);
-                setIsCreatingEvent(false);
-            };
-
-            const currentKey = formatKey(selectedDate);
-            const dailyAgenda = reminders[currentKey] || [];
-
-            return (
-                <div class="grid grid-cols-12 gap-6 h-[95vh]">
-                    
-                    {/* LEFT PANEL: QUICK WINS */}
-                   <div className="col-span-12 lg:col-span-3 bg-white rounded-[32px] border border-gray-100 shadow-sm flex flex-col overflow-hidden">
-    <div className="p-6 border-b border-gray-50 bg-gray-50/50">
-        <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-4">Quick Wins</h3>
-        <input 
-            value={newWinText}
-            onChange={e => setNewWinText(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && newWinText.trim() && (setQuickWins([{id: Date.now(), text: newWinText, done: false, details: ""}, ...quickWins]), setNewWinText(""))}
-            placeholder="+ Rapid Task"
-            className="w-full bg-white border border-gray-100 rounded-xl p-3 text-xs font-bold outline-none focus:ring-2 ring-blue-100 transition-all"
-        />
-    </div>
-    <div className="flex-grow overflow-y-auto p-4 space-y-2 custom-scroll">
-        {quickWins.map(win => (
-            <div 
-                key={win.id} 
-                onDoubleClick={() => { setEditingWinId(win.id); setTempDetails(win.details || ""); }}
-                className={`flex flex-col gap-2 p-3 rounded-xl group transition-all cursor-pointer ${editingWinId === win.id ? 'bg-blue-50 ring-1 ring-blue-200' : 'bg-gray-50'}`}
-            >
-                <div className="flex items-center gap-3">
-                    <input type="checkbox" checked={win.done} onChange={() => setQuickWins(quickWins.map(w => w.id === win.id ? {...w, done: !w.done} : w))} className="rounded-full text-blue-500" />
-                    <span className={`text-[11px] font-bold text-gray-600 flex-grow ${win.done ? 'line-through opacity-40' : ''}`}>{win.text}</span>
-                    <button onClick={() => setQuickWins(quickWins.filter(w => w.id !== win.id))} className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">×</button>
-                </div>
-                {editingWinId === win.id ? (
-                    <div className="mt-2 space-y-2 animate-pop">
-                        <textarea autoFocus value={tempDetails} onChange={e => setTempDetails(e.target.value)} placeholder="Add notes..." className="w-full text-[10px] p-2 rounded-lg border border-blue-100 outline-none resize-none h-16" />
-                        <button onClick={() => { setQuickWins(quickWins.map(w => w.id === win.id ? { ...w, details: tempDetails } : w)); setEditingWinId(null); }} className="bg-blue-500 text-white text-[8px] font-black uppercase px-3 py-1 rounded-md">Save Note</button>
-                    </div>
-                ) : (
-                    win.details && <p className="text-[9px] text-gray-400 italic ml-7 truncate">{win.details}</p>
-                )}
-            </div>
-        ))}
-    </div>
-</div>
-
-                    {/* CENTER PANEL: QUICKNOTES (GREEN) */}
-                    <div class="col-span-12 lg:col-span-6 bg-white rounded-[40px] border border-gray-100 shadow-sm flex flex-col overflow-hidden">
-                        <div class="p-8 pb-4">
-                            <h3 class="text-[10px] font-black text-green-600 uppercase tracking-[.4em] mb-2">Workspace</h3>
-                            <h2 class="text-4xl font-black italic uppercase tracking-tighter text-gray-900 mb-6">QuickNotes</h2>
-                            <input 
-                                onKeyDown={e => e.key === 'Enter' && e.target.value.trim() && (setScratchNotes([{id: Date.now(), text: e.target.value, details: ""}, ...scratchNotes]), e.target.value = "")}
-                                placeholder="New workspace entry..."
-                                class="w-full bg-green-50 border-2 border-green-50 rounded-2xl p-5 text-lg font-bold outline-none focus:border-green-200 transition-all text-green-900 placeholder-green-300"
-                            />
-                        </div>
-                        
-                        <div class="flex-grow overflow-y-auto p-8 pt-2 space-y-4 custom-scroll">
-                            {scratchNotes.map(note => (
-                                <div key={note.id} class="bg-gray-50/50 rounded-3xl p-6 border border-transparent hover:border-green-100 transition-all group">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <p class="text-lg font-bold text-gray-800">{note.text}</p>
-                                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                                            <button onClick={() => setScratchNotes(scratchNotes.filter(n => n.id !== note.id))} class="text-gray-300 hover:text-red-500">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <button onClick={() => {
-                                            const key = formatKey(new Date());
-                                            const updated = {...reminders};
-                                            updated[key] = [...(updated[key] || []), {id: Date.now(), text: note.text, notes: note.details, start: toDateTimeLocal(new Date()), end: toDateTimeLocal(new Date()), type: 'note'}];
-                                            setReminders(updated);
-                                            setScratchNotes(scratchNotes.filter(n => n.id !== note.id));
-                                        }} class="bg-green-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-100">Schedule</button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* RIGHT PANEL: CALENDAR & AGENDA */}
-                    <div class="col-span-12 lg:col-span-3 flex flex-col gap-6 overflow-hidden">
-                        
-                        {/* CALENDAR MODULE */}
-                        <div class="bg-white rounded-[32px] border border-gray-100 shadow-sm p-5 relative overflow-hidden">
-                            <div class="flex justify-between items-center mb-4">
-                                <h4 class="text-[10px] font-black uppercase text-gray-400">{navDate.toLocaleString('default', { month: 'short', year: 'numeric' })}</h4>
-                                <div class="flex gap-1">
-                                    <button onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() - 1, 1))} class="p-1 text-gray-300 hover:text-gray-600">â†</button>
-                                    <button onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() + 1, 1))} class="p-1 text-gray-300 hover:text-gray-600">â†’</button>
-                                </div>
-                            </div>
-                            <div class="day-grid gap-1">
-                                {["S","M","T","W","T","F","S"].map(d => <div key={d} class="text-center text-[8px] font-black text-gray-200 mb-2">{d}</div>)}
-                                {(() => {
-                                    const year = navDate.getFullYear(), month = navDate.getMonth();
-                                    const firstDay = new Date(year, month, 1).getDay(), daysInMonth = new Date(year, month + 1, 0).getDate();
-                                    const days = [];
-                                    for (let i = 0; i < firstDay; i++) days.push(<div key={`e-${i}`} />);
-                                    for (let i = 1; i <= daysInMonth; i++) {
-                                        const d = new Date(year, month, i), k = formatKey(d);
-                                        const isActive = formatKey(selectedDate) === k;
-                                        const hasItems = reminders[k]?.length > 0;
-                                        days.push(
-                                            <button 
-                                                key={i}
-                                                onClick={() => setSelectedDate(d)}
-                                                onDoubleClick={() => handleDayDoubleClick(d)}
-                                                class={`aspect-square text-[10px] font-bold rounded-lg flex flex-col items-center justify-center transition-all ${isActive ? 'bg-gray-900 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
-                                            >
-                                                {i}
-                                                {hasItems && <div class={`w-1 h-1 rounded-full mt-0.5 ${isActive ? 'bg-green-400' : 'bg-green-500'}`} />}
-                                            </button>
-                                        );
-                                    }
-                                    return days;
-                                })()}
-                            </div>
-
-                            {/* DOUBLE-CLICK EVENT MODAL */}
-                            {isCreatingEvent && (
-                                <div class="absolute inset-0 bg-white/98 z-50 p-5 flex flex-col animate-pop border-2 border-green-500 rounded-[32px]">
-                                    <div class="flex justify-between items-center mb-4">
-                                        <h3 class="text-[10px] font-black text-green-600 uppercase tracking-widest">New Timed Event</h3>
-                                        <button onClick={() => setIsCreatingEvent(false)} class="text-gray-400 hover:text-black text-xl">Ã—</button>
-                                    </div>
-                                    <div class="space-y-4 flex-grow overflow-y-auto pr-1 custom-scroll">
-                                        <input autoFocus placeholder="Event Title" value={tempTitle} onChange={e => setTempTitle(e.target.value)} class="w-full text-sm font-bold p-3 bg-gray-50 rounded-xl outline-none border border-transparent focus:border-green-200" />
-                                        
-                                        <div class="space-y-3">
-                                            <div class="grid grid-cols-1">
-                                                <label class="text-[8px] font-black text-gray-400 uppercase ml-1 mb-1">Start Day & Time</label>
-                                                <input type="datetime-local" value={startTime} onChange={e => setStartTime(e.target.value)} class="w-full text-[10px] p-2 bg-gray-50 rounded-lg outline-none" />
-                                            </div>
-                                            <div class="grid grid-cols-1">
-                                                <label class="text-[8px] font-black text-gray-400 uppercase ml-1 mb-1">End Day & Time</label>
-                                                <input type="datetime-local" value={endTime} onChange={e => setEndTime(e.target.value)} class="w-full text-[10px] p-2 bg-gray-50 rounded-lg outline-none" />
-                                            </div>
-                                        </div>
-
-                                        <textarea placeholder="Notes..." value={tempNotes} onChange={e => setTempNotes(e.target.value)} class="w-full text-[10px] p-3 bg-gray-50 rounded-xl outline-none min-h-[60px] resize-none" />
-                                    </div>
-                                    <button onClick={saveCalendarEvent} class="w-full bg-gray-900 text-white text-[10px] font-black uppercase py-4 rounded-2xl mt-4 hover:bg-green-600 transition-colors">Confirm Schedule</button>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* AGENDA MODULE */}
-                        <div class="bg-white rounded-[32px] border border-gray-100 shadow-sm flex-grow flex flex-col overflow-hidden">
-                            <div class="p-5 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
-                                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Daily Agenda</h3>
-                                <span class="text-[9px] font-bold text-gray-400">{currentKey}</span>
-                            </div>
-                            <div class="flex-grow overflow-y-auto p-4 space-y-3 custom-scroll">
-                                {dailyAgenda.length === 0 ? (
-                                    <div class="h-full flex flex-col items-center justify-center opacity-20">
-                                        <p class="text-[9px] font-black uppercase tracking-widest italic text-center">No Events Scheduled</p>
-                                    </div>
-                                ) : (
-                                    dailyAgenda.map(event => (
-                                        <div key={event.id} class="p-4 rounded-2xl bg-gray-50 border border-transparent hover:border-green-100 transition-all group">
-                                            <div class="flex justify-between items-start mb-2">
-                                                <p class="text-[11px] font-black uppercase text-gray-800 leading-tight">{event.text}</p>
-                                                <button onClick={() => {
-                                                    const updated = {...reminders};
-                                                    updated[currentKey] = updated[currentKey].filter(e => e.id !== event.id);
-                                                    setReminders(updated);
-                                                }} class="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100">Ã—</button>
-                                            </div>
-                                            <div class="space-y-1">
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-[8px] font-black text-green-600 uppercase">From</span>
-                                                    <span class="text-[9px] font-bold text-gray-500">{new Date(event.start).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
-                                                </div>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-[8px] font-black text-gray-400 uppercase">To</span>
-                                                    <span class="text-[9px] font-bold text-gray-500">{new Date(event.end).toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'})}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
+        :root {
+            --bg-primary: #fff5f0;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #ffe8dd;
+            --text-primary: #2d1810;
+            --text-secondary: #5a4a42;
+            --text-tertiary: #9a8a82;
+            --accent-primary: #ff6b35;
+            --accent-secondary: #ff8c61;
+            --accent-light: #fff0e8;
+            --border-color: #ffd4c4;
+            --shadow-sm: 0 1px 3px rgba(255, 107, 53, 0.08);
+            --shadow-md: 0 4px 12px rgba(255, 107, 53, 0.12);
+            --shadow-lg: 0 8px 24px rgba(255, 107, 53, 0.16);
+            --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd166 100%);
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<CalendarApp />);
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hamburger Menu */
+        .hamburger-menu {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem;
+            z-index: 1001;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            width: 40px;
+            height: 40px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hamburger-menu:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .hamburger-bar {
+            width: 24px;
+            height: 3px;
+            background: var(--text-primary);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .hamburger-menu:hover .hamburger-bar {
+            background: var(--accent-primary);
+        }
+
+        /* Settings Menu Dropdown */
+        .settings-dropdown {
+            position: fixed;
+            top: 5rem;
+            left: 1.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            min-width: 200px;
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .settings-dropdown.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .settings-menu-item {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .settings-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .settings-menu-item:hover {
+            background: var(--accent-light);
+            color: var(--accent-primary);
+        }
+
+        .settings-menu-item.danger:hover {
+            background: #fee;
+            color: #c00;
+        }
+
+        /* Settings Modal */
+        .settings-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 20, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1002;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .settings-modal.active {
+            display: flex;
+        }
+
+        .settings-modal-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        .settings-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .settings-modal-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .settings-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .settings-section-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .settings-section-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .danger-button {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+            width: 100%;
+        }
+
+        .danger-button:hover {
+            background: #b91c1c;
+        }
+
+        /* Note Detail Modal */
+        .note-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 20, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .note-detail-modal.active {
+            display: flex;
+        }
+
+        .note-detail-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        .note-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .note-detail-timestamp {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .note-detail-text {
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .note-detail-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .note-action-btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-note-to-calendar {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-note-to-calendar:hover {
+            background: var(--accent-secondary);
+        }
+
+        .btn-note-to-task {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--accent-primary);
+        }
+
+        .btn-note-to-task:hover {
+            background: var(--accent-light);
+        }
+
+        .btn-delete-note {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-delete-note:hover {
+            background: #fee;
+            border-color: #c00;
+            color: #c00;
+        }
+
+        /* Meetings Panel Modal */
+        .meetings-panel-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 20, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .meetings-panel-modal.active {
+            display: flex;
+        }
+
+        .meetings-panel-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 900px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        .meetings-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .meetings-panel-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            background: var(--gradient-ocean);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .meetings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meeting-card {
+            padding: 1.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            border-left: 4px solid #8b5cf6;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .meeting-card:hover {
+            background: #f3e8ff;
+            transform: translateX(4px);
+        }
+
+        .meeting-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .meeting-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .meeting-date-time {
+            font-size: 0.9rem;
+            color: #8b5cf6;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .meeting-task-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .meeting-actions-quick {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .meeting-action-icon {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .meeting-action-icon:hover {
+            color: #8b5cf6;
+            transform: scale(1.1);
+        }
+
+        /* Meeting Detail Modal */
+        .meeting-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 20, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .meeting-detail-modal.active {
+            display: flex;
+        }
+
+        .meeting-detail-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        .meeting-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .meeting-detail-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .meeting-info-section {
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        .meeting-info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .meeting-info-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .meeting-info-value {
+            color: var(--text-primary);
+        }
+
+        .reminder-selector {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .reminder-chip {
+            padding: 0.4rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reminder-chip:hover {
+            border-color: #8b5cf6;
+        }
+
+        .reminder-chip.selected {
+            background: #8b5cf6;
+            color: white;
+            border-color: #8b5cf6;
+        }
+
+        .meeting-tasks-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .meeting-task-input-area {
+            margin-bottom: 1rem;
+        }
+
+        .meeting-task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .meeting-task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .meeting-task-item:hover {
+            background: #f3e8ff;
+        }
+
+        /* Reminder Notification Modal */
+        .reminder-notification-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 20, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .reminder-notification-modal.active {
+            display: flex;
+        }
+
+        .reminder-notification-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
+            animation: pulse 0.5s ease;
+            border: 3px solid #8b5cf6;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .reminder-notification-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .reminder-notification-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #8b5cf6;
+            margin-bottom: 0.5rem;
+        }
+
+        .reminder-notification-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .reminder-notification-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .reminder-notification-time {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .reminder-tasks-preview {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .reminder-task-preview-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        .reminder-task-preview-item:last-child {
+            border-bottom: none;
+        }
+
+        .reminder-notification-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .reminder-action-btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.95rem;
+        }
+
+        .btn-open-meeting {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .btn-open-meeting:hover {
+            background: #7c3aed;
+        }
+
+        .btn-dismiss-reminder {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-dismiss-reminder:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Recurring meeting styles */
+        .recurrence-pattern-option {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .recurrence-pattern-option:hover {
+            border-color: #8b5cf6;
+            background: #f3e8ff;
+        }
+
+        .recurrence-pattern-option input[type="radio"] {
+            margin-right: 0.5rem;
+            accent-color: #8b5cf6;
+            cursor: pointer;
+        }
+
+        .recurrence-pattern-option span {
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .day-checkbox-label {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .day-checkbox-label:hover {
+            border-color: #8b5cf6;
+            background: #f3e8ff;
+        }
+
+        .day-checkbox-label input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: #8b5cf6;
+            cursor: pointer;
+        }
+
+        .day-checkbox-label span {
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .header {
+            margin-bottom: 3rem;
+            animation: slideDown 0.7s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: var(--gradient-sunset);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+        }
+
+        .header .date-display {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.2fr;
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .panel:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .panel-header h2 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .add-btn {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .add-btn:hover {
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .add-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Tasks Section */
+        .task-input-area {
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .task-input-area.active {
+            opacity: 1;
+            max-height: 200px;
+            margin-bottom: 1.5rem;
+        }
+
+        .task-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            background: var(--bg-tertiary);
+        }
+
+        .task-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-secondary);
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            animation: taskSlide 0.3s ease;
+        }
+
+        @keyframes taskSlide {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .task-item:hover {
+            background: var(--accent-light);
+            transform: translateX(4px);
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent-primary);
+        }
+
+        .task-text {
+            flex: 1;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .task-item.completed .task-text {
+            text-decoration: line-through;
+            color: var(--text-tertiary);
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            padding: 0.25rem 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .delete-btn:hover {
+            color: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        /* Notes Section */
+        .notes-area {
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .notes-area.active {
+            opacity: 1;
+            max-height: 300px;
+        }
+
+        .note-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            transition: all 0.2s ease;
+            background: var(--bg-tertiary);
+        }
+
+        .note-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            background: var(--bg-secondary);
+        }
+
+        .save-note-btn {
+            margin-top: 0.75rem;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .save-note-btn:hover {
+            background: var(--accent-secondary);
+        }
+
+        .notes-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .note-item {
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            border-left: 4px solid var(--accent-primary);
+            transition: all 0.2s ease;
+            animation: noteSlide 0.3s ease;
+        }
+
+        @keyframes noteSlide {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .note-item:hover {
+            background: var(--accent-light);
+            transform: translateX(4px);
+        }
+
+        .note-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .note-time {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            font-weight: 500;
+        }
+
+        .note-text {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        /* Calendar Section */
+        .calendar {
+            position: relative;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-month {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
+        .calendar-day:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-secondary);
+            transform: scale(1.05);
+        }
+
+        .calendar-day.other-month {
+            color: var(--text-tertiary);
+            background: transparent;
+        }
+
+        .calendar-day.today {
+            background: var(--gradient-sunset);
+            color: white;
+            font-weight: 700;
+            border: none;
+        }
+
+        .calendar-day.has-event::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            width: 6px;
+            height: 6px;
+            background: var(--accent-primary);
+            border-radius: 50%;
+        }
+
+        .calendar-day.today.has-event::after {
+            background: white;
+        }
+
+        .calendar-day.has-meeting::before {
+            content: '';
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 6px;
+            height: 6px;
+            background: #8b5cf6;
+            border-radius: 50%;
+        }
+
+        .calendar-day.today.has-meeting::before {
+            background: white;
+        }
+
+        .calendar-day.has-event.has-meeting::after {
+            bottom: 4px;
+            left: 4px;
+        }
+
+        .calendar-day.has-event.has-meeting::before {
+            top: 4px;
+            right: 4px;
+        }
+
+        .calendar-day.selected {
+            background: var(--accent-secondary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .calendar-day.in-range {
+            background: var(--accent-light);
+            border-color: var(--accent-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Agenda View */
+        .agenda-view {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--bg-tertiary);
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .agenda-view.active {
+            max-height: 600px;
+            opacity: 1;
+        }
+
+        .agenda-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .agenda-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .clear-selection-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .clear-selection-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        .agenda-content {
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        .agenda-day-section {
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .agenda-day-header {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--accent-primary);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .agenda-event {
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--accent-primary);
+            transition: all 0.2s ease;
+        }
+
+        .agenda-event:hover {
+            background: var(--accent-light);
+            transform: translateX(4px);
+        }
+
+        .agenda-event-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .agenda-event-time {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .agenda-event-duration {
+            display: inline-block;
+            font-size: 0.75rem;
+            color: var(--accent-primary);
+            background: var(--accent-light);
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            font-weight: 600;
+        }
+
+        .agenda-condensed {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .agenda-summary {
+            padding: 1rem;
+            background: var(--accent-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+            margin-bottom: 1rem;
+        }
+
+        .agenda-summary-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--accent-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .agenda-summary-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .event-input-area {
+            opacity: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .event-input-area.active {
+            opacity: 1;
+            max-height: 400px;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+
+        .event-form input,
+        .event-form textarea {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .event-form input:focus,
+        .event-form textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .event-form-btns {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .event-form-btns button {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .save-event-btn {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .save-event-btn:hover {
+            background: var(--accent-secondary);
+        }
+
+        .cancel-event-btn {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .cancel-event-btn:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .events-list {
+            max-height: 300px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+        }
+
+        .events-list.hidden {
+            display: none;
+        }
+
+        .event-item {
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid var(--accent-primary);
+            transition: all 0.2s ease;
+            animation: eventSlide 0.3s ease;
+        }
+
+        @keyframes eventSlide {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .event-item:hover {
+            background: var(--accent-light);
+        }
+
+        .event-date {
+            font-size: 0.8rem;
+            color: var(--accent-primary);
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .event-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .event-time {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .event-duration {
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+            margin-top: 0.25rem;
+        }
+
+        /* Day View Modal */
+        .day-view-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 20, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .day-view-modal.active {
+            display: flex;
+        }
+
+        .day-view-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .day-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .day-view-header-left {
+            flex: 1;
+        }
+
+        .day-view-header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .day-view-title {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-tertiary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-modal-btn:hover {
+            color: var(--accent-primary);
+            transform: rotate(90deg);
+        }
+
+        .day-view-events {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .day-event-item {
+            padding: 1.25rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+            transition: all 0.2s ease;
+        }
+
+        .day-event-item:hover {
+            background: var(--accent-light);
+            transform: translateX(4px);
+        }
+
+        .day-event-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .day-event-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .day-event-time {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.25rem;
+        }
+
+        .day-event-duration {
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            font-weight: 600;
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: var(--accent-light);
+            border-radius: 6px;
+        }
+
+        .day-event-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        /* Task Detail Modal */
+        .task-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(26, 22, 20, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .task-detail-modal.active {
+            display: flex;
+        }
+
+        .task-detail-content {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 2rem;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.3s ease;
+        }
+
+        .task-detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
+        }
+
+        .task-detail-title {
+            flex: 1;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .task-detail-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .task-action-btn {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-add-to-calendar {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .btn-add-to-calendar:hover {
+            background: var(--accent-secondary);
+        }
+
+        .btn-delete-task {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-delete-task:hover {
+            background: #fee;
+            border-color: #c00;
+            color: #c00;
+        }
+
+        /* Rich Text Editor */
+        .notes-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .notes-section-label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+            display: block;
+        }
+
+        .editor-ribbon {
+            display: flex;
+            gap: 0.25rem;
+            padding: 0.5rem;
+            background: var(--bg-tertiary);
+            border-radius: 8px 8px 0 0;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            flex-wrap: wrap;
+        }
+
+        .ribbon-group {
+            display: flex;
+            gap: 0.25rem;
+            padding-right: 0.5rem;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .ribbon-group:last-child {
+            border-right: none;
+        }
+
+        .ribbon-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            min-width: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ribbon-btn:hover {
+            background: var(--accent-light);
+            border-color: var(--accent-primary);
+        }
+
+        .ribbon-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .ribbon-select {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 100px;
+        }
+
+        .ribbon-select:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .task-notes-editor {
+            width: 100%;
+            min-height: 200px;
+            max-height: 400px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            resize: vertical;
+            overflow-y: auto;
+            background: var(--bg-secondary);
+            line-height: 1.6;
+        }
+
+        .task-notes-editor:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .task-notes-editor[contenteditable="true"] {
+            cursor: text;
+        }
+
+        .task-notes-editor ul,
+        .task-notes-editor ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .task-notes-editor li {
+            margin-bottom: 0.25rem;
+        }
+
+        .task-notes-editor p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Event Scheduling Section in Task Modal */
+        .event-scheduling-section {
+            margin-bottom: 1.5rem;
+            padding-top: 1rem;
+            border-top: 2px solid var(--bg-tertiary);
+        }
+
+        .event-scheduling-section .event-form {
+            margin-top: 0.75rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: var(--text-tertiary);
+            font-style: italic;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-tertiary);
+        }
+
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .calendar {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hamburger Menu -->
+    <div class="hamburger-menu" onclick="toggleSettingsDropdown()">
+        <div class="hamburger-bar"></div>
+        <div class="hamburger-bar"></div>
+        <div class="hamburger-bar"></div>
+    </div>
+
+    <!-- Settings Dropdown -->
+    <div class="settings-dropdown" id="settingsDropdown">
+        <div class="settings-menu-item" onclick="openMeetingsPanel()">Meetings</div>
+        <div class="settings-menu-item" onclick="openSettingsModal()">Settings</div>
+    </div>
+
+    <div class="app-container">
+        <header class="header">
+            <h1>Daily Planner</h1>
+            <div class="date-display" id="currentDate"></div>
+        </header>
+
+        <div class="main-grid">
+            <!-- Quick Wins Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Quick Wins</h2>
+                    <button class="add-btn" onclick="toggleTaskInput()">+ Add</button>
+                </div>
+                
+                <div class="task-input-area" id="taskInputArea">
+                    <input type="text" class="task-input" id="taskInput" placeholder="What do you need to do?" onkeypress="handleTaskKeypress(event)">
+                </div>
+
+                <div class="task-list" id="taskList">
+                    <div class="empty-state">No tasks yet. Add your first task!</div>
+                </div>
+            </div>
+
+            <!-- Notes Panel -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Quick Notes</h2>
+                </div>
+
+                <div class="notes-area active" id="notesArea">
+                    <textarea class="note-input" id="noteInput" placeholder="Jot down your thoughts..."></textarea>
+                    <button class="save-note-btn" onclick="saveNote()">Save Note</button>
+                </div>
+
+                <div class="notes-list" id="notesList">
+                    <div class="empty-state">No notes yet. Capture your ideas!</div>
+                </div>
+            </div>
+
+            <!-- Calendar Panel -->
+            <div class="panel calendar">
+                <div class="panel-header">
+                    <h2>Calendar</h2>
+                    <button class="add-btn" onclick="toggleEventInput()">+ Event</button>
+                </div>
+
+                <div class="event-input-area" id="eventInputArea">
+                    <div class="event-form">
+                        <input type="text" id="eventTitle" placeholder="Event title">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
+                                <input type="date" id="eventStartDate">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
+                                <input type="date" id="eventEndDate">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <input type="time" id="eventStartTime" placeholder="Start time" step="300">
+                            <input type="time" id="eventEndTime" placeholder="End time" step="300">
+                        </div>
+                        <textarea id="eventDescription" placeholder="Description (optional)" rows="2"></textarea>
+                        <div class="event-form-btns">
+                            <button class="save-event-btn" onclick="saveEvent()">Save Event</button>
+                            <button class="cancel-event-btn" onclick="toggleEventInput()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calendar-nav">
+                    <div class="calendar-month" id="calendarMonth"></div>
+                    <div class="nav-btns">
+                        <button class="nav-btn" onclick="previousMonth()">â€¹</button>
+                        <button class="nav-btn" onclick="nextMonth()">â€º</button>
+                    </div>
+                </div>
+
+                <div class="calendar-grid">
+                    <div class="calendar-day-header">Sun</div>
+                    <div class="calendar-day-header">Mon</div>
+                    <div class="calendar-day-header">Tue</div>
+                    <div class="calendar-day-header">Wed</div>
+                    <div class="calendar-day-header">Thu</div>
+                    <div class="calendar-day-header">Fri</div>
+                    <div class="calendar-day-header">Sat</div>
+                </div>
+
+                <div class="calendar-grid" id="calendarDays"></div>
+
+                <!-- Agenda View -->
+                <div class="agenda-view" id="agendaView">
+                    <div class="agenda-header">
+                        <div class="agenda-title" id="agendaTitle"></div>
+                        <button class="clear-selection-btn" onclick="clearDateSelection()">Clear</button>
+                    </div>
+                    <div class="agenda-content" id="agendaContent"></div>
+                </div>
+
+                <div class="events-list" id="eventsList"></div>
+            </div>
+        </div>
+
+        <!-- Day View Modal -->
+        <div class="day-view-modal" id="dayViewModal" onclick="closeDayView(event)">
+            <div class="day-view-content" onclick="event.stopPropagation()">
+                <div class="day-view-header">
+                    <div class="day-view-header-left">
+                        <div class="day-view-title" id="dayViewTitle"></div>
+                    </div>
+                    <div class="day-view-header-actions">
+                        <button class="add-btn" onclick="toggleDayEventInput()" id="dayAddEventBtn">+ Add Event</button>
+                        <button class="close-modal-btn" onclick="closeDayView()">Ã—</button>
+                    </div>
+                </div>
+                
+                <!-- Quick add event form in modal -->
+                <div class="event-input-area" id="dayEventInputArea">
+                    <div class="event-form">
+                        <input type="text" id="dayEventTitle" placeholder="Event title">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
+                                <input type="date" id="dayEventStartDate">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
+                                <input type="date" id="dayEventEndDate">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <input type="time" id="dayEventStartTime" placeholder="Start time" step="300">
+                            <input type="time" id="dayEventEndTime" placeholder="End time" step="300">
+                        </div>
+                        <textarea id="dayEventDescription" placeholder="Description (optional)" rows="2"></textarea>
+                        <div class="event-form-btns">
+                            <button class="save-event-btn" onclick="saveDayEvent()">Save Event</button>
+                            <button class="cancel-event-btn" onclick="toggleDayEventInput()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="day-view-events" id="dayViewEvents"></div>
+            </div>
+        </div>
+
+        <!-- Task Detail Modal -->
+        <div class="task-detail-modal" id="taskDetailModal" onclick="closeTaskDetail(event)">
+            <div class="task-detail-content" onclick="event.stopPropagation()">
+                <div class="task-detail-header">
+                    <div class="task-detail-title" id="taskDetailTitle"></div>
+                    <button class="close-modal-btn" onclick="closeTaskDetail()">Ã—</button>
+                </div>
+
+                <div class="notes-section">
+                    <label class="notes-section-label">Notes</label>
+                    <div class="editor-ribbon">
+                        <div class="ribbon-group">
+                            <select class="ribbon-select" onchange="changeFontSize(this.value)">
+                                <option value="3">Normal</option>
+                                <option value="1">Small</option>
+                                <option value="5">Large</option>
+                                <option value="7">Huge</option>
+                            </select>
+                        </div>
+                        <div class="ribbon-group">
+                            <button class="ribbon-btn" onclick="formatText('bold')" title="Bold"><strong>B</strong></button>
+                            <button class="ribbon-btn" onclick="formatText('italic')" title="Italic"><em>I</em></button>
+                            <button class="ribbon-btn" onclick="formatText('underline')" title="Underline"><u>U</u></button>
+                        </div>
+                        <div class="ribbon-group">
+                            <button class="ribbon-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">â€¢ List</button>
+                            <button class="ribbon-btn" onclick="formatText('insertOrderedList')" title="Numbered List">1. List</button>
+                        </div>
+                        <div class="ribbon-group">
+                            <button class="ribbon-btn" onclick="clearFormatting()" title="Clear Formatting">Clear</button>
+                        </div>
+                    </div>
+                    <div class="task-notes-editor" 
+                         id="taskNotesEditor" 
+                         contenteditable="true" 
+                         data-placeholder="Add detailed notes about this task...">
+                    </div>
+                </div>
+
+                <!-- Reminder Section -->
+                <div class="notes-section">
+                    <label class="notes-section-label">Set Reminder</label>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Date</label>
+                            <input type="date" id="taskReminderDate" class="task-input">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Time</label>
+                            <input type="time" id="taskReminderTime" class="task-input" step="300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event Scheduling Section -->
+                <div class="event-scheduling-section" id="eventSchedulingSection" style="display: none;">
+                    <label class="notes-section-label">Schedule Event</label>
+                    <div class="event-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
+                                <input type="date" id="taskEventStartDate">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
+                                <input type="date" id="taskEventEndDate">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <input type="time" id="taskEventStartTime" placeholder="Start time" step="300">
+                            <input type="time" id="taskEventEndTime" placeholder="End time" step="300">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="task-detail-actions">
+                    <button class="task-action-btn btn-add-to-calendar" id="addToCalendarBtn" onclick="toggleEventScheduling()">Add to Calendar</button>
+                    <button class="task-action-btn btn-add-to-calendar" id="saveEventBtn" onclick="saveTaskAsEvent()" style="display: none;">Save Event</button>
+                    <button class="task-action-btn btn-delete-task" onclick="deleteTaskFromModal()">Delete Task</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div class="settings-modal" id="settingsModal" onclick="closeSettingsModal(event)">
+            <div class="settings-modal-content" onclick="event.stopPropagation()">
+                <div class="settings-modal-header">
+                    <div class="settings-modal-title">Settings</div>
+                    <button class="close-modal-btn" onclick="closeSettingsModal()">Ã—</button>
+                </div>
+
+                <div class="settings-section">
+                    <div class="settings-section-title">Data Management</div>
+                    <div class="settings-section-description">
+                        Clear all tasks, notes, and events from your planner. This action cannot be undone.
+                    </div>
+                    <button class="danger-button" onclick="clearAllData()">Clear All Data</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Note Detail Modal -->
+        <div class="note-detail-modal" id="noteDetailModal" onclick="closeNoteDetail(event)">
+            <div class="note-detail-content" onclick="event.stopPropagation()">
+                <div class="note-detail-header">
+                    <div class="note-detail-timestamp" id="noteDetailTimestamp"></div>
+                    <button class="close-modal-btn" onclick="closeNoteDetail()">Ã—</button>
+                </div>
+
+                <div class="note-detail-text" id="noteDetailText"></div>
+
+                <div class="notes-section">
+                    <label class="notes-section-label">Additional Notes</label>
+                    <div class="editor-ribbon">
+                        <div class="ribbon-group">
+                            <select class="ribbon-select" onchange="changeNoteFontSize(this.value)">
+                                <option value="3">Normal</option>
+                                <option value="1">Small</option>
+                                <option value="5">Large</option>
+                                <option value="7">Huge</option>
+                            </select>
+                        </div>
+                        <div class="ribbon-group">
+                            <button class="ribbon-btn" onclick="formatNoteText('bold')" title="Bold"><strong>B</strong></button>
+                            <button class="ribbon-btn" onclick="formatNoteText('italic')" title="Italic"><em>I</em></button>
+                            <button class="ribbon-btn" onclick="formatNoteText('underline')" title="Underline"><u>U</u></button>
+                        </div>
+                        <div class="ribbon-group">
+                            <button class="ribbon-btn" onclick="formatNoteText('insertUnorderedList')" title="Bullet List">â€¢ List</button>
+                            <button class="ribbon-btn" onclick="formatNoteText('insertOrderedList')" title="Numbered List">1. List</button>
+                        </div>
+                        <div class="ribbon-group">
+                            <button class="ribbon-btn" onclick="clearNoteFormatting()" title="Clear Formatting">Clear</button>
+                        </div>
+                    </div>
+                    <div class="task-notes-editor" 
+                         id="noteDetailsEditor" 
+                         contenteditable="true" 
+                         data-placeholder="Add additional details...">
+                    </div>
+                </div>
+
+                <!-- Event Scheduling Section for Notes -->
+                <div class="event-scheduling-section" id="noteEventSchedulingSection" style="display: none;">
+                    <label class="notes-section-label">Schedule Event</label>
+                    <div class="event-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
+                                <input type="date" id="noteEventStartDate">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
+                                <input type="date" id="noteEventEndDate">
+                            </div>
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <input type="time" id="noteEventStartTime" placeholder="Start time" step="300">
+                            <input type="time" id="noteEventEndTime" placeholder="End time" step="300">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note-detail-actions">
+                    <button class="note-action-btn btn-note-to-calendar" id="noteAddToCalendarBtn" onclick="toggleNoteEventScheduling()">Add to Calendar</button>
+                    <button class="note-action-btn btn-note-to-calendar" id="noteSaveEventBtn" onclick="saveNoteAsEvent()" style="display: none;">Schedule Event</button>
+                    <button class="note-action-btn btn-note-to-task" onclick="addNoteToTask()">Add to Tasks</button>
+                    <button class="note-action-btn btn-delete-note" onclick="deleteNoteFromModal()">Delete Note</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meetings Panel Modal -->
+        <div class="meetings-panel-modal" id="meetingsPanelModal" onclick="closeMeetingsPanel(event)">
+            <div class="meetings-panel-content" onclick="event.stopPropagation()">
+                <div class="meetings-panel-header">
+                    <div class="meetings-panel-title">Meetings</div>
+                    <div style="display: flex; gap: 0.5rem; align-items: center;">
+                        <button class="add-btn" onclick="openCreateMeetingForm()">+ New Meeting</button>
+                        <button class="close-modal-btn" onclick="closeMeetingsPanel()">Ã—</button>
+                    </div>
+                </div>
+
+                <!-- Create Meeting Form -->
+                <div id="createMeetingForm" style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-tertiary); border-radius: 4px;">
+                    <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Create New Meeting</h3>
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <input type="text" id="newMeetingName" placeholder="Meeting name" class="task-input">
+                        <input type="date" id="newMeetingDate" class="task-input">
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                            <div>
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start time</label>
+                                <input type="time" id="newMeetingStartTime" class="task-input" step="300">
+                            </div>
+                            <div>
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End time</label>
+                                <input type="time" id="newMeetingEndTime" class="task-input" step="300">
+                            </div>
+                        </div>
+
+                        <!-- Recurring checkbox -->
+                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0;">
+                            <input type="checkbox" id="isRecurringMeeting" onchange="toggleRecurringOptions()" style="cursor: pointer; accent-color: #8b5cf6;">
+                            <label for="isRecurringMeeting" style="cursor: pointer; color: var(--text-primary); font-weight: 500;">Recurring meeting</label>
+                        </div>
+
+                        <!-- Recurring options (hidden by default) -->
+                        <div id="recurringOptions" style="display: none; padding: 1rem; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; font-weight: 600;">Recurrence pattern</label>
+                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
+                                    <label class="recurrence-pattern-option">
+                                        <input type="radio" name="recurrencePattern" value="daily" onchange="updateRecurrencePattern('daily')">
+                                        <span>Daily</span>
+                                    </label>
+                                    <label class="recurrence-pattern-option">
+                                        <input type="radio" name="recurrencePattern" value="weekly" checked onchange="updateRecurrencePattern('weekly')">
+                                        <span>Weekly</span>
+                                    </label>
+                                    <label class="recurrence-pattern-option">
+                                        <input type="radio" name="recurrencePattern" value="monthly" onchange="updateRecurrencePattern('monthly')">
+                                        <span>Monthly</span>
+                                    </label>
+                                    <label class="recurrence-pattern-option">
+                                        <input type="radio" name="recurrencePattern" value="yearly" onchange="updateRecurrencePattern('yearly')">
+                                        <span>Yearly</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Recur every section -->
+                            <div style="margin-bottom: 0.75rem;">
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; font-weight: 600;">Recur every</label>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="number" id="recurrenceInterval" value="1" min="1" max="99" class="task-input" style="width: 80px; text-align: center;">
+                                    <span id="recurrenceIntervalLabel" style="color: var(--text-primary);">week(s) on:</span>
+                                </div>
+                            </div>
+
+                            <!-- Day selection (for weekly) -->
+                            <div id="weeklyDaySelection" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.75rem;">
+                                <label class="day-checkbox-label">
+                                    <input type="checkbox" value="0" class="recurring-day-checkbox">
+                                    <span>Sunday</span>
+                                </label>
+                                <label class="day-checkbox-label">
+                                    <input type="checkbox" value="1" class="recurring-day-checkbox">
+                                    <span>Monday</span>
+                                </label>
+                                <label class="day-checkbox-label">
+                                    <input type="checkbox" value="2" class="recurring-day-checkbox">
+                                    <span>Tuesday</span>
+                                </label>
+                                <label class="day-checkbox-label">
+                                    <input type="checkbox" value="3" class="recurring-day-checkbox">
+                                    <span>Wednesday</span>
+                                </label>
+                                <label class="day-checkbox-label">
+                                    <input type="checkbox" value="4" class="recurring-day-checkbox">
+                                    <span>Thursday</span>
+                                </label>
+                                <label class="day-checkbox-label">
+                                    <input type="checkbox" value="5" class="recurring-day-checkbox">
+                                    <span>Friday</span>
+                                </label>
+                                <label class="day-checkbox-label">
+                                    <input type="checkbox" value="6" class="recurring-day-checkbox">
+                                    <span>Saturday</span>
+                                </label>
+                            </div>
+
+                            <!-- End date for recurring -->
+                            <div>
+                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; font-weight: 600;">End date (optional)</label>
+                                <input type="date" id="recurrenceEndDate" class="task-input">
+                            </div>
+                        </div>
+
+                        <div style="display: flex; gap: 0.5rem;">
+                            <button class="add-btn" style="flex: 1;" onclick="createMeeting()">Create Meeting</button>
+                            <button class="add-btn" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="cancelCreateMeeting()">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="meetings-list" id="meetingsList">
+                    <div class="empty-state">No meetings scheduled. Create your first meeting!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meeting Detail Modal -->
+        <div class="meeting-detail-modal" id="meetingDetailModal" onclick="closeMeetingDetail(event)">
+            <div class="meeting-detail-content" onclick="event.stopPropagation()">
+                <div class="meeting-detail-header">
+                    <div class="meeting-detail-title" id="meetingDetailTitle"></div>
+                    <button class="close-modal-btn" onclick="closeMeetingDetail()">Ã—</button>
+                </div>
+
+                <div class="meeting-info-section">
+                    <div class="meeting-info-row">
+                        <span class="meeting-info-label">Date & Time:</span>
+                        <span class="meeting-info-value" id="meetingDetailDateTime"></span>
+                    </div>
+                    <div class="meeting-info-row">
+                        <span class="meeting-info-label">Reminders:</span>
+                    </div>
+                    <div class="reminder-selector" id="reminderSelector">
+                        <div class="reminder-chip" data-time="5" onclick="toggleReminder('5')">5 min before</div>
+                        <div class="reminder-chip" data-time="30" onclick="toggleReminder('30')">30 min before</div>
+                        <div class="reminder-chip" data-time="60" onclick="toggleReminder('60')">1 hour before</div>
+                        <div class="reminder-chip" data-time="360" onclick="toggleReminder('360')">6 hours before</div>
+                        <div class="reminder-chip" data-time="720" onclick="toggleReminder('720')">12 hours before</div>
+                        <div class="reminder-chip" data-time="1440" onclick="toggleReminder('1440')">1 day before</div>
+                    </div>
+                </div>
+
+                <div class="meeting-tasks-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <h3 style="color: var(--text-primary);">Meeting Tasks</h3>
+                        <button class="add-btn" onclick="toggleMeetingTaskInput()">+ Add Task</button>
+                    </div>
+
+                    <div class="meeting-task-input-area" id="meetingTaskInputArea" style="display: none; margin-bottom: 1rem;">
+                        <input type="text" class="task-input" id="meetingTaskInput" placeholder="Task for this meeting..." onkeypress="handleMeetingTaskKeypress(event)">
+                    </div>
+
+                    <div class="meeting-task-list" id="meetingTaskList">
+                        <div class="empty-state">No tasks for this meeting yet</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                    <button class="task-action-btn btn-add-to-calendar" style="flex: 1;" onclick="saveMeetingChanges()">Save Changes</button>
+                    <button class="task-action-btn btn-delete-task" style="flex: 1;" onclick="deleteMeetingFromDetail()">Delete Meeting</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reminder Notification Modal -->
+        <div class="reminder-notification-modal" id="reminderNotificationModal">
+            <div class="reminder-notification-content">
+                <div class="reminder-notification-header">
+                    <div class="reminder-notification-title">â° Meeting Reminder</div>
+                    <div class="reminder-notification-subtitle" id="reminderMeetingTitle"></div>
+                </div>
+
+                <div class="reminder-notification-body">
+                    <div class="reminder-notification-time" id="reminderMeetingTime"></div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong style="color: var(--text-primary);">Pending Tasks:</strong>
+                    </div>
+                    <div class="reminder-tasks-preview" id="reminderTasksPreview">
+                    </div>
+                </div>
+
+                <div class="reminder-notification-actions">
+                    <button class="reminder-action-btn btn-open-meeting" onclick="openMeetingFromReminder()">Open Meeting</button>
+                    <button class="reminder-action-btn btn-dismiss-reminder" onclick="dismissReminder()">Dismiss</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State management
+        let currentMonth = new Date();
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        let events = JSON.parse(localStorage.getItem('events')) || [];
+        let meetings = JSON.parse(localStorage.getItem('meetings')) || [];
+        let selectedDate = null;
+        let selectedDates = [];
+        let isDragging = false;
+        let dragStartDate = null;
+        let hasDragged = false;
+
+        // Initialize app
+        function init() {
+            updateCurrentDate();
+            renderCalendar();
+            renderTasks();
+            renderNotes();
+            renderEvents();
+        }
+
+        // Date display
+        function updateCurrentDate() {
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
+        }
+
+        // Tasks functionality
+        function toggleTaskInput() {
+            const area = document.getElementById('taskInputArea');
+            const input = document.getElementById('taskInput');
+            area.classList.toggle('active');
+            if (area.classList.contains('active')) {
+                setTimeout(() => input.focus(), 300);
+            }
+        }
+
+        function handleTaskKeypress(event) {
+            if (event.key === 'Enter') {
+                addTask();
+            }
+        }
+
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                tasks.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    notes: '',
+                    reminderDate: null,
+                    reminderTime: null,
+                    createdAt: new Date().toISOString()
+                });
+                
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                input.value = '';
+                renderTasks();
+                toggleTaskInput();
+            }
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                renderTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('taskList');
+            
+            if (tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state">No tasks yet. Add your first task!</div>';
+                return;
+            }
+
+            container.innerHTML = tasks.map(task => `
+                <div class="task-item ${task.completed ? 'completed' : ''}" ondblclick="openTaskDetail(${task.id})">
+                    <input type="checkbox" class="task-checkbox" 
+                           ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask(${task.id})"
+                           onclick="event.stopPropagation()">
+                    <span class="task-text">${task.text}</span>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">Ã—</button>
+                </div>
+            `).join('');
+        }
+
+        // Notes functionality
+        function toggleNotesInput() {
+            const area = document.getElementById('notesArea');
+            const input = document.getElementById('noteInput');
+            area.classList.toggle('active');
+            if (area.classList.contains('active')) {
+                setTimeout(() => input.focus(), 300);
+            }
+        }
+
+        function saveNote() {
+            const input = document.getElementById('noteInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                notes.unshift({
+                    id: Date.now(),
+                    text: text,
+                    detailedNotes: '',
+                    createdAt: new Date().toISOString()
+                });
+                
+                localStorage.setItem('notes', JSON.stringify(notes));
+                input.value = '';
+                renderNotes();
+                toggleNotesInput();
+            }
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(n => n.id !== id);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            renderNotes();
+        }
+
+        function renderNotes() {
+            const container = document.getElementById('notesList');
+            
+            if (notes.length === 0) {
+                container.innerHTML = '<div class="empty-state">No notes yet. Capture your ideas!</div>';
+                return;
+            }
+
+            container.innerHTML = notes.map(note => {
+                const date = new Date(note.createdAt);
+                const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                
+                return `
+                    <div class="note-item" ondblclick="openNoteDetail(${note.id})">
+                        <div class="note-header">
+                            <span class="note-time">${timeStr}</span>
+                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">Ã—</button>
+                        </div>
+                        <div class="note-text">${note.text}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Calendar functionality
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            
+            // Update month display
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
+            
+            // Calculate calendar grid
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+            
+            const container = document.getElementById('calendarDays');
+            let html = '';
+            
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                html += `<div class="calendar-day other-month">${daysInPrevMonth - i}</div>`;
+            }
+            
+            // Current month days
+            const today = new Date();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateStr = date.toISOString().split('T')[0];
+                const isToday = date.toDateString() === today.toDateString();
+                
+                // Check if any event includes this date (for multi-day events)
+                const hasEvent = events.some(e => {
+                    const eventStart = new Date(e.startDate);
+                    const eventEnd = new Date(e.endDate || e.startDate);
+                    const currentDate = new Date(dateStr);
+                    return currentDate >= eventStart && currentDate <= eventEnd;
+                });
+
+                // Check if there's a meeting on this date
+                const hasMeeting = meetings.some(m => m.date === dateStr);
+                
+                const isSelected = selectedDates.includes(dateStr);
+                const isInRange = selectedDates.length > 1 && isDateInRange(dateStr);
+                
+                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${hasMeeting ? 'has-meeting' : ''} ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''}" 
+                         data-date="${dateStr}"
+                         ondblclick="openDayView('${dateStr}')"
+                         onmousedown="startDateSelection('${dateStr}')"
+                         onmouseenter="continueDateSelection('${dateStr}')"
+                         onmouseup="endDateSelection()">${day}</div>`;
+            }
+            
+            // Next month days
+            const remainingDays = 42 - (firstDay + daysInMonth);
+            for (let day = 1; day <= remainingDays; day++) {
+                html += `<div class="calendar-day other-month">${day}</div>`;
+            }
+            
+            container.innerHTML = html;
+            renderEvents();
+        }
+
+        function previousMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth.setMonth(currentMonth.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function toggleEventInput() {
+            const area = document.getElementById('eventInputArea');
+            area.classList.toggle('active');
+            
+            if (!area.classList.contains('active')) {
+                // Clear form
+                document.getElementById('eventTitle').value = '';
+                document.getElementById('eventStartDate').value = '';
+                document.getElementById('eventEndDate').value = '';
+                document.getElementById('eventStartTime').value = '';
+                document.getElementById('eventEndTime').value = '';
+                document.getElementById('eventDescription').value = '';
+            }
+        }
+
+        function saveEvent() {
+            const title = document.getElementById('eventTitle').value.trim();
+            const startDate = document.getElementById('eventStartDate').value;
+            const endDate = document.getElementById('eventEndDate').value;
+            const startTime = document.getElementById('eventStartTime').value;
+            const endTime = document.getElementById('eventEndTime').value;
+            const description = document.getElementById('eventDescription').value.trim();
+            
+            if (title && startDate) {
+                events.push({
+                    id: Date.now(),
+                    title: title,
+                    startDate: startDate,
+                    endDate: endDate || startDate, // Default to start date if no end date
+                    startTime: startTime,
+                    endTime: endTime,
+                    description: description
+                });
+                
+                // Sort by start date and time
+                events.sort((a, b) => {
+                    const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
+                    const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
+                    return dateTimeA - dateTimeB;
+                });
+                
+                localStorage.setItem('events', JSON.stringify(events));
+                toggleEventInput();
+                renderCalendar();
+                renderEvents();
+            }
+        }
+
+        function deleteEvent(id) {
+            events = events.filter(e => e.id !== id);
+            localStorage.setItem('events', JSON.stringify(events));
+            renderCalendar();
+            renderEvents();
+            renderAgenda();
+        }
+
+        // Date Selection & Agenda Functions
+        function startDateSelection(dateStr) {
+            isDragging = true;
+            hasDragged = false;
+            dragStartDate = dateStr;
+            selectedDates = [dateStr];
+            renderCalendar();
+        }
+
+        function continueDateSelection(dateStr) {
+            if (!isDragging) return;
+            
+            // If we moved to a different date, mark that we've dragged
+            if (dateStr !== dragStartDate) {
+                hasDragged = true;
+            }
+            
+            // Build range from drag start to current
+            const start = new Date(dragStartDate);
+            const current = new Date(dateStr);
+            
+            const minDate = start < current ? start : current;
+            const maxDate = start < current ? current : start;
+            
+            selectedDates = [];
+            for (let d = new Date(minDate); d <= maxDate; d.setDate(d.getDate() + 1)) {
+                selectedDates.push(d.toISOString().split('T')[0]);
+            }
+            
+            renderCalendar();
+        }
+
+        function endDateSelection() {
+            if (isDragging) {
+                isDragging = false;
+                
+                // Only render agenda if we actually dragged
+                // If we didn't drag (just clicked), keep the single date selection
+                if (!hasDragged) {
+                    // This was a simple click, keep just the one date
+                    selectedDates = [dragStartDate];
+                }
+                
+                renderAgenda();
+                hasDragged = false;
+            }
+        }
+
+        function isDateInRange(dateStr) {
+            if (selectedDates.length < 2) return false;
+            const sortedDates = [...selectedDates].sort();
+            return dateStr >= sortedDates[0] && dateStr <= sortedDates[sortedDates.length - 1];
+        }
+
+        function clearDateSelection() {
+            selectedDates = [];
+            dragStartDate = null;
+            isDragging = false;
+            hasDragged = false;
+            renderCalendar();
+            document.getElementById('agendaView').classList.remove('active');
+            document.getElementById('eventsList').classList.remove('hidden');
+        }
+
+        function renderAgenda() {
+            const agendaView = document.getElementById('agendaView');
+            const agendaTitle = document.getElementById('agendaTitle');
+            const agendaContent = document.getElementById('agendaContent');
+            const eventsList = document.getElementById('eventsList');
+            
+            if (selectedDates.length === 0) {
+                agendaView.classList.remove('active');
+                eventsList.classList.remove('hidden');
+                return;
+            }
+            
+            agendaView.classList.add('active');
+            eventsList.classList.add('hidden');
+            
+            if (selectedDates.length === 0) {
+                agendaView.classList.remove('active');
+                return;
+            }
+            
+            agendaView.classList.add('active');
+            
+            // Sort selected dates
+            const sortedDates = [...selectedDates].sort();
+            
+            if (selectedDates.length === 1) {
+                // Single date - detailed view
+                const date = new Date(sortedDates[0]);
+                agendaTitle.textContent = date.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                const dayEvents = events.filter(e => {
+                    const eventStart = new Date(e.startDate);
+                    const eventEnd = new Date(e.endDate || e.startDate);
+                    const currentDate = new Date(sortedDates[0]);
+                    return currentDate >= eventStart && currentDate <= eventEnd;
+                }).sort((a, b) => {
+                    const timeA = a.startTime || '00:00';
+                    const timeB = b.startTime || '00:00';
+                    return timeA.localeCompare(timeB);
+                });
+                
+                // Deduplicate events by ID
+                const uniqueEvents = [];
+                const seenIds = new Set();
+                dayEvents.forEach(event => {
+                    if (!seenIds.has(event.id)) {
+                        seenIds.add(event.id);
+                        uniqueEvents.push(event);
+                    }
+                });
+                
+                if (uniqueEvents.length === 0) {
+                    agendaContent.innerHTML = '<div class="empty-state">No events scheduled</div>';
+                } else {
+                    agendaContent.innerHTML = uniqueEvents.map(event => {
+                        const startDate = new Date(event.startDate);
+                        const endDate = new Date(event.endDate || event.startDate);
+                        
+                        let dateRangeStr = '';
+                        if (event.startDate !== event.endDate && event.endDate) {
+                            const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                            const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            dateRangeStr = `${startStr} - ${endStr}`;
+                        }
+                        
+                        let timeStr = '';
+                        let durationStr = '';
+                        
+                        if (event.startTime) {
+                            const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
+                                hour: 'numeric', 
+                                minute: '2-digit' 
+                            });
+                            
+                            if (event.endTime) {
+                                const endFormatted = new Date('2000-01-01 ' + event.endTime).toLocaleTimeString('en-US', { 
+                                    hour: 'numeric', 
+                                    minute: '2-digit' 
+                                });
+                                timeStr = `${startFormatted} - ${endFormatted}`;
+                                durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
+                            } else {
+                                timeStr = startFormatted;
+                            }
+                        }
+                        
+                        return `
+                            <div class="agenda-event">
+                                <div class="agenda-event-title">${event.title}</div>
+                                ${dateRangeStr ? `<div class="agenda-event-time" style="color: var(--accent-primary); font-weight: 600; margin-bottom: 0.25rem;">${dateRangeStr}</div>` : ''}
+                                ${timeStr ? `<div class="agenda-event-time">
+                                    ${timeStr}
+                                    ${durationStr ? `<span class="agenda-event-duration">${durationStr}</span>` : ''}
+                                </div>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } else {
+                // Multi-date range - condensed view
+                const startDate = new Date(sortedDates[0]);
+                const endDate = new Date(sortedDates[sortedDates.length - 1]);
+                
+                agendaTitle.textContent = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+                
+                // Get all events in the range
+                const rangeEvents = events.filter(e => {
+                    const eventStart = new Date(e.startDate);
+                    const eventEnd = new Date(e.endDate || e.startDate);
+                    return eventEnd >= startDate && eventStart <= endDate;
+                }).sort((a, b) => {
+                    const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
+                    const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
+                    return dateTimeA - dateTimeB;
+                });
+                
+                // Deduplicate events by ID
+                const uniqueRangeEvents = [];
+                const seenRangeIds = new Set();
+                rangeEvents.forEach(event => {
+                    if (!seenRangeIds.has(event.id)) {
+                        seenRangeIds.add(event.id);
+                        uniqueRangeEvents.push(event);
+                    }
+                });
+                
+                if (uniqueRangeEvents.length === 0) {
+                    agendaContent.innerHTML = '<div class="empty-state">No events in this date range</div>';
+                } else {
+                    // Summary
+                    const totalEvents = uniqueRangeEvents.length;
+                    const totalDays = selectedDates.length;
+                    
+                    let summaryHTML = `
+                        <div class="agenda-summary">
+                            <div class="agenda-summary-title">${totalEvents} event${totalEvents !== 1 ? 's' : ''} over ${totalDays} day${totalDays !== 1 ? 's' : ''}</div>
+                        </div>
+                    `;
+                    
+                    // Separate multi-day spanning events from single-day events
+                    const spanningEvents = [];
+                    const daySpecificEvents = {};
+                    
+                    uniqueRangeEvents.forEach(event => {
+                        const eventStart = new Date(event.startDate);
+                        const eventEnd = new Date(event.endDate || event.startDate);
+                        const eventSpansDays = event.endDate && event.startDate !== event.endDate;
+                        
+                        if (eventSpansDays) {
+                            // This is a multi-day event
+                            spanningEvents.push(event);
+                        } else {
+                            // Single day event - add to specific day
+                            if (!daySpecificEvents[event.startDate]) {
+                                daySpecificEvents[event.startDate] = [];
+                            }
+                            daySpecificEvents[event.startDate].push(event);
+                        }
+                    });
+                    
+                    let eventsHTML = '';
+                    
+                    // Show spanning events first (only once each)
+                    if (spanningEvents.length > 0) {
+                        eventsHTML += `<div class="agenda-day-section">`;
+                        eventsHTML += `<div class="agenda-day-header">Multi-Day Events</div>`;
+                        
+                        spanningEvents.forEach(event => {
+                            const eventStart = new Date(event.startDate);
+                            const eventEnd = new Date(event.endDate);
+                            const dateRangeStr = `${eventStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${eventEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+                            
+                            let timeStr = '';
+                            if (event.startTime && event.endTime) {
+                                const durationStr = calculateDuration(event.startDate, event.startTime, event.endDate, event.endTime);
+                                timeStr = `<span class="agenda-event-duration">${durationStr}</span>`;
+                            }
+                            
+                            eventsHTML += `
+                                <div class="agenda-event">
+                                    <div class="agenda-event-title">${event.title}</div>
+                                    <div class="agenda-event-time">
+                                        ${dateRangeStr}
+                                        ${timeStr}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        
+                        eventsHTML += `</div>`;
+                    }
+                    
+                    // Then show single-day events grouped by date
+                    sortedDates.forEach(dateStr => {
+                        if (daySpecificEvents[dateStr] && daySpecificEvents[dateStr].length > 0) {
+                            const date = new Date(dateStr);
+                            const dayHeader = date.toLocaleDateString('en-US', { 
+                                weekday: 'short', 
+                                month: 'short', 
+                                day: 'numeric' 
+                            });
+                            
+                            eventsHTML += `<div class="agenda-day-section">`;
+                            eventsHTML += `<div class="agenda-day-header">${dayHeader}</div>`;
+                            
+                            daySpecificEvents[dateStr].forEach(event => {
+                                let timeStr = '';
+                                if (event.startTime) {
+                                    const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
+                                        hour: 'numeric', 
+                                        minute: '2-digit' 
+                                    });
+                                    timeStr = startFormatted;
+                                    
+                                    if (event.endTime) {
+                                        const durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
+                                        timeStr += ` <span class="agenda-event-duration">${durationStr}</span>`;
+                                    }
+                                }
+                                
+                                eventsHTML += `
+                                    <div class="agenda-event">
+                                        <div class="agenda-event-title">${event.title}</div>
+                                        ${timeStr ? `<div class="agenda-event-time">${timeStr}</div>` : ''}
+                                    </div>
+                                `;
+                            });
+                            
+                            eventsHTML += `</div>`;
+                        }
+                    });
+                    
+                    agendaContent.innerHTML = summaryHTML + eventsHTML;
+                }
+            }
+        }
+
+        function calculateDuration(startDate, startTime, endDate, endTime) {
+            if (!startDate || !startTime || !endDate || !endTime) return null;
+            
+            const start = new Date(startDate + ' ' + startTime);
+            const end = new Date(endDate + ' ' + endTime);
+            const diffMs = end - start;
+            
+            if (diffMs <= 0) return null;
+            
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffDays > 0) {
+                const remainingHours = diffHours % 24;
+                const remainingMins = diffMins % 60;
+                
+                let result = `${diffDays}d`;
+                if (remainingHours > 0) result += ` ${remainingHours}h`;
+                if (remainingMins > 0) result += ` ${remainingMins}m`;
+                return result;
+            } else if (diffHours > 0) {
+                const remainingMins = diffMins % 60;
+                return remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours}h`;
+            } else {
+                return `${diffMins}m`;
+            }
+        }
+
+        function renderEvents() {
+            const container = document.getElementById('eventsList');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Filter for upcoming or ongoing events
+            const upcoming = events.filter(e => {
+                const eventEnd = new Date(e.endDate || e.startDate);
+                eventEnd.setHours(23, 59, 59, 999);
+                return eventEnd >= today;
+            });
+            
+            if (upcoming.length === 0) {
+                container.innerHTML = '<div class="empty-state">No upcoming events</div>';
+                return;
+            }
+
+            container.innerHTML = upcoming.slice(0, 5).map(event => {
+                const startDate = new Date(event.startDate);
+                const endDate = new Date(event.endDate || event.startDate);
+                
+                let dateStr = '';
+                if (event.startDate === event.endDate || !event.endDate) {
+                    dateStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                } else {
+                    const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    dateStr = `${startStr} - ${endStr}`;
+                }
+                
+                let timeStr = '';
+                let durationStr = '';
+                
+                if (event.startTime) {
+                    const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit' 
+                    });
+                    
+                    if (event.endTime) {
+                        const endFormatted = new Date('2000-01-01 ' + event.endTime).toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit' 
+                        });
+                        timeStr = `${startFormatted} - ${endFormatted}`;
+                        durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
+                    } else {
+                        timeStr = startFormatted;
+                    }
+                }
+                
+                return `
+                    <div class="event-item">
+                        <div class="note-header">
+                            <div class="event-date">${dateStr}</div>
+                            <button class="delete-btn" onclick="deleteEvent(${event.id})">Ã—</button>
+                        </div>
+                        <div class="event-title">${event.title}</div>
+                        ${timeStr ? `<div class="event-time">${timeStr}</div>` : ''}
+                        ${durationStr ? `<div class="event-duration">Duration: ${durationStr}</div>` : ''}
+                        ${event.description ? `<div class="note-text" style="margin-top: 0.5rem; font-size: 0.85rem;">${event.description}</div>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Day View Modal Functions
+        let currentDayViewDate = null;
+
+        function openDayView(dateStr) {
+            currentDayViewDate = dateStr;
+            const date = new Date(dateStr);
+            
+            // Find all events that include this date
+            const dayEvents = events.filter(e => {
+                const eventStart = new Date(e.startDate);
+                const eventEnd = new Date(e.endDate || e.startDate);
+                const currentDate = new Date(dateStr);
+                return currentDate >= eventStart && currentDate <= eventEnd;
+            });
+            
+            const dateFormatted = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
+            
+            document.getElementById('dayViewTitle').textContent = dateFormatted;
+            
+            // Pre-populate the date in the quick add form
+            document.getElementById('dayEventStartDate').value = dateStr;
+            document.getElementById('dayEventEndDate').value = dateStr;
+            
+            const container = document.getElementById('dayViewEvents');
+            
+            if (dayEvents.length === 0) {
+                container.innerHTML = '<div class="empty-state">No events scheduled for this day</div>';
+            } else {
+                // Sort events by start time
+                dayEvents.sort((a, b) => {
+                    const timeA = a.startTime || '00:00';
+                    const timeB = b.startTime || '00:00';
+                    return timeA.localeCompare(timeB);
+                });
+                
+                container.innerHTML = dayEvents.map(event => {
+                    const startDate = new Date(event.startDate);
+                    const endDate = new Date(event.endDate || event.startDate);
+                    
+                    let dateRangeStr = '';
+                    if (event.startDate !== event.endDate && event.endDate) {
+                        const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        dateRangeStr = `${startStr} - ${endStr}`;
+                    }
+                    
+                    let timeStr = '';
+                    let durationStr = '';
+                    
+                    if (event.startTime) {
+                        const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit' 
+                        });
+                        
+                        if (event.endTime) {
+                            const endFormatted = new Date('2000-01-01 ' + event.endTime).toLocaleTimeString('en-US', { 
+                                hour: 'numeric', 
+                                minute: '2-digit' 
+                            });
+                            timeStr = `${startFormatted} - ${endFormatted}`;
+                            durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
+                        } else {
+                            timeStr = startFormatted;
+                        }
+                    }
+                    
+                    return `
+                        <div class="day-event-item">
+                            <div class="day-event-header">
+                                <div>
+                                    <div class="day-event-title">${event.title}</div>
+                                    ${dateRangeStr ? `<div class="day-event-time" style="color: var(--accent-primary); font-weight: 600;">${dateRangeStr}</div>` : ''}
+                                    ${timeStr ? `<div class="day-event-time">${timeStr}</div>` : ''}
+                                    ${durationStr ? `<div class="day-event-duration">${durationStr}</div>` : ''}
+                                </div>
+                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">Ã—</button>
+                            </div>
+                            ${event.description ? `<div class="day-event-description">${event.description}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            document.getElementById('dayViewModal').classList.add('active');
+        }
+
+        function toggleDayEventInput() {
+            const area = document.getElementById('dayEventInputArea');
+            area.classList.toggle('active');
+            
+            if (!area.classList.contains('active')) {
+                // Clear form but keep the dates
+                document.getElementById('dayEventTitle').value = '';
+                document.getElementById('dayEventStartTime').value = '';
+                document.getElementById('dayEventEndTime').value = '';
+                document.getElementById('dayEventDescription').value = '';
+            } else {
+                // Re-populate dates when opening
+                if (currentDayViewDate) {
+                    document.getElementById('dayEventStartDate').value = currentDayViewDate;
+                    document.getElementById('dayEventEndDate').value = currentDayViewDate;
+                }
+            }
+        }
+
+        function saveDayEvent() {
+            const title = document.getElementById('dayEventTitle').value.trim();
+            const startDate = document.getElementById('dayEventStartDate').value;
+            const endDate = document.getElementById('dayEventEndDate').value;
+            const startTime = document.getElementById('dayEventStartTime').value;
+            const endTime = document.getElementById('dayEventEndTime').value;
+            const description = document.getElementById('dayEventDescription').value.trim();
+            
+            if (title && startDate) {
+                events.push({
+                    id: Date.now(),
+                    title: title,
+                    startDate: startDate,
+                    endDate: endDate || startDate,
+                    startTime: startTime,
+                    endTime: endTime,
+                    description: description
+                });
+                
+                // Sort by start date and time
+                events.sort((a, b) => {
+                    const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
+                    const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
+                    return dateTimeA - dateTimeB;
+                });
+                
+                localStorage.setItem('events', JSON.stringify(events));
+                
+                // Clear form
+                document.getElementById('dayEventTitle').value = '';
+                document.getElementById('dayEventStartTime').value = '';
+                document.getElementById('dayEventEndTime').value = '';
+                document.getElementById('dayEventDescription').value = '';
+                
+                // Close the form
+                toggleDayEventInput();
+                
+                // Refresh the calendar and events
+                renderCalendar();
+                renderEvents();
+                
+                // Refresh the day view
+                if (currentDayViewDate) {
+                    openDayView(currentDayViewDate);
+                }
+            }
+        }
+
+        function closeDayView(event) {
+            if (!event || event.target.id === 'dayViewModal') {
+                document.getElementById('dayViewModal').classList.remove('active');
+                // Close the event input if it's open
+                const eventArea = document.getElementById('dayEventInputArea');
+                if (eventArea.classList.contains('active')) {
+                    eventArea.classList.remove('active');
+                }
+                currentDayViewDate = null;
+            }
+        }
+
+        function deleteEventFromDay(id) {
+            deleteEvent(id);
+            // Check if there are still events on this day
+            const modal = document.getElementById('dayViewModal');
+            if (modal.classList.contains('active')) {
+                const dayTitle = document.getElementById('dayViewTitle').textContent;
+                // Re-render the day view
+                const date = new Date(dayTitle);
+                const dateStr = date.toISOString().split('T')[0];
+                
+                // Find all events that include this date
+                const dayEvents = events.filter(e => {
+                    const eventStart = new Date(e.startDate);
+                    const eventEnd = new Date(e.endDate || e.startDate);
+                    const currentDate = new Date(dateStr);
+                    return currentDate >= eventStart && currentDate <= eventEnd;
+                });
+                
+                const container = document.getElementById('dayViewEvents');
+                
+                if (dayEvents.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No events scheduled for this day</div>';
+                } else {
+                    openDayView(dateStr);
+                }
+            }
+        }
+
+        // Initialize on load
+        init();
+        
+        // Add global mouseup listener to end date selection
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                endDateSelection();
+            }
+        });
+
+        // Task Detail Modal Functions
+        let currentTaskId = null;
+
+        function openTaskDetail(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            currentTaskId = taskId;
+            document.getElementById('taskDetailTitle').textContent = task.text;
+            
+            const editor = document.getElementById('taskNotesEditor');
+            editor.innerHTML = task.notes || '';
+            
+            // Load reminder data
+            document.getElementById('taskReminderDate').value = task.reminderDate || '';
+            document.getElementById('taskReminderTime').value = task.reminderTime || '';
+            
+            document.getElementById('taskDetailModal').classList.add('active');
+        }
+
+        function closeTaskDetail(event) {
+            if (!event || event.target.id === 'taskDetailModal') {
+                // Save notes and reminder before closing
+                if (currentTaskId) {
+                    const task = tasks.find(t => t.id === currentTaskId);
+                    if (task) {
+                        const editor = document.getElementById('taskNotesEditor');
+                        task.notes = editor.innerHTML;
+                        task.reminderDate = document.getElementById('taskReminderDate').value || null;
+                        task.reminderTime = document.getElementById('taskReminderTime').value || null;
+                        localStorage.setItem('tasks', JSON.stringify(tasks));
+                    }
+                }
+                
+                // Reset the scheduling section
+                document.getElementById('eventSchedulingSection').style.display = 'none';
+                document.getElementById('addToCalendarBtn').style.display = 'block';
+                document.getElementById('saveEventBtn').style.display = 'none';
+                
+                document.getElementById('taskDetailModal').classList.remove('active');
+                currentTaskId = null;
+            }
+        }
+
+        function deleteTaskFromModal() {
+            if (currentTaskId && confirm('Are you sure you want to delete this task?')) {
+                deleteTask(currentTaskId);
+                closeTaskDetail();
+            }
+        }
+
+        function addTaskToCalendar() {
+            const task = tasks.find(t => t.id === currentTaskId);
+            if (!task) return;
+
+            // Save notes first
+            const editor = document.getElementById('taskNotesEditor');
+            task.notes = editor.innerHTML;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+
+            // Convert notes to plain text for description
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = task.notes || '';
+            const plainTextNotes = tempDiv.textContent || '';
+
+            // Close task modal
+            document.getElementById('taskDetailModal').classList.remove('active');
+            currentTaskId = null;
+
+            // Open the calendar event form and pre-fill with task info
+            const eventArea = document.getElementById('eventInputArea');
+            eventArea.classList.add('active');
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('eventTitle').value = task.text;
+            document.getElementById('eventStartDate').value = today;
+            document.getElementById('eventEndDate').value = today;
+            document.getElementById('eventStartTime').value = '';
+            document.getElementById('eventEndTime').value = '';
+            document.getElementById('eventDescription').value = plainTextNotes;
+
+            // Scroll to the calendar panel
+            document.querySelector('.calendar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Focus on the start time field
+            setTimeout(() => document.getElementById('eventStartTime').focus(), 500);
+        }
+
+        function toggleEventScheduling() {
+            const schedulingSection = document.getElementById('eventSchedulingSection');
+            const addBtn = document.getElementById('addToCalendarBtn');
+            const saveBtn = document.getElementById('saveEventBtn');
+            
+            if (schedulingSection.style.display === 'none') {
+                // Show scheduling form
+                schedulingSection.style.display = 'block';
+                addBtn.style.display = 'none';
+                saveBtn.style.display = 'block';
+                
+                // Pre-fill with today's date
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('taskEventStartDate').value = today;
+                document.getElementById('taskEventEndDate').value = today;
+            } else {
+                // Hide scheduling form
+                schedulingSection.style.display = 'none';
+                addBtn.style.display = 'block';
+                saveBtn.style.display = 'none';
+            }
+        }
+
+        function saveTaskAsEvent() {
+            const task = tasks.find(t => t.id === currentTaskId);
+            if (!task) return;
+
+            // Save notes first
+            const editor = document.getElementById('taskNotesEditor');
+            task.notes = editor.innerHTML;
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+
+            // Get event details from the form
+            const startDate = document.getElementById('taskEventStartDate').value;
+            const endDate = document.getElementById('taskEventEndDate').value;
+            const startTime = document.getElementById('taskEventStartTime').value;
+            const endTime = document.getElementById('taskEventEndTime').value;
+
+            if (!startDate) {
+                alert('Please select a start date');
+                return;
+            }
+
+            // Convert notes to plain text for description
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = task.notes || '';
+            const plainTextNotes = tempDiv.textContent || '';
+
+            // Create the event
+            events.push({
+                id: Date.now(),
+                title: task.text,
+                startDate: startDate,
+                endDate: endDate || startDate,
+                startTime: startTime,
+                endTime: endTime,
+                description: plainTextNotes
+            });
+            
+            // Sort by start date and time
+            events.sort((a, b) => {
+                const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
+                const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
+                return dateTimeA - dateTimeB;
+            });
+            
+            localStorage.setItem('events', JSON.stringify(events));
+            
+            // Refresh the calendar and events
+            renderCalendar();
+            renderEvents();
+            renderAgenda();
+
+            // Close the modal
+            document.getElementById('taskDetailModal').classList.remove('active');
+            
+            // Reset the scheduling section
+            document.getElementById('eventSchedulingSection').style.display = 'none';
+            document.getElementById('addToCalendarBtn').style.display = 'block';
+            document.getElementById('saveEventBtn').style.display = 'none';
+            
+            currentTaskId = null;
+        }
+
+        // Rich Text Editor Functions
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('taskNotesEditor').focus();
+        }
+
+        function changeFontSize(size) {
+            document.execCommand('fontSize', false, size);
+            document.getElementById('taskNotesEditor').focus();
+        }
+
+        function clearFormatting() {
+            const editor = document.getElementById('taskNotesEditor');
+            const selection = window.getSelection();
+            
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const selectedText = range.toString();
+                
+                if (selectedText) {
+                    document.execCommand('removeFormat', false, null);
+                    document.execCommand('unlink', false, null);
+                }
+            }
+            
+            editor.focus();
+        }
+
+        // Rich Text Editor Functions for Note Modal
+        function formatNoteText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('noteDetailsEditor').focus();
+        }
+
+        function changeNoteFontSize(size) {
+            document.execCommand('fontSize', false, size);
+            document.getElementById('noteDetailsEditor').focus();
+        }
+
+        function clearNoteFormatting() {
+            const editor = document.getElementById('noteDetailsEditor');
+            const selection = window.getSelection();
+            
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const selectedText = range.toString();
+                
+                if (selectedText) {
+                    document.execCommand('removeFormat', false, null);
+                    document.execCommand('unlink', false, null);
+                }
+            }
+            
+            editor.focus();
+        }
+
+        // Initialize on load
+        init();
+        
+        // Add global mouseup listener to end date selection
+        document.addEventListener('mouseup', () => {
+            if (isDragging) {
+                endDateSelection();
+            }
+        });
+
+        // Close settings dropdown when clicking outside
+        document.addEventListener('click', (event) => {
+            const dropdown = document.getElementById('settingsDropdown');
+            const hamburger = document.querySelector('.hamburger-menu');
+            
+            if (!dropdown.contains(event.target) && !hamburger.contains(event.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        // Settings Menu Functions
+        function toggleSettingsDropdown() {
+            const dropdown = document.getElementById('settingsDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.add('active');
+            document.getElementById('settingsDropdown').classList.remove('active');
+        }
+
+        function closeSettingsModal(event) {
+            if (!event || event.target.id === 'settingsModal') {
+                document.getElementById('settingsModal').classList.remove('active');
+            }
+        }
+
+        // Note Detail Modal Functions
+        let currentNoteId = null;
+
+        function openNoteDetail(noteId) {
+            const note = notes.find(n => n.id === noteId);
+            if (!note) return;
+
+            currentNoteId = noteId;
+            
+            const date = new Date(note.createdAt);
+            const dateStr = date.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+            
+            document.getElementById('noteDetailTimestamp').textContent = dateStr;
+            document.getElementById('noteDetailText').textContent = note.text;
+            
+            const editor = document.getElementById('noteDetailsEditor');
+            editor.innerHTML = note.detailedNotes || '';
+            
+            document.getElementById('noteDetailModal').classList.add('active');
+        }
+
+        function closeNoteDetail(event) {
+            if (!event || event.target.id === 'noteDetailModal') {
+                // Save detailed notes before closing
+                if (currentNoteId) {
+                    const note = notes.find(n => n.id === currentNoteId);
+                    if (note) {
+                        const editor = document.getElementById('noteDetailsEditor');
+                        note.detailedNotes = editor.innerHTML;
+                        localStorage.setItem('notes', JSON.stringify(notes));
+                    }
+                }
+                
+                // Reset the scheduling section
+                document.getElementById('noteEventSchedulingSection').style.display = 'none';
+                document.getElementById('noteAddToCalendarBtn').style.display = 'block';
+                document.getElementById('noteSaveEventBtn').style.display = 'none';
+                
+                document.getElementById('noteDetailModal').classList.remove('active');
+                currentNoteId = null;
+            }
+        }
+
+        function addNoteToCalendar() {
+            const note = notes.find(n => n.id === currentNoteId);
+            if (!note) return;
+
+            // Save detailed notes first
+            const editor = document.getElementById('noteDetailsEditor');
+            note.detailedNotes = editor.innerHTML;
+            localStorage.setItem('notes', JSON.stringify(notes));
+
+            // Combine original note and detailed notes for description
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = note.detailedNotes || '';
+            const plainTextDetails = tempDiv.textContent || '';
+            
+            const fullDescription = note.text + (plainTextDetails ? '\n\n' + plainTextDetails : '');
+
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Create the event with the full note content
+            events.push({
+                id: Date.now(),
+                title: note.text.substring(0, 100) + (note.text.length > 100 ? '...' : ''),
+                startDate: today,
+                endDate: today,
+                startTime: '',
+                endTime: '',
+                description: fullDescription
+            });
+            
+            // Sort by start date and time
+            events.sort((a, b) => {
+                const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
+                const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
+                return dateTimeA - dateTimeB;
+            });
+            
+            localStorage.setItem('events', JSON.stringify(events));
+            
+            // Refresh the calendar and events
+            renderCalendar();
+            renderEvents();
+            renderAgenda();
+
+            // Close modal
+            closeNoteDetail();
+            
+            alert('Note added to calendar for today!');
+        }
+
+        function toggleNoteEventScheduling() {
+            const schedulingSection = document.getElementById('noteEventSchedulingSection');
+            const addBtn = document.getElementById('noteAddToCalendarBtn');
+            const saveBtn = document.getElementById('noteSaveEventBtn');
+            
+            if (schedulingSection.style.display === 'none') {
+                // Show scheduling form
+                schedulingSection.style.display = 'block';
+                addBtn.style.display = 'none';
+                saveBtn.style.display = 'block';
+                
+                // Pre-fill with today's date
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('noteEventStartDate').value = today;
+                document.getElementById('noteEventEndDate').value = today;
+            } else {
+                // Hide scheduling form
+                schedulingSection.style.display = 'none';
+                addBtn.style.display = 'block';
+                saveBtn.style.display = 'none';
+            }
+        }
+
+        function saveNoteAsEvent() {
+            const note = notes.find(n => n.id === currentNoteId);
+            if (!note) return;
+
+            // Save detailed notes first
+            const editor = document.getElementById('noteDetailsEditor');
+            note.detailedNotes = editor.innerHTML;
+            localStorage.setItem('notes', JSON.stringify(notes));
+
+            // Get event details from the form
+            const startDate = document.getElementById('noteEventStartDate').value;
+            const endDate = document.getElementById('noteEventEndDate').value;
+            const startTime = document.getElementById('noteEventStartTime').value;
+            const endTime = document.getElementById('noteEventEndTime').value;
+
+            if (!startDate) {
+                alert('Please select a start date');
+                return;
+            }
+
+            // Combine original note and detailed notes for description
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = note.detailedNotes || '';
+            const plainTextDetails = tempDiv.textContent || '';
+            const fullDescription = note.text + (plainTextDetails ? '\n\n' + plainTextDetails : '');
+
+            // Ask if user wants to move or copy the note
+            const moveNote = confirm(
+                'Do you want to MOVE this note to calendar (deletes the note)?\n\n' +
+                'Click OK to MOVE the note\n' +
+                'Click Cancel to KEEP the note and create a calendar event'
+            );
+
+            // Create the event
+            events.push({
+                id: Date.now(),
+                title: note.text.substring(0, 100) + (note.text.length > 100 ? '...' : ''),
+                startDate: startDate,
+                endDate: endDate || startDate,
+                startTime: startTime,
+                endTime: endTime,
+                description: fullDescription
+            });
+            
+            // Sort by start date and time
+            events.sort((a, b) => {
+                const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
+                const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
+                return dateTimeA - dateTimeB;
+            });
+            
+            localStorage.setItem('events', JSON.stringify(events));
+
+            // If user chose to move, delete the note
+            if (moveNote) {
+                notes = notes.filter(n => n.id !== currentNoteId);
+                localStorage.setItem('notes', JSON.stringify(notes));
+                renderNotes();
+            }
+            
+            // Refresh the calendar and events
+            renderCalendar();
+            renderEvents();
+            renderAgenda();
+
+            // Close the modal and reset scheduling section
+            document.getElementById('noteEventSchedulingSection').style.display = 'none';
+            document.getElementById('noteAddToCalendarBtn').style.display = 'block';
+            document.getElementById('noteSaveEventBtn').style.display = 'none';
+            closeNoteDetail();
+            
+            if (moveNote) {
+                alert('Note moved to calendar!');
+            } else {
+                alert('Calendar event created! Note kept in notes.');
+            }
+        }
+
+        function addNoteToTask() {
+            const note = notes.find(n => n.id === currentNoteId);
+            if (!note) return;
+
+            // Save detailed notes first
+            const editor = document.getElementById('noteDetailsEditor');
+            note.detailedNotes = editor.innerHTML;
+            localStorage.setItem('notes', JSON.stringify(notes));
+
+            // Create a new task with both the original note and detailed notes
+            tasks.push({
+                id: Date.now(),
+                text: note.text.substring(0, 100) + (note.text.length > 100 ? '...' : ''),
+                completed: false,
+                notes: (note.text.length > 100 ? note.text : '') + (note.detailedNotes || ''), // Combine original text (if truncated) and detailed notes
+                createdAt: new Date().toISOString()
+            });
+            
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+            renderTasks();
+
+            // Close modal
+            closeNoteDetail();
+            
+            alert('Note added to tasks!');
+        }
+
+        function deleteNoteFromModal() {
+            if (currentNoteId && confirm('Are you sure you want to delete this note?')) {
+                deleteNote(currentNoteId);
+                closeNoteDetail();
+            }
+        }
+
+        function clearAllData() {
+            const confirmText = 'Are you sure you want to clear all tasks, notes, and events? This action cannot be undone.';
+            
+            if (confirm(confirmText)) {
+                // Clear all data from localStorage
+                localStorage.removeItem('tasks');
+                localStorage.removeItem('notes');
+                localStorage.removeItem('events');
+                localStorage.removeItem('meetings');
+                
+                // Reset in-memory state
+                tasks = [];
+                notes = [];
+                events = [];
+                meetings = [];
+                selectedDates = [];
+                dragStartDate = null;
+                isDragging = false;
+                hasDragged = false;
+                
+                // Re-render all components
+                renderTasks();
+                renderNotes();
+                renderCalendar();
+                renderEvents();
+                
+                // Hide agenda if shown
+                document.getElementById('agendaView').classList.remove('active');
+                document.getElementById('eventsList').classList.remove('hidden');
+                
+                // Close the settings modal
+                closeSettingsModal();
+                
+                alert('All data has been cleared successfully.');
+            }
+        }
+
+        // Meetings Management Functions
+        let currentMeetingId = null;
+        let currentReminderMeetingId = null;
+
+        function openMeetingsPanel() {
+            document.getElementById('meetingsPanelModal').classList.add('active');
+            document.getElementById('settingsDropdown').classList.remove('active');
+            renderMeetingsList();
+            checkReminders(); // Check for any pending reminders when opening
+        }
+
+        function closeMeetingsPanel(event) {
+            if (!event || event.target.id === 'meetingsPanelModal') {
+                document.getElementById('meetingsPanelModal').classList.remove('active');
+                document.getElementById('createMeetingForm').style.display = 'none';
+            }
+        }
+
+        function openCreateMeetingForm() {
+            document.getElementById('createMeetingForm').style.display = 'block';
+            document.getElementById('newMeetingDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        function toggleRecurringOptions() {
+            const checkbox = document.getElementById('isRecurringMeeting');
+            const options = document.getElementById('recurringOptions');
+            options.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        function updateRecurrencePattern(pattern) {
+            const intervalLabel = document.getElementById('recurrenceIntervalLabel');
+            const weeklyDaySelection = document.getElementById('weeklyDaySelection');
+            
+            switch(pattern) {
+                case 'daily':
+                    intervalLabel.textContent = 'day(s)';
+                    weeklyDaySelection.style.display = 'none';
+                    break;
+                case 'weekly':
+                    intervalLabel.textContent = 'week(s) on:';
+                    weeklyDaySelection.style.display = 'grid';
+                    break;
+                case 'monthly':
+                    intervalLabel.textContent = 'month(s)';
+                    weeklyDaySelection.style.display = 'none';
+                    break;
+                case 'yearly':
+                    intervalLabel.textContent = 'year(s)';
+                    weeklyDaySelection.style.display = 'none';
+                    break;
+            }
+        }
+
+        function cancelCreateMeeting() {
+            document.getElementById('createMeetingForm').style.display = 'none';
+            document.getElementById('newMeetingName').value = '';
+            document.getElementById('newMeetingDate').value = '';
+            document.getElementById('newMeetingStartTime').value = '';
+            document.getElementById('newMeetingEndTime').value = '';
+            document.getElementById('isRecurringMeeting').checked = false;
+            document.getElementById('recurringOptions').style.display = 'none';
+            document.getElementById('recurrenceInterval').value = '1';
+            document.getElementById('recurrenceEndDate').value = '';
+            document.querySelectorAll('.recurring-day-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        function createMeeting() {
+            const name = document.getElementById('newMeetingName').value.trim();
+            const date = document.getElementById('newMeetingDate').value;
+            const startTime = document.getElementById('newMeetingStartTime').value;
+            const endTime = document.getElementById('newMeetingEndTime').value;
+            const isRecurring = document.getElementById('isRecurringMeeting').checked;
+
+            if (!name || !date) {
+                alert('Please provide a meeting name and date');
+                return;
+            }
+
+            const baseMeeting = {
+                id: Date.now(),
+                name: name,
+                date: date,
+                startTime: startTime,
+                endTime: endTime,
+                tasks: [],
+                reminders: [],
+                createdAt: new Date().toISOString()
+            };
+
+            if (isRecurring) {
+                // Get recurrence settings
+                const pattern = document.querySelector('input[name="recurrencePattern"]:checked').value;
+                const interval = parseInt(document.getElementById('recurrenceInterval').value);
+                const endDate = document.getElementById('recurrenceEndDate').value;
+                
+                baseMeeting.isRecurring = true;
+                baseMeeting.recurrence = {
+                    pattern: pattern,
+                    interval: interval,
+                    endDate: endDate || null
+                };
+
+                if (pattern === 'weekly') {
+                    const selectedDays = Array.from(document.querySelectorAll('.recurring-day-checkbox:checked'))
+                        .map(cb => parseInt(cb.value));
+                    
+                    if (selectedDays.length === 0) {
+                        alert('Please select at least one day for weekly recurrence');
+                        return;
+                    }
+                    baseMeeting.recurrence.daysOfWeek = selectedDays;
+                }
+
+                // Generate recurring meetings
+                const generatedMeetings = generateRecurringMeetings(baseMeeting);
+                meetings.push(...generatedMeetings);
+            } else {
+                baseMeeting.isRecurring = false;
+                meetings.push(baseMeeting);
+            }
+
+            localStorage.setItem('meetings', JSON.stringify(meetings));
+            
+            cancelCreateMeeting();
+            renderMeetingsList();
+            renderCalendar();
+            renderEvents();
+        }
+
+        function generateRecurringMeetings(baseMeeting) {
+            const generatedMeetings = [];
+            const startDate = new Date(baseMeeting.date);
+            const endDate = baseMeeting.recurrence.endDate ? new Date(baseMeeting.recurrence.endDate) : null;
+            const maxOccurrences = endDate ? 365 : 52; // Limit to 1 year if no end date, or 52 occurrences
+            
+            let currentDate = new Date(startDate);
+            let occurrenceCount = 0;
+
+            while (occurrenceCount < maxOccurrences) {
+                if (endDate && currentDate > endDate) break;
+
+                let shouldAdd = false;
+
+                switch (baseMeeting.recurrence.pattern) {
+                    case 'daily':
+                        shouldAdd = true;
+                        break;
+                    
+                    case 'weekly':
+                        const dayOfWeek = currentDate.getDay();
+                        shouldAdd = baseMeeting.recurrence.daysOfWeek.includes(dayOfWeek);
+                        break;
+                    
+                    case 'monthly':
+                        shouldAdd = currentDate.getDate() === startDate.getDate();
+                        break;
+                    
+                    case 'yearly':
+                        shouldAdd = currentDate.getMonth() === startDate.getMonth() && 
+                                    currentDate.getDate() === startDate.getDate();
+                        break;
+                }
+
+                if (shouldAdd && (occurrenceCount === 0 || currentDate >= startDate)) {
+                    generatedMeetings.push({
+                        ...baseMeeting,
+                        id: baseMeeting.id + occurrenceCount,
+                        date: currentDate.toISOString().split('T')[0],
+                        tasks: [], // Each occurrence gets its own task list
+                        reminders: [...baseMeeting.reminders],
+                        seriesId: baseMeeting.id // Link to original series
+                    });
+                    occurrenceCount++;
+                }
+
+                // Increment date based on pattern
+                switch (baseMeeting.recurrence.pattern) {
+                    case 'daily':
+                        currentDate.setDate(currentDate.getDate() + baseMeeting.recurrence.interval);
+                        break;
+                    case 'weekly':
+                        currentDate.setDate(currentDate.getDate() + 1); // Check each day
+                        break;
+                    case 'monthly':
+                        currentDate.setMonth(currentDate.getMonth() + baseMeeting.recurrence.interval);
+                        break;
+                    case 'yearly':
+                        currentDate.setFullYear(currentDate.getFullYear() + baseMeeting.recurrence.interval);
+                        break;
+                }
+            }
+
+            return generatedMeetings;
+        }
+
+        function renderMeetingsList() {
+            const container = document.getElementById('meetingsList');
+            
+            if (meetings.length === 0) {
+                container.innerHTML = '<div class="empty-state">No meetings scheduled. Create your first meeting!</div>';
+                return;
+            }
+
+            // Sort by date/time
+            const sortedMeetings = [...meetings].sort((a, b) => {
+                const dateTimeA = new Date(a.date + ' ' + (a.startTime || '00:00'));
+                const dateTimeB = new Date(b.date + ' ' + (b.startTime || '00:00'));
+                return dateTimeA - dateTimeB;
+            });
+
+            container.innerHTML = sortedMeetings.map(meeting => {
+                const date = new Date(meeting.date);
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                
+                let timeStr = 'All day';
+                if (meeting.startTime) {
+                    const startFormatted = new Date('2000-01-01 ' + meeting.startTime).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit' 
+                    });
+                    
+                    if (meeting.endTime) {
+                        const endFormatted = new Date('2000-01-01 ' + meeting.endTime).toLocaleTimeString('en-US', { 
+                            hour: 'numeric', 
+                            minute: '2-digit' 
+                        });
+                        timeStr = `${startFormatted} - ${endFormatted}`;
+                    } else {
+                        timeStr = startFormatted;
+                    }
+                }
+
+                const incompleteTasks = meeting.tasks.filter(t => !t.completed).length;
+                const totalTasks = meeting.tasks.length;
+                const recurringBadge = meeting.isRecurring ? '<span style="background: #8b5cf6; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; margin-left: 0.5rem;">Recurring</span>' : '';
+
+                return `
+                    <div class="meeting-card" onclick="openMeetingDetail(${meeting.id})">
+                        <div class="meeting-card-header">
+                            <div>
+                                <div class="meeting-title">${meeting.name}${recurringBadge}</div>
+                                <div class="meeting-date-time">${dateStr} at ${timeStr}</div>
+                                <div class="meeting-task-count">${incompleteTasks} of ${totalTasks} tasks pending</div>
+                            </div>
+                            <div class="meeting-actions-quick">
+                                <button class="meeting-action-icon" onclick="event.stopPropagation(); deleteMeeting(${meeting.id})" title="Delete">Ã—</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openMeetingDetail(meetingId) {
+            const meeting = meetings.find(m => m.id === meetingId);
+            if (!meeting) return;
+
+            currentMeetingId = meetingId;
+
+            document.getElementById('meetingDetailTitle').textContent = meeting.name;
+            
+            const date = new Date(meeting.date);
+            const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            
+            let timeStr = 'All day';
+            if (meeting.startTime) {
+                const startFormatted = new Date('2000-01-01 ' + meeting.startTime).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+                
+                if (meeting.endTime) {
+                    const endFormatted = new Date('2000-01-01 ' + meeting.endTime).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit' 
+                    });
+                    timeStr = `${startFormatted} - ${endFormatted}`;
+                } else {
+                    timeStr = startFormatted;
+                }
+            }
+            
+            document.getElementById('meetingDetailDateTime').textContent = `${dateStr} at ${timeStr}`;
+
+            // Update reminder chips
+            document.querySelectorAll('.reminder-chip').forEach(chip => {
+                const time = chip.getAttribute('data-time');
+                if (meeting.reminders.includes(parseInt(time))) {
+                    chip.classList.add('selected');
+                } else {
+                    chip.classList.remove('selected');
+                }
+            });
+
+            renderMeetingTasks();
+            
+            document.getElementById('meetingDetailModal').classList.add('active');
+        }
+
+        function closeMeetingDetail(event) {
+            if (!event || event.target.id === 'meetingDetailModal') {
+                saveMeetingChanges(); // Auto-save on close
+                document.getElementById('meetingDetailModal').classList.remove('active');
+                document.getElementById('meetingTaskInputArea').style.display = 'none';
+                currentMeetingId = null;
+            }
+        }
+
+        function toggleReminder(minutes) {
+            const meeting = meetings.find(m => m.id === currentMeetingId);
+            if (!meeting) return;
+
+            const time = parseInt(minutes);
+            const index = meeting.reminders.indexOf(time);
+
+            if (index > -1) {
+                meeting.reminders.splice(index, 1);
+            } else {
+                meeting.reminders.push(time);
+            }
+
+            // Update UI
+            const chip = document.querySelector(`.reminder-chip[data-time="${minutes}"]`);
+            chip.classList.toggle('selected');
+        }
+
+        function toggleMeetingTaskInput() {
+            const area = document.getElementById('meetingTaskInputArea');
+            const input = document.getElementById('meetingTaskInput');
+            
+            if (area.style.display === 'none') {
+                area.style.display = 'block';
+                setTimeout(() => input.focus(), 100);
+            } else {
+                area.style.display = 'none';
+            }
+        }
+
+        function handleMeetingTaskKeypress(event) {
+            if (event.key === 'Enter') {
+                addMeetingTask();
+            }
+        }
+
+        function addMeetingTask() {
+            const meeting = meetings.find(m => m.id === currentMeetingId);
+            if (!meeting) return;
+
+            const input = document.getElementById('meetingTaskInput');
+            const text = input.value.trim();
+
+            if (text) {
+                meeting.tasks.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                });
+
+                input.value = '';
+                renderMeetingTasks();
+                document.getElementById('meetingTaskInputArea').style.display = 'none';
+            }
+        }
+
+        function toggleMeetingTask(taskId) {
+            const meeting = meetings.find(m => m.id === currentMeetingId);
+            if (!meeting) return;
+
+            const task = meeting.tasks.find(t => t.id === taskId);
+            if (task) {
+                task.completed = !task.completed;
+                renderMeetingTasks();
+            }
+        }
+
+        function deleteMeetingTask(taskId) {
+            const meeting = meetings.find(m => m.id === currentMeetingId);
+            if (!meeting) return;
+
+            meeting.tasks = meeting.tasks.filter(t => t.id !== taskId);
+            renderMeetingTasks();
+        }
+
+        function renderMeetingTasks() {
+            const meeting = meetings.find(m => m.id === currentMeetingId);
+            if (!meeting) return;
+
+            const container = document.getElementById('meetingTaskList');
+
+            if (meeting.tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state">No tasks for this meeting yet</div>';
+                return;
+            }
+
+            container.innerHTML = meeting.tasks.map(task => `
+                <div class="meeting-task-item ${task.completed ? 'completed' : ''}">
+                    <input type="checkbox" class="task-checkbox" 
+                           ${task.completed ? 'checked' : ''} 
+                           onchange="toggleMeetingTask(${task.id})"
+                           onclick="event.stopPropagation()">
+                    <span class="task-text" style="flex: 1;">${task.text}</span>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteMeetingTask(${task.id})">Ã—</button>
+                </div>
+            `).join('');
+        }
+
+        function saveMeetingChanges() {
+            localStorage.setItem('meetings', JSON.stringify(meetings));
+            renderMeetingsList();
+            renderCalendar(); // Refresh calendar
+            renderEvents();
+        }
+
+        function deleteMeeting(meetingId) {
+            if (confirm('Are you sure you want to delete this meeting and all its tasks?')) {
+                meetings = meetings.filter(m => m.id !== meetingId);
+                localStorage.setItem('meetings', JSON.stringify(meetings));
+                renderMeetingsList();
+                renderCalendar();
+                renderEvents();
+            }
+        }
+
+        function deleteMeetingFromDetail() {
+            if (currentMeetingId && confirm('Are you sure you want to delete this meeting and all its tasks?')) {
+                meetings = meetings.filter(m => m.id !== currentMeetingId);
+                localStorage.setItem('meetings', JSON.stringify(meetings));
+                closeMeetingDetail();
+                renderMeetingsList();
+                renderCalendar();
+                renderEvents();
+            }
+        }
+
+        // Reminder System
+        function checkReminders() {
+            const now = new Date();
+            
+            meetings.forEach(meeting => {
+                const meetingDateTime = new Date(meeting.date + ' ' + (meeting.startTime || '00:00'));
+                
+                meeting.reminders.forEach(reminderMinutes => {
+                    const reminderTime = new Date(meetingDateTime.getTime() - (reminderMinutes * 60000));
+                    
+                    // Check if reminder time has passed and is within the last 5 minutes
+                    const timeDiff = now - reminderTime;
+                    if (timeDiff >= 0 && timeDiff < 300000) { // Within last 5 minutes
+                        // Check if we haven't already shown this reminder
+                        const reminderKey = `reminder_${meeting.id}_${reminderMinutes}`;
+                        if (!sessionStorage.getItem(reminderKey)) {
+                            showReminder(meeting);
+                            sessionStorage.setItem(reminderKey, 'shown');
+                            flashBrowserTab(meeting.name);
+                        }
+                    }
+                });
+            });
+        }
+
+        function showReminder(meeting) {
+            currentReminderMeetingId = meeting.id;
+            
+            document.getElementById('reminderMeetingTitle').textContent = meeting.name;
+            
+            const date = new Date(meeting.date);
+            const dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
+            
+            let timeStr = 'All day';
+            if (meeting.startTime) {
+                const startFormatted = new Date('2000-01-01 ' + meeting.startTime).toLocaleTimeString('en-US', { 
+                    hour: 'numeric', 
+                    minute: '2-digit' 
+                });
+                
+                if (meeting.endTime) {
+                    const endFormatted = new Date('2000-01-01 ' + meeting.endTime).toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit' 
+                    });
+                    timeStr = `${startFormatted} - ${endFormatted}`;
+                } else {
+                    timeStr = startFormatted;
+                }
+            }
+            
+            document.getElementById('reminderMeetingTime').textContent = `${dateStr} at ${timeStr}`;
+
+            const incompleteTasks = meeting.tasks.filter(t => !t.completed);
+            const previewContainer = document.getElementById('reminderTasksPreview');
+            
+            if (incompleteTasks.length === 0) {
+                previewContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">All tasks completed!</div>';
+            } else {
+                previewContainer.innerHTML = incompleteTasks.map(task => `
+                    <div class="reminder-task-preview-item">â€¢ ${task.text}</div>
+                `).join('');
+            }
+
+            document.getElementById('reminderNotificationModal').classList.add('active');
+        }
+
+        function flashBrowserTab(meetingName) {
+            const originalTitle = document.title;
+            let count = 0;
+            const interval = setInterval(() => {
+                document.title = count % 2 === 0 ? `â° ${meetingName}` : originalTitle;
+                count++;
+                if (count >= 10) {
+                    clearInterval(interval);
+                    document.title = originalTitle;
+                }
+            }, 500);
+        }
+
+        function dismissReminder() {
+            document.getElementById('reminderNotificationModal').classList.remove('active');
+            currentReminderMeetingId = null;
+        }
+
+        function openMeetingFromReminder() {
+            dismissReminder();
+            openMeetingsPanel();
+            setTimeout(() => {
+                openMeetingDetail(currentReminderMeetingId);
+            }, 300);
+        }
+
+        // Check reminders every minute
+        setInterval(checkReminders, 60000);
+
+        // Task Reminder System
+        function checkTaskReminders() {
+            const now = new Date();
+            
+            tasks.forEach(task => {
+                if (!task.reminderDate || !task.reminderTime || task.completed) return;
+                
+                const reminderDateTime = new Date(task.reminderDate + ' ' + task.reminderTime);
+                
+                // Check if reminder time has passed and is within the last 5 minutes
+                const timeDiff = now - reminderDateTime;
+                if (timeDiff >= 0 && timeDiff < 300000) { // Within last 5 minutes
+                    // Check if we haven't already shown this reminder
+                    const reminderKey = `task_reminder_${task.id}`;
+                    if (!sessionStorage.getItem(reminderKey)) {
+                        showTaskReminder(task);
+                        sessionStorage.setItem(reminderKey, 'shown');
+                        flashBrowserTab(task.text);
+                    }
+                }
+            });
+        }
+
+        function showTaskReminder(task) {
+            // Use a simpler alert-style reminder for tasks
+            const message = `â° Quick Win Reminder:\n\n${task.text}\n\nTime to tackle this task!`;
+            
+            if (confirm(message + '\n\nOpen task details?')) {
+                openTaskDetail(task.id);
+            }
+        }
+
+        // Check both meeting and task reminders
+        setInterval(() => {
+            checkReminders();
+            checkTaskReminders();
+        }, 60000);
+
+        // Check on load
+        checkTaskReminders();
+
+        function clearAllData() {
+            const confirmText = 'Are you sure you want to clear all tasks, notes, and events? This action cannot be undone.';
+            
+            if (confirm(confirmText)) {
+                // Clear all data from localStorage
+                localStorage.removeItem('tasks');
+                localStorage.removeItem('notes');
+                localStorage.removeItem('events');
+                
+                // Reset in-memory state
+                tasks = [];
+                notes = [];
+                events = [];
+                selectedDates = [];
+                dragStartDate = null;
+                isDragging = false;
+                hasDragged = false;
+                
+                // Re-render all components
+                renderTasks();
+                renderNotes();
+                renderCalendar();
+                renderEvents();
+                
+                // Hide agenda if shown
+                document.getElementById('agendaView').classList.remove('active');
+                document.getElementById('eventsList').classList.remove('hidden');
+                
+                // Close the settings modal
+                closeSettingsModal();
+                
+                alert('All data has been cleared successfully.');
+            }
+        }
+
     </script>
 </body>
 </html>
