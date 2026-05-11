@@ -4,34 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Premium neutrals - clean and sophisticated */
-            --bg-primary: #fafafa;
+            --bg-primary: #fff5f0;
             --bg-secondary: #ffffff;
-            --bg-tertiary: #f5f5f7;
-            --text-primary: #1a1a1a;
-            --text-secondary: #6b7280;
-            --text-tertiary: #9ca3af;
-            
-            /* Refined coral accent */
+            --bg-tertiary: #ffe8dd;
+            --text-primary: #2d1810;
+            --text-secondary: #5a4a42;
+            --text-tertiary: #9a8a82;
             --accent-primary: #ff6b35;
-            --accent-secondary: #ff8a5b;
-            --accent-light: #fff3f0;
-            
-            /* Premium borders */
-            --border-color: #e5e7eb;
-            
-            /* Elevated shadows with subtle depth */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
-            
-            /* Premium gradients */
-            --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #ff8a5b 100%);
-            --gradient-ocean: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
-            --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
+            --accent-secondary: #ff8c61;
+            --accent-light: #fff0e8;
+            --border-color: #ffd4c4;
+            --shadow-sm: 0 1px 3px rgba(255, 107, 53, 0.08);
+            --shadow-md: 0 4px 12px rgba(255, 107, 53, 0.12);
+            --shadow-lg: 0 8px 24px rgba(255, 107, 53, 0.16);
+            --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd166 100%);
         }
 
         * {
@@ -41,14 +30,11 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(to bottom, #fafafa 0%, #f5f5f7 100%);
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
-            font-size: 15px;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
         }
 
         .app-container {
@@ -63,7 +49,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Hamburger Menu - Premium Floating Action */
+        /* Hamburger Menu */
         .hamburger-menu {
             position: fixed;
             top: 1.5rem;
@@ -71,25 +57,24 @@
             z-index: 1001;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+            border-radius: 8px;
             padding: 0.75rem;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-md);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
             gap: 0.35rem;
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             justify-content: center;
             align-items: center;
         }
 
         .hamburger-menu:hover {
-            background: var(--bg-tertiary);
+            background: var(--accent-light);
             border-color: var(--accent-primary);
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
 
         .hamburger-bar {
@@ -352,14 +337,14 @@
         }
 
         .header h1 {
-            font-family: 'Playfair Display', Georgia, serif;
+            font-family: 'Crimson Pro', serif;
             font-size: 3.5rem;
             font-weight: 700;
             background: var(--gradient-sunset);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.02em;
             margin-bottom: 0.5rem;
         }
 
@@ -383,12 +368,11 @@
 
         .panel {
             background: var(--bg-secondary);
-            border-radius: 16px;
-            padding: 0;
+            border-radius: 8px;
+            padding: 2rem;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
+            transition: all 0.3s ease;
         }
 
         .panel:hover {
@@ -400,41 +384,35 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1.5rem 2rem;
-            background: linear-gradient(to bottom, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
-            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--bg-tertiary);
         }
 
         .panel-header h2 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
             color: var(--text-primary);
-            letter-spacing: -0.02em;
-        }
-
-        /* Panel content padding */
-        .task-list, .notes-list, .calendar, .events-list, .task-input-area, .notes-area {
-            padding: 1.5rem 2rem 2rem 2rem;
         }
 
         .add-btn {
-            background: var(--gradient-sunset);
+            background: var(--accent-primary);
             color: white;
             border: none;
-            padding: 0.625rem 1.25rem;
-            border-radius: 10px;
-            font-size: 0.875rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);
-            letter-spacing: 0.01em;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
         }
 
         .add-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+            background: var(--accent-secondary);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .add-btn:active {
@@ -699,22 +677,19 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 12px;
-            font-size: 0.9375rem;
-            font-weight: 500;
+            border-radius: 4px;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             position: relative;
             background: var(--bg-tertiary);
-            border: 1px solid transparent;
-            color: var(--text-primary);
+            border: 1px solid var(--border-color);
         }
 
         .calendar-day:hover {
             background: var(--accent-light);
-            color: var(--accent-primary);
+            border-color: var(--accent-secondary);
             transform: scale(1.05);
-            box-shadow: var(--shadow-sm);
         }
 
         .calendar-day.other-month {
@@ -727,7 +702,6 @@
             color: white;
             font-weight: 700;
             border: none;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
         .calendar-day.has-event::after {
@@ -1417,28 +1391,32 @@
     <script type="module">
         // Import Firebase modules
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Your Firebase configuration
+        // Your Firebase configuration - Nova Quick
         const firebaseConfig = {
-            apiKey: "AIzaSyDNRxK0VNsw0F8kM1rHkhgjXkpTi8P8sMU",
-            authDomain: "quick-organizer.firebaseapp.com",
-            projectId: "quick-organizer",
-            storageBucket: "quick-organizer.firebasestorage.app",
-            messagingSenderId: "744637037865",
-            appId: "1:744637037865:web:12e7869cd82d8cb6d34b38"
+            apiKey: "AIzaSyC21uDcMLyGso3kLqBYimTL8loUi5zzLjw",
+            authDomain: "nova-quick.firebaseapp.com",
+            projectId: "nova-quick",
+            storageBucket: "nova-quick.firebasestorage.app",
+            messagingSenderId: "914595554926",
+            appId: "1:914595554926:web:e19d4fc962794d9e9aa87f",
+            measurementId: "G-YLV78DYWEJ"
         };
 
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         const db = getFirestore(app);
 
-        // Make db available globally
+        // Make db and modules available globally
         window.db = db;
-        window.firestoreModules = { collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot };
+        window.analytics = analytics;
+        window.firestoreModules = { collection, doc, setDoc, getDocs, deleteDoc, onSnapshot };
         window.firebaseReady = true;
 
-        console.log('ðŸ”¥ Firebase connected successfully!');
+        console.log('ðŸ”¥ Firebase connected to Nova Quick!');
     </script>
 </head>
 <body>
@@ -1458,8 +1436,10 @@
         <header class="header">
             <h1>Daily Planner</h1>
             <div class="date-display" id="currentDate"></div>
-            <div id="syncStatus" style="position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; opacity: 0; transition: opacity 0.3s ease; z-index: 1000;"></div>
         </header>
+
+        <!-- Sync Status Indicator -->
+        <div id="syncStatus" style="position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 0.625rem 1rem; border-radius: 10px; font-size: 0.875rem; font-weight: 600; opacity: 0; transition: opacity 0.3s ease; z-index: 1000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);"></div>
 
         <div class="main-grid">
             <!-- Tasks Panel -->
@@ -1530,8 +1510,8 @@
                 <div class="calendar-nav">
                     <div class="calendar-month" id="calendarMonth"></div>
                     <div class="nav-btns">
-                        <button class="nav-btn" onclick="previousMonth()">â€¹</button>
-                        <button class="nav-btn" onclick="nextMonth()">â€º</button>
+                        <button class="nav-btn" onclick="previousMonth()">&lsaquo;</button>
+                        <button class="nav-btn" onclick="nextMonth()">&rsaquo;</button>
                     </div>
                 </div>
 
@@ -1569,7 +1549,7 @@
                     </div>
                     <div class="day-view-header-actions">
                         <button class="add-btn" onclick="toggleDayEventInput()" id="dayAddEventBtn">+ Add Event</button>
-                        <button class="close-modal-btn" onclick="closeDayView()">Ã—</button>
+                        <button class="close-modal-btn" onclick="closeDayView()">&times;</button>
                     </div>
                 </div>
                 
@@ -1608,7 +1588,7 @@
             <div class="task-detail-content" onclick="event.stopPropagation()">
                 <div class="task-detail-header">
                     <div class="task-detail-title" id="taskDetailTitle"></div>
-                    <button class="close-modal-btn" onclick="closeTaskDetail()">Ã—</button>
+                    <button class="close-modal-btn" onclick="closeTaskDetail()">&times;</button>
                 </div>
 
                 <div class="notes-section">
@@ -1676,7 +1656,7 @@
             <div class="settings-modal-content" onclick="event.stopPropagation()">
                 <div class="settings-modal-header">
                     <div class="settings-modal-title">Settings</div>
-                    <button class="close-modal-btn" onclick="closeSettingsModal()">Ã—</button>
+                    <button class="close-modal-btn" onclick="closeSettingsModal()">&times;</button>
                 </div>
 
                 <div class="settings-section">
@@ -1694,7 +1674,7 @@
             <div class="note-detail-content" onclick="event.stopPropagation()">
                 <div class="note-detail-header">
                     <div class="note-detail-timestamp" id="noteDetailTimestamp"></div>
-                    <button class="close-modal-btn" onclick="closeNoteDetail()">Ã—</button>
+                    <button class="close-modal-btn" onclick="closeNoteDetail()">&times;</button>
                 </div>
 
                 <div class="note-detail-text" id="noteDetailText"></div>
@@ -1778,7 +1758,7 @@
         let firebaseInitialized = false;
         let syncEnabled = false;
 
-        // Wait for Firebase to be ready, then load data
+        // Wait for Firebase to be ready
         function waitForFirebase() {
             if (window.firebaseReady) {
                 initializeFirebaseSync();
@@ -1793,22 +1773,16 @@
                 firebaseInitialized = true;
                 console.log('ðŸ”„ Initializing Firebase sync...');
                 
-                // Load all data from Firebase
                 await loadFromFirebase();
-                
-                // Set up real-time listeners
                 setupRealtimeListeners();
                 
                 syncEnabled = true;
                 console.log('âœ… Firebase sync enabled!');
-                
-                // Show sync indicator
-                showSyncStatus('Synced with cloud â˜ï¸');
+                showSyncStatus('Connected to Nova Quick â˜ï¸', '#10b981');
             } catch (error) {
                 console.error('âŒ Firebase sync failed:', error);
-                // Fallback to localStorage
                 loadFromLocalStorage();
-                showSyncStatus('Offline mode (localStorage)');
+                showSyncStatus('Offline mode', '#f59e0b');
             }
         }
 
@@ -1817,23 +1791,19 @@
             const { collection, getDocs } = window.firestoreModules;
             
             try {
-                // Load tasks
                 const tasksSnapshot = await getDocs(collection(window.db, 'tasks'));
-                tasks = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                tasks = tasksSnapshot.docs.map(doc => ({ ...doc.data() }));
                 
-                // Load notes
                 const notesSnapshot = await getDocs(collection(window.db, 'notes'));
-                notes = notesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                notes = notesSnapshot.docs.map(doc => ({ ...doc.data() }));
                 
-                // Load events
                 const eventsSnapshot = await getDocs(collection(window.db, 'events'));
-                events = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                events = eventsSnapshot.docs.map(doc => ({ ...doc.data() }));
                 
-                // Load meetings
                 const meetingsSnapshot = await getDocs(collection(window.db, 'meetings'));
-                meetings = meetingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                meetings = meetingsSnapshot.docs.map(doc => ({ ...doc.data() }));
                 
-                console.log('ðŸ“¥ Data loaded from Firebase');
+                console.log('ðŸ“¥ Loaded from Firebase:', { tasks: tasks.length, notes: notes.length, events: events.length, meetings: meetings.length });
             } catch (error) {
                 console.error('Error loading from Firebase:', error);
                 throw error;
@@ -1846,47 +1816,30 @@
             notes = JSON.parse(localStorage.getItem('notes')) || [];
             events = JSON.parse(localStorage.getItem('events')) || [];
             meetings = JSON.parse(localStorage.getItem('meetings')) || [];
-            console.log('ðŸ“¥ Data loaded from localStorage');
+            console.log('ðŸ“¥ Loaded from localStorage');
         }
 
         // Save to Firebase
         async function saveToFirebase(collectionName, data) {
-            if (!syncEnabled) {
-                // Fallback to localStorage
-                localStorage.setItem(collectionName, JSON.stringify(data));
-                return;
-            }
+            // Always save to localStorage as backup
+            localStorage.setItem(collectionName, JSON.stringify(data));
+            
+            if (!syncEnabled) return;
 
             const { collection, doc, setDoc } = window.firestoreModules;
             
             try {
-                // Save each item
+                const batch = [];
                 for (const item of data) {
-                    await setDoc(doc(window.db, collectionName, String(item.id)), item);
+                    batch.push(setDoc(doc(window.db, collectionName, String(item.id)), item));
                 }
+                await Promise.all(batch);
                 
-                // Also backup to localStorage
-                localStorage.setItem(collectionName, JSON.stringify(data));
-                
-                showSyncStatus('Saved to cloud â˜ï¸');
+                showSyncStatus('Synced â˜ï¸', '#10b981');
+                console.log(`ðŸ’¾ Saved ${data.length} items to ${collectionName}`);
             } catch (error) {
                 console.error(`Error saving ${collectionName}:`, error);
-                // Fallback to localStorage
-                localStorage.setItem(collectionName, JSON.stringify(data));
-            }
-        }
-
-        // Delete from Firebase
-        async function deleteFromFirebase(collectionName, itemId) {
-            if (!syncEnabled) return;
-
-            const { collection, doc, deleteDoc } = window.firestoreModules;
-            
-            try {
-                await deleteDoc(doc(window.db, collectionName, String(itemId)));
-                showSyncStatus('Deleted from cloud â˜ï¸');
-            } catch (error) {
-                console.error(`Error deleting from ${collectionName}:`, error);
+                showSyncStatus('Sync failed', '#ef4444');
             }
         }
 
@@ -1894,40 +1847,48 @@
         function setupRealtimeListeners() {
             const { collection, onSnapshot } = window.firestoreModules;
             
-            // Listen to tasks changes
             onSnapshot(collection(window.db, 'tasks'), (snapshot) => {
-                tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderTasks();
+                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
+                if (remoteChanges.length > 0) {
+                    tasks = snapshot.docs.map(doc => ({ ...doc.data() }));
+                    renderTasks();
+                }
             });
             
-            // Listen to notes changes
             onSnapshot(collection(window.db, 'notes'), (snapshot) => {
-                notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderNotes();
+                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
+                if (remoteChanges.length > 0) {
+                    notes = snapshot.docs.map(doc => ({ ...doc.data() }));
+                    renderNotes();
+                }
             });
             
-            // Listen to events changes
             onSnapshot(collection(window.db, 'events'), (snapshot) => {
-                events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderEvents();
-                renderCalendar();
+                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
+                if (remoteChanges.length > 0) {
+                    events = snapshot.docs.map(doc => ({ ...doc.data() }));
+                    renderEvents();
+                    renderCalendar();
+                }
             });
             
-            // Listen to meetings changes
             onSnapshot(collection(window.db, 'meetings'), (snapshot) => {
-                meetings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderCalendar();
-                renderEvents();
+                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
+                if (remoteChanges.length > 0) {
+                    meetings = snapshot.docs.map(doc => ({ ...doc.data() }));
+                    renderCalendar();
+                }
             });
             
             console.log('ðŸ‘‚ Real-time listeners active');
         }
 
         // Show sync status
-        function showSyncStatus(message) {
+        function showSyncStatus(message, color = '#10b981') {
             const statusEl = document.getElementById('syncStatus');
             if (statusEl) {
                 statusEl.textContent = message;
+                statusEl.style.background = color;
                 statusEl.style.opacity = '1';
                 setTimeout(() => {
                     statusEl.style.opacity = '0';
@@ -2019,7 +1980,7 @@
                            onchange="toggleTask(${task.id})"
                            onclick="event.stopPropagation()">
                     <span class="task-text">${task.text}</span>
-                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">Ã—</button>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">&times;</button>
                 </div>
             `).join('');
         }
@@ -2075,7 +2036,7 @@
                     <div class="note-item" ondblclick="openNoteDetail(${note.id})">
                         <div class="note-header">
                             <span class="note-time">${timeStr}</span>
-                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">Ã—</button>
+                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">&times;</button>
                         </div>
                         <div class="note-text">${note.text}</div>
                     </div>
@@ -2597,7 +2558,7 @@
                     <div class="event-item">
                         <div class="note-header">
                             <div class="event-date">${dateStr}</div>
-                            <button class="delete-btn" onclick="deleteEvent(${event.id})">Ã—</button>
+                            <button class="delete-btn" onclick="deleteEvent(${event.id})">&times;</button>
                         </div>
                         <div class="event-title">${event.title}</div>
                         ${timeStr ? `<div class="event-time">${timeStr}</div>` : ''}
@@ -2689,7 +2650,7 @@
                                     ${timeStr ? `<div class="day-event-time">${timeStr}</div>` : ''}
                                     ${durationStr ? `<div class="day-event-duration">${durationStr}</div>` : ''}
                                 </div>
-                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">Ã—</button>
+                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">&times;</button>
                             </div>
                             ${event.description ? `<div class="day-event-description">${event.description}</div>` : ''}
                         </div>
