@@ -3,3309 +3,1111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daily Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-primary: #fff5f0;
-            --bg-secondary: #ffffff;
-            --bg-tertiary: #ffe8dd;
-            --text-primary: #2d1810;
-            --text-secondary: #5a4a42;
-            --text-tertiary: #9a8a82;
-            --accent-primary: #ff6b35;
-            --accent-secondary: #ff8c61;
-            --accent-light: #fff0e8;
-            --border-color: #ffd4c4;
-            --shadow-sm: 0 1px 3px rgba(255, 107, 53, 0.08);
-            --shadow-md: 0 4px 12px rgba(255, 107, 53, 0.12);
-            --shadow-lg: 0 8px 24px rgba(255, 107, 53, 0.16);
-            --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd166 100%);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            overflow-x: hidden;
-        }
-
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Hamburger Menu */
-        .hamburger-menu {
-            position: fixed;
-            top: 1.5rem;
-            left: 1.5rem;
-            z-index: 1001;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-            width: 40px;
-            height: 40px;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .hamburger-menu:hover {
-            background: var(--accent-light);
-            border-color: var(--accent-primary);
-            box-shadow: var(--shadow-md);
-        }
-
-        .hamburger-bar {
-            width: 24px;
-            height: 3px;
-            background: var(--text-primary);
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .hamburger-menu:hover .hamburger-bar {
-            background: var(--accent-primary);
-        }
-
-        /* Settings Menu Dropdown */
-        .settings-dropdown {
-            position: fixed;
-            top: 5rem;
-            left: 1.5rem;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            box-shadow: var(--shadow-lg);
-            z-index: 1000;
-            min-width: 200px;
-            opacity: 0;
-            transform: translateY(-10px);
-            pointer-events: none;
-            transition: all 0.3s ease;
-        }
-
-        .settings-dropdown.active {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: all;
-        }
-
-        .settings-menu-item {
-            padding: 0.75rem 1rem;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-        }
-
-        .settings-menu-item:last-child {
-            border-bottom: none;
-        }
-
-        .settings-menu-item:hover {
-            background: var(--accent-light);
-            color: var(--accent-primary);
-        }
-
-        .settings-menu-item.danger:hover {
-            background: #fee;
-            color: #c00;
-        }
-
-        /* Settings Modal */
-        .settings-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 22, 20, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1002;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .settings-modal.active {
-            display: flex;
-        }
-
-        .settings-modal-content {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
-        }
-
-        .settings-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-
-        .settings-modal-title {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .settings-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .settings-section-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--text-primary);
-            margin-bottom: 0.75rem;
-        }
-
-        .settings-section-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            line-height: 1.5;
-        }
-
-        .danger-button {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
-            width: 100%;
-        }
-
-        .danger-button:hover {
-            background: #b91c1c;
-        }
-
-        /* Note Detail Modal */
-        .note-detail-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 22, 20, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .note-detail-modal.active {
-            display: flex;
-        }
-
-        .note-detail-content {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 700px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
-        }
-
-        .note-detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-
-        .note-detail-timestamp {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .note-detail-text {
-            margin-bottom: 1.5rem;
-            padding: 1.5rem;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            border-left: 4px solid var(--accent-primary);
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--text-primary);
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        .note-detail-actions {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .note-action-btn {
-            flex: 1;
-            min-width: 150px;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .btn-note-to-calendar {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .btn-note-to-calendar:hover {
-            background: var(--accent-secondary);
-        }
-
-        .btn-note-to-task {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 2px solid var(--accent-primary);
-        }
-
-        .btn-note-to-task:hover {
-            background: var(--accent-light);
-        }
-
-        .btn-delete-note {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-delete-note:hover {
-            background: #fee;
-            border-color: #c00;
-            color: #c00;
-        }
-
-        .header {
-            margin-bottom: 3rem;
-            animation: slideDown 0.7s ease-out;
-        }
-
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .header h1 {
-            font-family: 'Crimson Pro', serif;
-            font-size: 3.5rem;
-            font-weight: 700;
-            background: var(--gradient-sunset);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
-            margin-bottom: 0.5rem;
-        }
-
-        .header .date-display {
-            font-size: 1.1rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1.2fr;
-            gap: 2rem;
-            animation: fadeInUp 0.8s ease-out 0.2s backwards;
-        }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .panel {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
-        }
-
-        .panel:hover {
-            box-shadow: var(--shadow-lg);
-            transform: translateY(-2px);
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-
-        .panel-header h2 {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .add-btn {
-            background: var(--accent-primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1.25rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .add-btn:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .add-btn:active {
-            transform: translateY(0);
-        }
-
-        /* Tasks Section */
-        .task-input-area {
-            margin-bottom: 1.5rem;
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .task-input-area.active {
-            opacity: 1;
-            max-height: 200px;
-            margin-bottom: 1.5rem;
-        }
-
-        .task-input {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            transition: all 0.2s ease;
-            background: var(--bg-tertiary);
-        }
-
-        .task-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            background: var(--bg-secondary);
-        }
-
-        .task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            transition: all 0.2s ease;
-            animation: taskSlide 0.3s ease;
-        }
-
-        @keyframes taskSlide {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .task-item:hover {
-            background: var(--accent-light);
-            transform: translateX(4px);
-        }
-
-        .task-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: var(--accent-primary);
-        }
-
-        .task-text {
-            flex: 1;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-        }
-
-        .task-item.completed .task-text {
-            text-decoration: line-through;
-            color: var(--text-tertiary);
-        }
-
-        .delete-btn {
-            background: none;
-            border: none;
-            color: var(--text-tertiary);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0.25rem 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .delete-btn:hover {
-            color: var(--accent-primary);
-            transform: scale(1.1);
-        }
-
-        /* Notes Section */
-        .notes-area {
-            margin-bottom: 1.5rem;
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .notes-area.active {
-            opacity: 1;
-            max-height: 300px;
-        }
-
-        .note-input {
-            width: 100%;
-            min-height: 120px;
-            padding: 1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            resize: vertical;
-            transition: all 0.2s ease;
-            background: var(--bg-tertiary);
-        }
-
-        .note-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            background: var(--bg-secondary);
-        }
-
-        .save-note-btn {
-            margin-top: 0.75rem;
-            background: var(--accent-primary);
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-        }
-
-        .save-note-btn:hover {
-            background: var(--accent-secondary);
-        }
-
-        .notes-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            max-height: 450px;
-            overflow-y: auto;
-        }
-
-        .note-item {
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            border-left: 4px solid var(--accent-primary);
-            transition: all 0.2s ease;
-            animation: noteSlide 0.3s ease;
-        }
-
-        @keyframes noteSlide {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .note-item:hover {
-            background: var(--accent-light);
-            transform: translateX(4px);
-        }
-
-        .note-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .note-time {
-            font-size: 0.8rem;
-            color: var(--text-tertiary);
-            font-weight: 500;
-        }
-
-        .note-text {
-            font-size: 0.95rem;
-            color: var(--text-primary);
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-
-        /* Calendar Section */
-        .calendar {
-            position: relative;
-        }
-
-        .calendar-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .calendar-month {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .nav-btns {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .nav-btn {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 1.2rem;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .nav-btn:hover {
-            background: var(--accent-light);
-            border-color: var(--accent-primary);
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .calendar-day-header {
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            padding: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-        }
-
-        .calendar-day:hover {
-            background: var(--accent-light);
-            border-color: var(--accent-secondary);
-            transform: scale(1.05);
-        }
-
-        .calendar-day.other-month {
-            color: var(--text-tertiary);
-            background: transparent;
-        }
-
-        .calendar-day.today {
-            background: var(--gradient-sunset);
-            color: white;
-            font-weight: 700;
-            border: none;
-        }
-
-        .calendar-day.has-event::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            width: 6px;
-            height: 6px;
-            background: var(--accent-primary);
-            border-radius: 50%;
-        }
-
-        .calendar-day.today.has-event::after {
-            background: white;
-        }
-
-        .calendar-day.selected {
-            background: var(--accent-secondary);
-            color: white;
-            border-color: var(--accent-primary);
-        }
-
-        .calendar-day.in-range {
-            background: var(--accent-light);
-            border-color: var(--accent-secondary);
-            color: var(--text-primary);
-        }
-
-        /* Agenda View */
-        .agenda-view {
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 2px solid var(--bg-tertiary);
-            max-height: 0;
-            overflow: hidden;
-            opacity: 0;
-            transition: all 0.3s ease;
-        }
-
-        .agenda-view.active {
-            max-height: 600px;
-            opacity: 1;
-        }
-
-        .agenda-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .agenda-title {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .clear-selection-btn {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            padding: 0.4rem 0.75rem;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: var(--text-secondary);
-        }
-
-        .clear-selection-btn:hover {
-            background: var(--accent-light);
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
-        }
-
-        .agenda-content {
-            max-height: 450px;
-            overflow-y: auto;
-        }
-
-        .agenda-day-section {
-            margin-bottom: 1.5rem;
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .agenda-day-header {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--accent-primary);
-            margin-bottom: 0.75rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .agenda-event {
-            padding: 0.75rem 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-            border-left: 3px solid var(--accent-primary);
-            transition: all 0.2s ease;
-        }
-
-        .agenda-event:hover {
-            background: var(--accent-light);
-            transform: translateX(4px);
-        }
-
-        .agenda-event-title {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .agenda-event-time {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .agenda-event-duration {
-            display: inline-block;
-            font-size: 0.75rem;
-            color: var(--accent-primary);
-            background: var(--accent-light);
-            padding: 0.15rem 0.5rem;
-            border-radius: 4px;
-            margin-left: 0.5rem;
-            font-weight: 600;
-        }
-
-        .agenda-condensed {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .agenda-summary {
-            padding: 1rem;
-            background: var(--accent-light);
-            border-radius: 8px;
-            border-left: 4px solid var(--accent-primary);
-            margin-bottom: 1rem;
-        }
-
-        .agenda-summary-title {
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--accent-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .agenda-summary-text {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .event-input-area {
-            opacity: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .event-input-area.active {
-            opacity: 1;
-            max-height: 400px;
-            margin-bottom: 1.5rem;
-        }
-
-        .event-form {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-        }
-
-        .event-form input,
-        .event-form textarea {
-            padding: 0.75rem;
-            border: 2px solid var(--border-color);
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-
-        .event-form input:focus,
-        .event-form textarea:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-        }
-
-        .event-form-btns {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .event-form-btns button {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .save-event-btn {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .save-event-btn:hover {
-            background: var(--accent-secondary);
-        }
-
-        .cancel-event-btn {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .cancel-event-btn:hover {
-            background: var(--bg-tertiary);
-        }
-
-        .events-list {
-            max-height: 300px;
-            overflow-y: auto;
-            transition: all 0.3s ease;
-        }
-
-        .events-list.hidden {
-            display: none;
-        }
-
-        .event-item {
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            margin-bottom: 0.75rem;
-            border-left: 4px solid var(--accent-primary);
-            transition: all 0.2s ease;
-            animation: eventSlide 0.3s ease;
-        }
-
-        @keyframes eventSlide {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .event-item:hover {
-            background: var(--accent-light);
-        }
-
-        .event-date {
-            font-size: 0.8rem;
-            color: var(--accent-primary);
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .event-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-
-        .event-time {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .event-duration {
-            font-size: 0.85rem;
-            color: var(--accent-primary);
-            font-weight: 600;
-            margin-top: 0.25rem;
-        }
-
-        /* Day View Modal */
-        .day-view-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 22, 20, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .day-view-modal.active {
-            display: flex;
-        }
-
-        .day-view-content {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .day-view-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-
-        .day-view-header-left {
-            flex: 1;
-        }
-
-        .day-view-header-actions {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .day-view-title {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .close-modal-btn {
-            background: none;
-            border: none;
-            font-size: 2rem;
-            color: var(--text-tertiary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            padding: 0;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .close-modal-btn:hover {
-            color: var(--accent-primary);
-            transform: rotate(90deg);
-        }
-
-        .day-view-events {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .day-event-item {
-            padding: 1.25rem;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            border-left: 4px solid var(--accent-primary);
-            transition: all 0.2s ease;
-        }
-
-        .day-event-item:hover {
-            background: var(--accent-light);
-            transform: translateX(4px);
-        }
-
-        .day-event-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.75rem;
-        }
-
-        .day-event-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--text-primary);
-        }
-
-        .day-event-time {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.25rem;
-        }
-
-        .day-event-duration {
-            font-size: 0.85rem;
-            color: var(--accent-primary);
-            font-weight: 600;
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: var(--accent-light);
-            border-radius: 6px;
-        }
-
-        .day-event-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid var(--border-color);
-        }
-
-        /* Task Detail Modal */
-        .task-detail-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 22, 20, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .task-detail-modal.active {
-            display: flex;
-        }
-
-        .task-detail-content {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 700px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
-        }
-
-        .task-detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-
-        .task-detail-title {
-            flex: 1;
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .task-detail-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .task-action-btn {
-            flex: 1;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .btn-add-to-calendar {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .btn-add-to-calendar:hover {
-            background: var(--accent-secondary);
-        }
-
-        .btn-delete-task {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-delete-task:hover {
-            background: #fee;
-            border-color: #c00;
-            color: #c00;
-        }
-
-        /* Rich Text Editor */
-        .notes-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .notes-section-label {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.75rem;
-            display: block;
-        }
-
-        .editor-ribbon {
-            display: flex;
-            gap: 0.25rem;
-            padding: 0.5rem;
-            background: var(--bg-tertiary);
-            border-radius: 8px 8px 0 0;
-            border: 1px solid var(--border-color);
-            border-bottom: none;
-            flex-wrap: wrap;
-        }
-
-        .ribbon-group {
-            display: flex;
-            gap: 0.25rem;
-            padding-right: 0.5rem;
-            border-right: 1px solid var(--border-color);
-        }
-
-        .ribbon-group:last-child {
-            border-right: none;
-        }
-
-        .ribbon-btn {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            min-width: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ribbon-btn:hover {
-            background: var(--accent-light);
-            border-color: var(--accent-primary);
-        }
-
-        .ribbon-btn.active {
-            background: var(--accent-primary);
-            color: white;
-            border-color: var(--accent-primary);
-        }
-
-        .ribbon-select {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            padding: 0.4rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            min-width: 100px;
-        }
-
-        .ribbon-select:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-        }
-
-        .task-notes-editor {
-            width: 100%;
-            min-height: 200px;
-            max-height: 400px;
-            padding: 1rem;
-            border: 1px solid var(--border-color);
-            border-radius: 0 0 8px 8px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            resize: vertical;
-            overflow-y: auto;
-            background: var(--bg-secondary);
-            line-height: 1.6;
-        }
-
-        .task-notes-editor:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-        }
-
-        .task-notes-editor[contenteditable="true"] {
-            cursor: text;
-        }
-
-        .task-notes-editor ul,
-        .task-notes-editor ol {
-            margin-left: 1.5rem;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .task-notes-editor li {
-            margin-bottom: 0.25rem;
-        }
-
-        .task-notes-editor p {
-            margin-bottom: 0.5rem;
-        }
-
-        /* Event Scheduling Section in Task Modal */
-        .event-scheduling-section {
-            margin-bottom: 1.5rem;
-            padding-top: 1rem;
-            border-top: 2px solid var(--bg-tertiary);
-        }
-
-        .event-scheduling-section .event-form {
-            margin-top: 0.75rem;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 2rem 1rem;
-            color: var(--text-tertiary);
-            font-style: italic;
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border-color);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--text-tertiary);
-        }
-
-        @media (max-width: 1200px) {
-            .main-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            .calendar {
-                grid-column: 1 / -1;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2.5rem;
-            }
-        }
-    </style>
+    <title>Code Jefferson v5.1.0 - Cloud Edition</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Firebase SDK -->
-    <script type="module">
-        // Import Firebase modules
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; margin: 0; }
+        .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .animate-pop { animation: pop 0.2s ease-out; }
+        @keyframes pop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #e5e7eb; border-radius: 10px; }
+        .rich-editor { min-height: 100px; outline: none; }
+        .rich-editor ul { list-style-type: disc; padding-left: 1.5rem; }
+        .rich-editor ol { list-style-type: decimal; padding-left: 1.5rem; }
+        .rich-editor b { font-weight: bold; }
+        .rich-editor u { text-decoration: underline; }
+        .firebase-status { 
+            position: fixed; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .status-dot { 
+            width: 8px; 
+            height: 8px; 
+            border-radius: 50%; 
+        }
+        .status-connected { background: #10b981; }
+        .status-disconnected { background: #ef4444; }
+        .status-syncing { background: #f59e0b; animation: pulse 1s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    </style>
+</head>
+<body class="p-4 md:p-6">
+    <div id="root"></div>
 
-        // Your Firebase configuration - Nova Quick
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useMemo, useCallback } = React;
+
+        // Firebase Configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyC21uDcMLyGso3kLqBYimTL8loUi5zzLjw",
-            authDomain: "nova-quick.firebaseapp.com",
-            projectId: "nova-quick",
-            storageBucket: "nova-quick.firebasestorage.app",
-            messagingSenderId: "914595554926",
-            appId: "1:914595554926:web:e19d4fc962794d9e9aa87f",
-            measurementId: "G-YLV78DYWEJ"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
+        let db = null;
+        let auth = null;
+        let isFirebaseConfigured = false;
 
-        // Make db and modules available globally
-        window.db = db;
-        window.analytics = analytics;
-        window.firestoreModules = { collection, doc, setDoc, getDocs, deleteDoc, onSnapshot };
-        window.firebaseReady = true;
-
-        console.log('ðŸ”¥ Firebase connected to Nova Quick!');
-    </script>
-</head>
-<body>
-    <!-- Hamburger Menu -->
-    <div class="hamburger-menu" onclick="toggleSettingsDropdown()">
-        <div class="hamburger-bar"></div>
-        <div class="hamburger-bar"></div>
-        <div class="hamburger-bar"></div>
-    </div>
-
-    <!-- Settings Dropdown -->
-    <div class="settings-dropdown" id="settingsDropdown">
-        <div class="settings-menu-item" onclick="openSettingsModal()">Settings</div>
-    </div>
-
-    <div class="app-container">
-        <header class="header">
-            <h1>Daily Planner</h1>
-            <div class="date-display" id="currentDate"></div>
-        </header>
-
-        <!-- Sync Status Indicator -->
-        <div id="syncStatus" style="position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 0.625rem 1rem; border-radius: 10px; font-size: 0.875rem; font-weight: 600; opacity: 0; transition: opacity 0.3s ease; z-index: 1000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);"></div>
-
-        <div class="main-grid">
-            <!-- Tasks Panel -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h2>Tasks</h2>
-                    <button class="add-btn" onclick="toggleTaskInput()">+ Add</button>
-                </div>
-                
-                <div class="task-input-area" id="taskInputArea">
-                    <input type="text" class="task-input" id="taskInput" placeholder="What do you need to do?" onkeypress="handleTaskKeypress(event)">
-                </div>
-
-                <div class="task-list" id="taskList">
-                    <div class="empty-state">No tasks yet. Add your first task!</div>
-                </div>
-            </div>
-
-            <!-- Notes Panel -->
-            <div class="panel">
-                <div class="panel-header">
-                    <h2>Quick Notes</h2>
-                    <button class="add-btn" onclick="toggleNotesInput()">+ Add</button>
-                </div>
-
-                <div class="notes-area" id="notesArea">
-                    <textarea class="note-input" id="noteInput" placeholder="Jot down your thoughts..."></textarea>
-                    <button class="save-note-btn" onclick="saveNote()">Save Note</button>
-                </div>
-
-                <div class="notes-list" id="notesList">
-                    <div class="empty-state">No notes yet. Capture your ideas!</div>
-                </div>
-            </div>
-
-            <!-- Calendar Panel -->
-            <div class="panel calendar">
-                <div class="panel-header">
-                    <h2>Calendar</h2>
-                    <button class="add-btn" onclick="toggleEventInput()">+ Event</button>
-                </div>
-
-                <div class="event-input-area" id="eventInputArea">
-                    <div class="event-form">
-                        <input type="text" id="eventTitle" placeholder="Event title">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
-                                <input type="date" id="eventStartDate">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
-                                <input type="date" id="eventEndDate">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <input type="time" id="eventStartTime" placeholder="Start time" step="300">
-                            <input type="time" id="eventEndTime" placeholder="End time" step="300">
-                        </div>
-                        <textarea id="eventDescription" placeholder="Description (optional)" rows="2"></textarea>
-                        <div class="event-form-btns">
-                            <button class="save-event-btn" onclick="saveEvent()">Save Event</button>
-                            <button class="cancel-event-btn" onclick="toggleEventInput()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="calendar-nav">
-                    <div class="calendar-month" id="calendarMonth"></div>
-                    <div class="nav-btns">
-                        <button class="nav-btn" onclick="previousMonth()">&lsaquo;</button>
-                        <button class="nav-btn" onclick="nextMonth()">&rsaquo;</button>
-                    </div>
-                </div>
-
-                <div class="calendar-grid">
-                    <div class="calendar-day-header">Sun</div>
-                    <div class="calendar-day-header">Mon</div>
-                    <div class="calendar-day-header">Tue</div>
-                    <div class="calendar-day-header">Wed</div>
-                    <div class="calendar-day-header">Thu</div>
-                    <div class="calendar-day-header">Fri</div>
-                    <div class="calendar-day-header">Sat</div>
-                </div>
-
-                <div class="calendar-grid" id="calendarDays"></div>
-
-                <!-- Agenda View -->
-                <div class="agenda-view" id="agendaView">
-                    <div class="agenda-header">
-                        <div class="agenda-title" id="agendaTitle"></div>
-                        <button class="clear-selection-btn" onclick="clearDateSelection()">Clear</button>
-                    </div>
-                    <div class="agenda-content" id="agendaContent"></div>
-                </div>
-
-                <div class="events-list" id="eventsList"></div>
-            </div>
-        </div>
-
-        <!-- Day View Modal -->
-        <div class="day-view-modal" id="dayViewModal" onclick="closeDayView(event)">
-            <div class="day-view-content" onclick="event.stopPropagation()">
-                <div class="day-view-header">
-                    <div class="day-view-header-left">
-                        <div class="day-view-title" id="dayViewTitle"></div>
-                    </div>
-                    <div class="day-view-header-actions">
-                        <button class="add-btn" onclick="toggleDayEventInput()" id="dayAddEventBtn">+ Add Event</button>
-                        <button class="close-modal-btn" onclick="closeDayView()">&times;</button>
-                    </div>
-                </div>
-                
-                <!-- Quick add event form in modal -->
-                <div class="event-input-area" id="dayEventInputArea">
-                    <div class="event-form">
-                        <input type="text" id="dayEventTitle" placeholder="Event title">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
-                                <input type="date" id="dayEventStartDate">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
-                                <input type="date" id="dayEventEndDate">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <input type="time" id="dayEventStartTime" placeholder="Start time" step="300">
-                            <input type="time" id="dayEventEndTime" placeholder="End time" step="300">
-                        </div>
-                        <textarea id="dayEventDescription" placeholder="Description (optional)" rows="2"></textarea>
-                        <div class="event-form-btns">
-                            <button class="save-event-btn" onclick="saveDayEvent()">Save Event</button>
-                            <button class="cancel-event-btn" onclick="toggleDayEventInput()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="day-view-events" id="dayViewEvents"></div>
-            </div>
-        </div>
-
-        <!-- Task Detail Modal -->
-        <div class="task-detail-modal" id="taskDetailModal" onclick="closeTaskDetail(event)">
-            <div class="task-detail-content" onclick="event.stopPropagation()">
-                <div class="task-detail-header">
-                    <div class="task-detail-title" id="taskDetailTitle"></div>
-                    <button class="close-modal-btn" onclick="closeTaskDetail()">&times;</button>
-                </div>
-
-                <div class="notes-section">
-                    <label class="notes-section-label">Notes</label>
-                    <div class="editor-ribbon">
-                        <div class="ribbon-group">
-                            <select class="ribbon-select" onchange="changeFontSize(this.value)">
-                                <option value="3">Normal</option>
-                                <option value="1">Small</option>
-                                <option value="5">Large</option>
-                                <option value="7">Huge</option>
-                            </select>
-                        </div>
-                        <div class="ribbon-group">
-                            <button class="ribbon-btn" onclick="formatText('bold')" title="Bold"><strong>B</strong></button>
-                            <button class="ribbon-btn" onclick="formatText('italic')" title="Italic"><em>I</em></button>
-                            <button class="ribbon-btn" onclick="formatText('underline')" title="Underline"><u>U</u></button>
-                        </div>
-                        <div class="ribbon-group">
-                            <button class="ribbon-btn" onclick="formatText('insertUnorderedList')" title="Bullet List">â€¢ List</button>
-                            <button class="ribbon-btn" onclick="formatText('insertOrderedList')" title="Numbered List">1. List</button>
-                        </div>
-                        <div class="ribbon-group">
-                            <button class="ribbon-btn" onclick="clearFormatting()" title="Clear Formatting">Clear</button>
-                        </div>
-                    </div>
-                    <div class="task-notes-editor" 
-                         id="taskNotesEditor" 
-                         contenteditable="true" 
-                         data-placeholder="Add detailed notes about this task...">
-                    </div>
-                </div>
-
-                <!-- Event Scheduling Section -->
-                <div class="event-scheduling-section" id="eventSchedulingSection" style="display: none;">
-                    <label class="notes-section-label">Schedule Event</label>
-                    <div class="event-form">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
-                                <input type="date" id="taskEventStartDate">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
-                                <input type="date" id="taskEventEndDate">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <input type="time" id="taskEventStartTime" placeholder="Start time" step="300">
-                            <input type="time" id="taskEventEndTime" placeholder="End time" step="300">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="task-detail-actions">
-                    <button class="task-action-btn btn-add-to-calendar" id="addToCalendarBtn" onclick="toggleEventScheduling()">Add to Calendar</button>
-                    <button class="task-action-btn btn-add-to-calendar" id="saveEventBtn" onclick="saveTaskAsEvent()" style="display: none;">Save Event</button>
-                    <button class="task-action-btn btn-delete-task" onclick="deleteTaskFromModal()">Delete Task</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Settings Modal -->
-        <div class="settings-modal" id="settingsModal" onclick="closeSettingsModal(event)">
-            <div class="settings-modal-content" onclick="event.stopPropagation()">
-                <div class="settings-modal-header">
-                    <div class="settings-modal-title">Settings</div>
-                    <button class="close-modal-btn" onclick="closeSettingsModal()">&times;</button>
-                </div>
-
-                <div class="settings-section">
-                    <div class="settings-section-title">Data Management</div>
-                    <div class="settings-section-description">
-                        Clear all tasks, notes, and events from your planner. This action cannot be undone.
-                    </div>
-                    <button class="danger-button" onclick="clearAllData()">Clear All Data</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Note Detail Modal -->
-        <div class="note-detail-modal" id="noteDetailModal" onclick="closeNoteDetail(event)">
-            <div class="note-detail-content" onclick="event.stopPropagation()">
-                <div class="note-detail-header">
-                    <div class="note-detail-timestamp" id="noteDetailTimestamp"></div>
-                    <button class="close-modal-btn" onclick="closeNoteDetail()">&times;</button>
-                </div>
-
-                <div class="note-detail-text" id="noteDetailText"></div>
-
-                <div class="notes-section">
-                    <label class="notes-section-label">Additional Notes</label>
-                    <div class="editor-ribbon">
-                        <div class="ribbon-group">
-                            <select class="ribbon-select" onchange="changeNoteFontSize(this.value)">
-                                <option value="3">Normal</option>
-                                <option value="1">Small</option>
-                                <option value="5">Large</option>
-                                <option value="7">Huge</option>
-                            </select>
-                        </div>
-                        <div class="ribbon-group">
-                            <button class="ribbon-btn" onclick="formatNoteText('bold')" title="Bold"><strong>B</strong></button>
-                            <button class="ribbon-btn" onclick="formatNoteText('italic')" title="Italic"><em>I</em></button>
-                            <button class="ribbon-btn" onclick="formatNoteText('underline')" title="Underline"><u>U</u></button>
-                        </div>
-                        <div class="ribbon-group">
-                            <button class="ribbon-btn" onclick="formatNoteText('insertUnorderedList')" title="Bullet List">â€¢ List</button>
-                            <button class="ribbon-btn" onclick="formatNoteText('insertOrderedList')" title="Numbered List">1. List</button>
-                        </div>
-                        <div class="ribbon-group">
-                            <button class="ribbon-btn" onclick="clearNoteFormatting()" title="Clear Formatting">Clear</button>
-                        </div>
-                    </div>
-                    <div class="task-notes-editor" 
-                         id="noteDetailsEditor" 
-                         contenteditable="true" 
-                         data-placeholder="Add additional details...">
-                    </div>
-                </div>
-
-                <!-- Event Scheduling Section for Notes -->
-                <div class="event-scheduling-section" id="noteEventSchedulingSection" style="display: none;">
-                    <label class="notes-section-label">Schedule Event</label>
-                    <div class="event-form">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start Date</label>
-                                <input type="date" id="noteEventStartDate">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End Date</label>
-                                <input type="date" id="noteEventEndDate">
-                            </div>
-                        </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <input type="time" id="noteEventStartTime" placeholder="Start time" step="300">
-                            <input type="time" id="noteEventEndTime" placeholder="End time" step="300">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="note-detail-actions">
-                    <button class="note-action-btn btn-note-to-calendar" id="noteAddToCalendarBtn" onclick="toggleNoteEventScheduling()">Add to Calendar</button>
-                    <button class="note-action-btn btn-note-to-calendar" id="noteSaveEventBtn" onclick="saveNoteAsEvent()" style="display: none;">Schedule Event</button>
-                    <button class="note-action-btn btn-note-to-task" onclick="addNoteToTask()">Add to Tasks</button>
-                    <button class="note-action-btn btn-delete-note" onclick="deleteNoteFromModal()">Delete Note</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // State management
-        let currentMonth = new Date();
-        let tasks = [];
-        let notes = [];
-        let events = [];
-        let meetings = [];
-        let selectedDate = null;
-        let selectedDates = [];
-        let isDragging = false;
-        let dragStartDate = null;
-        let hasDragged = false;
-
-        // Firebase Sync System
-        let firebaseInitialized = false;
-        let syncEnabled = false;
-
-        // Wait for Firebase to be ready
-        function waitForFirebase() {
-            if (window.firebaseReady) {
-                initializeFirebaseSync();
+        try {
+            // Check if config has been updated from defaults
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                auth = firebase.auth();
+                isFirebaseConfigured = true;
+                console.log("âœ… Firebase initialized successfully");
             } else {
-                setTimeout(waitForFirebase, 100);
+                console.warn("âš ï¸ Firebase not configured. Using localStorage only. Update firebaseConfig to enable cloud sync.");
             }
+        } catch (error) {
+            console.error("âŒ Firebase initialization error:", error);
         }
 
-        // Initialize Firebase sync
-        async function initializeFirebaseSync() {
-            try {
-                firebaseInitialized = true;
-                console.log('ðŸ”„ Initializing Firebase sync...');
-                
-                await loadFromFirebase();
-                setupRealtimeListeners();
-                
-                syncEnabled = true;
-                console.log('âœ… Firebase sync enabled!');
-                showSyncStatus('Connected to Nova Quick â˜ï¸', '#10b981');
-            } catch (error) {
-                console.error('âŒ Firebase sync failed:', error);
-                loadFromLocalStorage();
-                showSyncStatus('Offline mode', '#f59e0b');
-            }
-        }
+        const formatKey = (d) => {
+            const dateObj = d instanceof Date ? d : new Date(d);
+            return `${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}/${dateObj.getFullYear()}`;
+        };
 
-        // Load data from Firebase
-        async function loadFromFirebase() {
-            const { collection, getDocs } = window.firestoreModules;
+        function InlineDatePicker({ value, onChange }) {
+            const [isOpen, setIsOpen] = useState(false);
+            const [viewDate, setViewDate] = useState(new Date());
+            const ref = useRef(null);
             
-            try {
-                const tasksSnapshot = await getDocs(collection(window.db, 'tasks'));
-                tasks = tasksSnapshot.docs.map(doc => ({ ...doc.data() }));
-                
-                const notesSnapshot = await getDocs(collection(window.db, 'notes'));
-                notes = notesSnapshot.docs.map(doc => ({ ...doc.data() }));
-                
-                const eventsSnapshot = await getDocs(collection(window.db, 'events'));
-                events = eventsSnapshot.docs.map(doc => ({ ...doc.data() }));
-                
-                const meetingsSnapshot = await getDocs(collection(window.db, 'meetings'));
-                meetings = meetingsSnapshot.docs.map(doc => ({ ...doc.data() }));
-                
-                console.log('ðŸ“¥ Loaded from Firebase:', { tasks: tasks.length, notes: notes.length, events: events.length, meetings: meetings.length });
-            } catch (error) {
-                console.error('Error loading from Firebase:', error);
-                throw error;
-            }
-        }
-
-        // Fallback: Load from localStorage
-        function loadFromLocalStorage() {
-            tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            notes = JSON.parse(localStorage.getItem('notes')) || [];
-            events = JSON.parse(localStorage.getItem('events')) || [];
-            meetings = JSON.parse(localStorage.getItem('meetings')) || [];
-            console.log('ðŸ“¥ Loaded from localStorage');
-        }
-
-        // Save to Firebase
-        async function saveToFirebase(collectionName, data) {
-            // Always save to localStorage as backup
-            localStorage.setItem(collectionName, JSON.stringify(data));
+            useEffect(() => {
+                const clickOut = (e) => { if (ref.current && !ref.current.contains(e.target)) setIsOpen(false); };
+                document.addEventListener("mousedown", clickOut);
+                return () => document.removeEventListener("mousedown", clickOut);
+            }, []);
             
-            if (!syncEnabled) return;
-
-            const { collection, doc, setDoc } = window.firestoreModules;
-            
-            try {
-                const batch = [];
-                for (const item of data) {
-                    batch.push(setDoc(doc(window.db, collectionName, String(item.id)), item));
+            const renderDays = useMemo(() => {
+                const year = viewDate.getFullYear(); 
+                const month = viewDate.getMonth();
+                const firstDay = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const days = [];
+                
+                for (let i = 0; i < firstDay; i++) days.push(<div key={`e-${i}`} />);
+                for (let i = 1; i <= daysInMonth; i++) {
+                    days.push(
+                        <button 
+                            key={i} 
+                            type="button" 
+                            onClick={() => { 
+                                onChange(formatKey(new Date(year, month, i))); 
+                                setIsOpen(false); 
+                            }} 
+                            className="text-[9px] p-1.5 hover:bg-gray-800 hover:text-white rounded-md font-bold"
+                        >
+                            {i}
+                        </button>
+                    );
                 }
-                await Promise.all(batch);
-                
-                showSyncStatus('Synced â˜ï¸', '#10b981');
-                console.log(`ðŸ’¾ Saved ${data.length} items to ${collectionName}`);
-            } catch (error) {
-                console.error(`Error saving ${collectionName}:`, error);
-                showSyncStatus('Sync failed', '#ef4444');
-            }
-        }
-
-        // Real-time sync listeners
-        function setupRealtimeListeners() {
-            const { collection, onSnapshot } = window.firestoreModules;
+                return days;
+            }, [viewDate, onChange]);
             
-            onSnapshot(collection(window.db, 'tasks'), (snapshot) => {
-                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
-                if (remoteChanges.length > 0) {
-                    tasks = snapshot.docs.map(doc => ({ ...doc.data() }));
-                    renderTasks();
-                }
-            });
-            
-            onSnapshot(collection(window.db, 'notes'), (snapshot) => {
-                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
-                if (remoteChanges.length > 0) {
-                    notes = snapshot.docs.map(doc => ({ ...doc.data() }));
-                    renderNotes();
-                }
-            });
-            
-            onSnapshot(collection(window.db, 'events'), (snapshot) => {
-                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
-                if (remoteChanges.length > 0) {
-                    events = snapshot.docs.map(doc => ({ ...doc.data() }));
-                    renderEvents();
-                    renderCalendar();
-                }
-            });
-            
-            onSnapshot(collection(window.db, 'meetings'), (snapshot) => {
-                const remoteChanges = snapshot.docChanges().filter(change => change.type !== 'removed');
-                if (remoteChanges.length > 0) {
-                    meetings = snapshot.docs.map(doc => ({ ...doc.data() }));
-                    renderCalendar();
-                }
-            });
-            
-            console.log('ðŸ‘‚ Real-time listeners active');
-        }
-
-        // Show sync status
-        function showSyncStatus(message, color = '#10b981') {
-            const statusEl = document.getElementById('syncStatus');
-            if (statusEl) {
-                statusEl.textContent = message;
-                statusEl.style.background = color;
-                statusEl.style.opacity = '1';
-                setTimeout(() => {
-                    statusEl.style.opacity = '0';
-                }, 2000);
-            }
-        }
-
-        // Initialize app
-        function init() {
-            updateCurrentDate();
-            renderCalendar();
-            renderTasks();
-            renderNotes();
-            renderEvents();
-            
-            // Start Firebase sync
-            waitForFirebase();
-        }
-
-        // Date display
-        function updateCurrentDate() {
-            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', options);
-        }
-
-        // Tasks functionality
-        function toggleTaskInput() {
-            const area = document.getElementById('taskInputArea');
-            const input = document.getElementById('taskInput');
-            area.classList.toggle('active');
-            if (area.classList.contains('active')) {
-                setTimeout(() => input.focus(), 300);
-            }
-        }
-
-        function handleTaskKeypress(event) {
-            if (event.key === 'Enter') {
-                addTask();
-            }
-        }
-
-        function addTask() {
-            const input = document.getElementById('taskInput');
-            const text = input.value.trim();
-            
-            if (text) {
-                tasks.push({
-                    id: Date.now(),
-                    text: text,
-                    completed: false,
-                    notes: '',
-                    createdAt: new Date().toISOString()
-                });
-                
-                saveToFirebase('tasks', tasks);
-                input.value = '';
-                renderTasks();
-                toggleTaskInput();
-            }
-        }
-
-        function toggleTask(id) {
-            const task = tasks.find(t => t.id === id);
-            if (task) {
-                task.completed = !task.completed;
-                saveToFirebase('tasks', tasks);
-                renderTasks();
-            }
-        }
-
-        function deleteTask(id) {
-            tasks = tasks.filter(t => t.id !== id);
-            saveToFirebase('tasks', tasks);
-            renderTasks();
-        }
-
-        function renderTasks() {
-            const container = document.getElementById('taskList');
-            
-            if (tasks.length === 0) {
-                container.innerHTML = '<div class="empty-state">No tasks yet. Add your first task!</div>';
-                return;
-            }
-
-            container.innerHTML = tasks.map(task => `
-                <div class="task-item ${task.completed ? 'completed' : ''}" ondblclick="openTaskDetail(${task.id})">
-                    <input type="checkbox" class="task-checkbox" 
-                           ${task.completed ? 'checked' : ''} 
-                           onchange="toggleTask(${task.id})"
-                           onclick="event.stopPropagation()">
-                    <span class="task-text">${task.text}</span>
-                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">&times;</button>
-                </div>
-            `).join('');
-        }
-
-        // Notes functionality
-        function toggleNotesInput() {
-            const area = document.getElementById('notesArea');
-            const input = document.getElementById('noteInput');
-            area.classList.toggle('active');
-            if (area.classList.contains('active')) {
-                setTimeout(() => input.focus(), 300);
-            }
-        }
-
-        function saveNote() {
-            const input = document.getElementById('noteInput');
-            const text = input.value.trim();
-            
-            if (text) {
-                notes.unshift({
-                    id: Date.now(),
-                    text: text,
-                    detailedNotes: '',
-                    createdAt: new Date().toISOString()
-                });
-                
-                saveToFirebase('notes', notes);
-                input.value = '';
-                renderNotes();
-                toggleNotesInput();
-            }
-        }
-
-        function deleteNote(id) {
-            notes = notes.filter(n => n.id !== id);
-            saveToFirebase('notes', notes);
-            renderNotes();
-        }
-
-        function renderNotes() {
-            const container = document.getElementById('notesList');
-            
-            if (notes.length === 0) {
-                container.innerHTML = '<div class="empty-state">No notes yet. Capture your ideas!</div>';
-                return;
-            }
-
-            container.innerHTML = notes.map(note => {
-                const date = new Date(note.createdAt);
-                const timeStr = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-                
-                return `
-                    <div class="note-item" ondblclick="openNoteDetail(${note.id})">
-                        <div class="note-header">
-                            <span class="note-time">${timeStr}</span>
-                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">&times;</button>
-                        </div>
-                        <div class="note-text">${note.text}</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Calendar functionality
-        function renderCalendar() {
-            const year = currentMonth.getFullYear();
-            const month = currentMonth.getMonth();
-            
-            // Update month display
-            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
-                              'July', 'August', 'September', 'October', 'November', 'December'];
-            document.getElementById('calendarMonth').textContent = `${monthNames[month]} ${year}`;
-            
-            // Calculate calendar grid
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const daysInPrevMonth = new Date(year, month, 0).getDate();
-            
-            const container = document.getElementById('calendarDays');
-            let html = '';
-            
-            // Previous month days
-            for (let i = firstDay - 1; i >= 0; i--) {
-                html += `<div class="calendar-day other-month">${daysInPrevMonth - i}</div>`;
-            }
-            
-            // Current month days
-            const today = new Date();
-            for (let day = 1; day <= daysInMonth; day++) {
-                const date = new Date(year, month, day);
-                const dateStr = date.toISOString().split('T')[0];
-                const isToday = date.toDateString() === today.toDateString();
-                
-                // Check if any event includes this date (for multi-day events)
-                const hasEvent = events.some(e => {
-                    const eventStart = new Date(e.startDate);
-                    const eventEnd = new Date(e.endDate || e.startDate);
-                    const currentDate = new Date(dateStr);
-                    return currentDate >= eventStart && currentDate <= eventEnd;
-                });
-                
-                const isSelected = selectedDates.includes(dateStr);
-                const isInRange = selectedDates.length > 1 && isDateInRange(dateStr);
-                
-                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''}" 
-                         data-date="${dateStr}"
-                         ondblclick="openDayView('${dateStr}')"
-                         onmousedown="startDateSelection('${dateStr}')"
-                         onmouseenter="continueDateSelection('${dateStr}')"
-                         onmouseup="endDateSelection()">${day}</div>`;
-            }
-            
-            // Next month days
-            const remainingDays = 42 - (firstDay + daysInMonth);
-            for (let day = 1; day <= remainingDays; day++) {
-                html += `<div class="calendar-day other-month">${day}</div>`;
-            }
-            
-            container.innerHTML = html;
-            renderEvents();
-        }
-
-        function previousMonth() {
-            currentMonth.setMonth(currentMonth.getMonth() - 1);
-            renderCalendar();
-        }
-
-        function nextMonth() {
-            currentMonth.setMonth(currentMonth.getMonth() + 1);
-            renderCalendar();
-        }
-
-        function toggleEventInput() {
-            const area = document.getElementById('eventInputArea');
-            area.classList.toggle('active');
-            
-            if (!area.classList.contains('active')) {
-                // Clear form
-                document.getElementById('eventTitle').value = '';
-                document.getElementById('eventStartDate').value = '';
-                document.getElementById('eventEndDate').value = '';
-                document.getElementById('eventStartTime').value = '';
-                document.getElementById('eventEndTime').value = '';
-                document.getElementById('eventDescription').value = '';
-            }
-        }
-
-        function saveEvent() {
-            const title = document.getElementById('eventTitle').value.trim();
-            const startDate = document.getElementById('eventStartDate').value;
-            const endDate = document.getElementById('eventEndDate').value;
-            const startTime = document.getElementById('eventStartTime').value;
-            const endTime = document.getElementById('eventEndTime').value;
-            const description = document.getElementById('eventDescription').value.trim();
-            
-            if (title && startDate) {
-                events.push({
-                    id: Date.now(),
-                    title: title,
-                    startDate: startDate,
-                    endDate: endDate || startDate, // Default to start date if no end date
-                    startTime: startTime,
-                    endTime: endTime,
-                    description: description
-                });
-                
-                // Sort by start date and time
-                events.sort((a, b) => {
-                    const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
-                    const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
-                    return dateTimeA - dateTimeB;
-                });
-                
-                saveToFirebase('events', events);
-                toggleEventInput();
-                renderCalendar();
-                renderEvents();
-            }
-        }
-
-        function deleteEvent(id) {
-            events = events.filter(e => e.id !== id);
-            saveToFirebase('events', events);
-            renderCalendar();
-            renderEvents();
-            renderAgenda();
-        }
-
-        // Date Selection & Agenda Functions
-        function startDateSelection(dateStr) {
-            isDragging = true;
-            hasDragged = false;
-            dragStartDate = dateStr;
-            selectedDates = [dateStr];
-            renderCalendar();
-        }
-
-        function continueDateSelection(dateStr) {
-            if (!isDragging) return;
-            
-            // If we moved to a different date, mark that we've dragged
-            if (dateStr !== dragStartDate) {
-                hasDragged = true;
-            }
-            
-            // Build range from drag start to current
-            const start = new Date(dragStartDate);
-            const current = new Date(dateStr);
-            
-            const minDate = start < current ? start : current;
-            const maxDate = start < current ? current : start;
-            
-            selectedDates = [];
-            for (let d = new Date(minDate); d <= maxDate; d.setDate(d.getDate() + 1)) {
-                selectedDates.push(d.toISOString().split('T')[0]);
-            }
-            
-            renderCalendar();
-        }
-
-        function endDateSelection() {
-            if (isDragging) {
-                isDragging = false;
-                
-                // Only render agenda if we actually dragged
-                // If we didn't drag (just clicked), keep the single date selection
-                if (!hasDragged) {
-                    // This was a simple click, keep just the one date
-                    selectedDates = [dragStartDate];
-                }
-                
-                renderAgenda();
-                hasDragged = false;
-            }
-        }
-
-        function isDateInRange(dateStr) {
-            if (selectedDates.length < 2) return false;
-            const sortedDates = [...selectedDates].sort();
-            return dateStr >= sortedDates[0] && dateStr <= sortedDates[sortedDates.length - 1];
-        }
-
-        function clearDateSelection() {
-            selectedDates = [];
-            dragStartDate = null;
-            isDragging = false;
-            hasDragged = false;
-            renderCalendar();
-            document.getElementById('agendaView').classList.remove('active');
-            document.getElementById('eventsList').classList.remove('hidden');
-        }
-
-        function renderAgenda() {
-            const agendaView = document.getElementById('agendaView');
-            const agendaTitle = document.getElementById('agendaTitle');
-            const agendaContent = document.getElementById('agendaContent');
-            const eventsList = document.getElementById('eventsList');
-            
-            if (selectedDates.length === 0) {
-                agendaView.classList.remove('active');
-                eventsList.classList.remove('hidden');
-                return;
-            }
-            
-            agendaView.classList.add('active');
-            eventsList.classList.add('hidden');
-            
-            if (selectedDates.length === 0) {
-                agendaView.classList.remove('active');
-                return;
-            }
-            
-            agendaView.classList.add('active');
-            
-            // Sort selected dates
-            const sortedDates = [...selectedDates].sort();
-            
-            if (selectedDates.length === 1) {
-                // Single date - detailed view
-                const date = new Date(sortedDates[0]);
-                agendaTitle.textContent = date.toLocaleDateString('en-US', { 
-                    weekday: 'long', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-                
-                const dayEvents = events.filter(e => {
-                    const eventStart = new Date(e.startDate);
-                    const eventEnd = new Date(e.endDate || e.startDate);
-                    const currentDate = new Date(sortedDates[0]);
-                    return currentDate >= eventStart && currentDate <= eventEnd;
-                }).sort((a, b) => {
-                    const timeA = a.startTime || '00:00';
-                    const timeB = b.startTime || '00:00';
-                    return timeA.localeCompare(timeB);
-                });
-                
-                // Deduplicate events by ID
-                const uniqueEvents = [];
-                const seenIds = new Set();
-                dayEvents.forEach(event => {
-                    if (!seenIds.has(event.id)) {
-                        seenIds.add(event.id);
-                        uniqueEvents.push(event);
-                    }
-                });
-                
-                if (uniqueEvents.length === 0) {
-                    agendaContent.innerHTML = '<div class="empty-state">No events scheduled</div>';
-                } else {
-                    agendaContent.innerHTML = uniqueEvents.map(event => {
-                        const startDate = new Date(event.startDate);
-                        const endDate = new Date(event.endDate || event.startDate);
-                        
-                        let dateRangeStr = '';
-                        if (event.startDate !== event.endDate && event.endDate) {
-                            const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                            const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                            dateRangeStr = `${startStr} - ${endStr}`;
-                        }
-                        
-                        let timeStr = '';
-                        let durationStr = '';
-                        
-                        if (event.startTime) {
-                            const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
-                                hour: 'numeric', 
-                                minute: '2-digit' 
-                            });
-                            
-                            if (event.endTime) {
-                                const endFormatted = new Date('2000-01-01 ' + event.endTime).toLocaleTimeString('en-US', { 
-                                    hour: 'numeric', 
-                                    minute: '2-digit' 
-                                });
-                                timeStr = `${startFormatted} - ${endFormatted}`;
-                                durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
-                            } else {
-                                timeStr = startFormatted;
-                            }
-                        }
-                        
-                        return `
-                            <div class="agenda-event">
-                                <div class="agenda-event-title">${event.title}</div>
-                                ${dateRangeStr ? `<div class="agenda-event-time" style="color: var(--accent-primary); font-weight: 600; margin-bottom: 0.25rem;">${dateRangeStr}</div>` : ''}
-                                ${timeStr ? `<div class="agenda-event-time">
-                                    ${timeStr}
-                                    ${durationStr ? `<span class="agenda-event-duration">${durationStr}</span>` : ''}
-                                </div>` : ''}
+            return (
+                <div className="relative w-full" ref={ref}>
+                    <button 
+                        type="button" 
+                        onClick={() => setIsOpen(!isOpen)} 
+                        className="text-[9px] font-black px-2 py-1.5 rounded-lg uppercase tracking-wider w-full text-center bg-gray-100 text-gray-900 hover:bg-gray-200 transition-all"
+                    >
+                        {value}
+                    </button>
+                    {isOpen && (
+                        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl p-3 z-[100] w-56 text-black animate-pop">
+                            <div className="flex justify-between items-center mb-2">
+                                <button 
+                                    type="button" 
+                                    onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))} 
+                                    className="p-1 hover:bg-gray-100 rounded-lg"
+                                >
+                                    â†
+                                </button>
+                                <span className="text-[9px] font-black uppercase">
+                                    {viewDate.toLocaleString('default', { month: 'short' })} {viewDate.getFullYear()}
+                                </span>
+                                <button 
+                                    type="button" 
+                                    onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))} 
+                                    className="p-1 hover:bg-gray-100 rounded-lg"
+                                >
+                                    â†’
+                                </button>
                             </div>
-                        `;
-                    }).join('');
-                }
-            } else {
-                // Multi-date range - condensed view
-                const startDate = new Date(sortedDates[0]);
-                const endDate = new Date(sortedDates[sortedDates.length - 1]);
-                
-                agendaTitle.textContent = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-                
-                // Get all events in the range
-                const rangeEvents = events.filter(e => {
-                    const eventStart = new Date(e.startDate);
-                    const eventEnd = new Date(e.endDate || e.startDate);
-                    return eventEnd >= startDate && eventStart <= endDate;
-                }).sort((a, b) => {
-                    const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
-                    const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
-                    return dateTimeA - dateTimeB;
-                });
-                
-                // Deduplicate events by ID
-                const uniqueRangeEvents = [];
-                const seenRangeIds = new Set();
-                rangeEvents.forEach(event => {
-                    if (!seenRangeIds.has(event.id)) {
-                        seenRangeIds.add(event.id);
-                        uniqueRangeEvents.push(event);
-                    }
-                });
-                
-                if (uniqueRangeEvents.length === 0) {
-                    agendaContent.innerHTML = '<div class="empty-state">No events in this date range</div>';
-                } else {
-                    // Summary
-                    const totalEvents = uniqueRangeEvents.length;
-                    const totalDays = selectedDates.length;
-                    
-                    let summaryHTML = `
-                        <div class="agenda-summary">
-                            <div class="agenda-summary-title">${totalEvents} event${totalEvents !== 1 ? 's' : ''} over ${totalDays} day${totalDays !== 1 ? 's' : ''}</div>
+                            <div className="day-grid gap-1">
+                                {["S","M","T","W","T","F","S"].map(d => 
+                                    <div key={d} className="text-center text-[7px] font-black text-gray-300">{d}</div>
+                                )}
+                                {renderDays}
+                            </div>
                         </div>
-                    `;
-                    
-                    // Separate multi-day spanning events from single-day events
-                    const spanningEvents = [];
-                    const daySpecificEvents = {};
-                    
-                    uniqueRangeEvents.forEach(event => {
-                        const eventStart = new Date(event.startDate);
-                        const eventEnd = new Date(event.endDate || event.startDate);
-                        const eventSpansDays = event.endDate && event.startDate !== event.endDate;
-                        
-                        if (eventSpansDays) {
-                            // This is a multi-day event
-                            spanningEvents.push(event);
-                        } else {
-                            // Single day event - add to specific day
-                            if (!daySpecificEvents[event.startDate]) {
-                                daySpecificEvents[event.startDate] = [];
-                            }
-                            daySpecificEvents[event.startDate].push(event);
-                        }
-                    });
-                    
-                    let eventsHTML = '';
-                    
-                    // Show spanning events first (only once each)
-                    if (spanningEvents.length > 0) {
-                        eventsHTML += `<div class="agenda-day-section">`;
-                        eventsHTML += `<div class="agenda-day-header">Multi-Day Events</div>`;
-                        
-                        spanningEvents.forEach(event => {
-                            const eventStart = new Date(event.startDate);
-                            const eventEnd = new Date(event.endDate);
-                            const dateRangeStr = `${eventStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${eventEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-                            
-                            let timeStr = '';
-                            if (event.startTime && event.endTime) {
-                                const durationStr = calculateDuration(event.startDate, event.startTime, event.endDate, event.endTime);
-                                timeStr = `<span class="agenda-event-duration">${durationStr}</span>`;
-                            }
-                            
-                            eventsHTML += `
-                                <div class="agenda-event">
-                                    <div class="agenda-event-title">${event.title}</div>
-                                    <div class="agenda-event-time">
-                                        ${dateRangeStr}
-                                        ${timeStr}
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        
-                        eventsHTML += `</div>`;
-                    }
-                    
-                    // Then show single-day events grouped by date
-                    sortedDates.forEach(dateStr => {
-                        if (daySpecificEvents[dateStr] && daySpecificEvents[dateStr].length > 0) {
-                            const date = new Date(dateStr);
-                            const dayHeader = date.toLocaleDateString('en-US', { 
-                                weekday: 'short', 
-                                month: 'short', 
-                                day: 'numeric' 
-                            });
-                            
-                            eventsHTML += `<div class="agenda-day-section">`;
-                            eventsHTML += `<div class="agenda-day-header">${dayHeader}</div>`;
-                            
-                            daySpecificEvents[dateStr].forEach(event => {
-                                let timeStr = '';
-                                if (event.startTime) {
-                                    const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
-                                        hour: 'numeric', 
-                                        minute: '2-digit' 
-                                    });
-                                    timeStr = startFormatted;
-                                    
-                                    if (event.endTime) {
-                                        const durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
-                                        timeStr += ` <span class="agenda-event-duration">${durationStr}</span>`;
-                                    }
-                                }
-                                
-                                eventsHTML += `
-                                    <div class="agenda-event">
-                                        <div class="agenda-event-title">${event.title}</div>
-                                        ${timeStr ? `<div class="agenda-event-time">${timeStr}</div>` : ''}
-                                    </div>
-                                `;
-                            });
-                            
-                            eventsHTML += `</div>`;
-                        }
-                    });
-                    
-                    agendaContent.innerHTML = summaryHTML + eventsHTML;
-                }
-            }
+                    )}
+                </div>
+            );
         }
 
-        function calculateDuration(startDate, startTime, endDate, endTime) {
-            if (!startDate || !startTime || !endDate || !endTime) return null;
-            
-            const start = new Date(startDate + ' ' + startTime);
-            const end = new Date(endDate + ' ' + endTime);
-            const diffMs = end - start;
-            
-            if (diffMs <= 0) return null;
-            
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-            
-            if (diffDays > 0) {
-                const remainingHours = diffHours % 24;
-                const remainingMins = diffMins % 60;
-                
-                let result = `${diffDays}d`;
-                if (remainingHours > 0) result += ` ${remainingHours}h`;
-                if (remainingMins > 0) result += ` ${remainingMins}m`;
-                return result;
-            } else if (diffHours > 0) {
-                const remainingMins = diffMins % 60;
-                return remainingMins > 0 ? `${diffHours}h ${remainingMins}m` : `${diffHours}h`;
-            } else {
-                return `${diffMins}m`;
+        const WinItem = React.memo(({ 
+            item, 
+            editingNoteId, 
+            schedulingNoteId,
+            tempNoteText,
+            tempNoteDetails,
+            onStartEdit,
+            onStartSchedule,
+            onSaveEdit,
+            onCancelEdit,
+            onToggleComplete,
+            onDelete,
+            onScheduleConfirm,
+            formData,
+            setFormData,
+            execCommand,
+            editorRef
+        }) => {
+            if (editingNoteId === item.id) {
+                return (
+                    <div className="bg-white p-4 rounded-2xl border-2 border-blue-500 shadow-xl animate-pop space-y-3">
+                        <input 
+                            autoFocus 
+                            className="text-[11px] font-black uppercase text-gray-900 outline-none w-full bg-gray-50 p-2 rounded-lg" 
+                            value={tempNoteText} 
+                            onChange={e => onStartEdit(item.id, e.target.value, tempNoteDetails)} 
+                        />
+                        <div className="flex gap-1 p-1 bg-gray-50 rounded-lg border border-gray-100">
+                            <button onClick={() => execCommand('bold')} className="p-1 hover:bg-gray-200 rounded font-bold w-6 text-[10px]">B</button>
+                            <button onClick={() => execCommand('underline')} className="p-1 hover:bg-gray-200 rounded underline w-6 text-[10px]">U</button>
+                            <button onClick={() => execCommand('insertUnorderedList')} className="p-1 hover:bg-gray-200 rounded text-[9px] px-2 font-bold">List</button>
+                        </div>
+                        <div 
+                            ref={editorRef} 
+                            contentEditable 
+                            className="rich-editor w-full bg-gray-50 p-3 rounded-lg text-[10px] font-medium min-h-[80px] outline-none overflow-y-auto" 
+                            dangerouslySetInnerHTML={{ __html: tempNoteDetails }} 
+                        />
+                        <div className="flex gap-2">
+                            <button 
+                                onClick={() => onSaveEdit(item.id, tempNoteText, editorRef.current.innerHTML)} 
+                                className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
+                            >
+                                Save
+                            </button>
+                            <button 
+                                onClick={onCancelEdit} 
+                                className="bg-gray-100 text-gray-400 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                );
             }
-        }
-
-        function renderEvents() {
-            const container = document.getElementById('eventsList');
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
             
-            // Filter for upcoming or ongoing events
-            const upcoming = events.filter(e => {
-                const eventEnd = new Date(e.endDate || e.startDate);
-                eventEnd.setHours(23, 59, 59, 999);
-                return eventEnd >= today;
-            });
-            
-            if (upcoming.length === 0) {
-                container.innerHTML = '<div class="empty-state">No upcoming events</div>';
-                return;
+            if (schedulingNoteId === item.id) {
+                return (
+                    <div className="bg-white p-4 rounded-2xl border-2 border-blue-500 shadow-xl animate-pop space-y-3">
+                        <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest text-center">Schedule Win</p>
+                        <h4 className="text-[10px] font-bold text-center">{item.text}</h4>
+                        <InlineDatePicker 
+                            value={formData.startDate} 
+                            onChange={v => setFormData({...formData, startDate: v})} 
+                        />
+                        <button 
+                            onClick={() => onScheduleConfirm(item, formData.startDate)} 
+                            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase w-full"
+                        >
+                            Confirm Add
+                        </button>
+                    </div>
+                );
             }
+            
+            return (
+                <div 
+                    onDoubleClick={() => onStartEdit(item.id, item.text, item.details || "")} 
+                    className={`flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm transition-all group hover:border-blue-200 cursor-pointer ${item.completed ? 'opacity-60 bg-gray-50' : ''}`}
+                >
+                    <input 
+                        type="checkbox" 
+                        checked={item.completed} 
+                        onChange={(e) => { 
+                            e.stopPropagation(); 
+                            onToggleComplete(item.id);
+                        }} 
+                        className="w-4 h-4 accent-blue-500 cursor-pointer" 
+                    />
+                    <div className="flex-grow min-w-0">
+                        <p className={`text-[11px] font-black uppercase text-gray-900 truncate ${item.completed ? 'line-through' : ''}`}>
+                            {item.text}
+                        </p>
+                        {item.details && (
+                            <div 
+                                className="text-[8px] text-gray-400 italic truncate opacity-60" 
+                                dangerouslySetInnerHTML={{ __html: item.details }}
+                            />
+                        )}
+                    </div>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                        <button 
+                            onClick={(e) => { 
+                                e.stopPropagation(); 
+                                onDelete(item.id);
+                            }} 
+                            className="p-1 text-gray-300 hover:text-red-500 transition-colors"
+                        >
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                        {!item.completed && (
+                            <button 
+                                onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    onStartSchedule(item.id);
+                                }} 
+                                className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-tighter"
+                            >
+                                Add
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        });
 
-            container.innerHTML = upcoming.slice(0, 5).map(event => {
-                const startDate = new Date(event.startDate);
-                const endDate = new Date(event.endDate || event.startDate);
-                
-                let dateStr = '';
-                if (event.startDate === event.endDate || !event.endDate) {
-                    dateStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                } else {
-                    const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                    const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    dateStr = `${startStr} - ${endStr}`;
+        function CalendarApp() {
+            const [user, setUser] = useState(null);
+            const [syncStatus, setSyncStatus] = useState('disconnected');
+            const [selectedDate, setSelectedDate] = useState(new Date());
+            const [navDate, setNavDate] = useState(new Date());
+            const [reminders, setReminders] = useState({});
+            const [scratchNotes, setScratchNotes] = useState([]);
+            const [quickWins, setQuickWins] = useState([]);
+            const [showCompleted, setShowCompleted] = useState(true);
+            const [isCreatingEvent, setIsCreatingEvent] = useState(false);
+            
+            const [editingNoteId, setEditingNoteId] = useState(null); 
+            const [schedulingNoteId, setSchedulingNoteId] = useState(null);
+            const [tempNoteText, setTempNoteText] = useState("");
+            const [tempNoteDetails, setTempNoteDetails] = useState("");
+            const [newWinText, setNewWinText] = useState("");
+            const [formData, setFormData] = useState({ text: "", details: "", startDate: formatKey(new Date()) });
+
+            const editorRef = useRef(null);
+            const firestoreSyncTimer = useRef(null);
+            const unsubscribeRef = useRef(null);
+
+            // Firebase Authentication
+            useEffect(() => {
+                if (!isFirebaseConfigured) {
+                    // Load from localStorage if Firebase not configured
+                    setReminders(JSON.parse(localStorage.getItem('cal-rem')) || {});
+                    setScratchNotes(JSON.parse(localStorage.getItem('cal-scratch')) || []);
+                    setQuickWins(JSON.parse(localStorage.getItem('cal-wins')) || []);
+                    return;
                 }
-                
-                let timeStr = '';
-                let durationStr = '';
-                
-                if (event.startTime) {
-                    const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit' 
-                    });
-                    
-                    if (event.endTime) {
-                        const endFormatted = new Date('2000-01-01 ' + event.endTime).toLocaleTimeString('en-US', { 
-                            hour: 'numeric', 
-                            minute: '2-digit' 
-                        });
-                        timeStr = `${startFormatted} - ${endFormatted}`;
-                        durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
+
+                const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+                    if (firebaseUser) {
+                        setUser(firebaseUser);
+                        setSyncStatus('connected');
+                        console.log("ðŸ‘¤ User signed in:", firebaseUser.email);
                     } else {
-                        timeStr = startFormatted;
-                    }
-                }
-                
-                return `
-                    <div class="event-item">
-                        <div class="note-header">
-                            <div class="event-date">${dateStr}</div>
-                            <button class="delete-btn" onclick="deleteEvent(${event.id})">&times;</button>
-                        </div>
-                        <div class="event-title">${event.title}</div>
-                        ${timeStr ? `<div class="event-time">${timeStr}</div>` : ''}
-                        ${durationStr ? `<div class="event-duration">Duration: ${durationStr}</div>` : ''}
-                        ${event.description ? `<div class="note-text" style="margin-top: 0.5rem; font-size: 0.85rem;">${event.description}</div>` : ''}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Day View Modal Functions
-        let currentDayViewDate = null;
-
-        function openDayView(dateStr) {
-            currentDayViewDate = dateStr;
-            const date = new Date(dateStr);
-            
-            // Find all events that include this date
-            const dayEvents = events.filter(e => {
-                const eventStart = new Date(e.startDate);
-                const eventEnd = new Date(e.endDate || e.startDate);
-                const currentDate = new Date(dateStr);
-                return currentDate >= eventStart && currentDate <= eventEnd;
-            });
-            
-            const dateFormatted = date.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
-            });
-            
-            document.getElementById('dayViewTitle').textContent = dateFormatted;
-            
-            // Pre-populate the date in the quick add form
-            document.getElementById('dayEventStartDate').value = dateStr;
-            document.getElementById('dayEventEndDate').value = dateStr;
-            
-            const container = document.getElementById('dayViewEvents');
-            
-            if (dayEvents.length === 0) {
-                container.innerHTML = '<div class="empty-state">No events scheduled for this day</div>';
-            } else {
-                // Sort events by start time
-                dayEvents.sort((a, b) => {
-                    const timeA = a.startTime || '00:00';
-                    const timeB = b.startTime || '00:00';
-                    return timeA.localeCompare(timeB);
-                });
-                
-                container.innerHTML = dayEvents.map(event => {
-                    const startDate = new Date(event.startDate);
-                    const endDate = new Date(event.endDate || event.startDate);
-                    
-                    let dateRangeStr = '';
-                    if (event.startDate !== event.endDate && event.endDate) {
-                        const startStr = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        const endStr = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                        dateRangeStr = `${startStr} - ${endStr}`;
-                    }
-                    
-                    let timeStr = '';
-                    let durationStr = '';
-                    
-                    if (event.startTime) {
-                        const startFormatted = new Date('2000-01-01 ' + event.startTime).toLocaleTimeString('en-US', { 
-                            hour: 'numeric', 
-                            minute: '2-digit' 
-                        });
-                        
-                        if (event.endTime) {
-                            const endFormatted = new Date('2000-01-01 ' + event.endTime).toLocaleTimeString('en-US', { 
-                                hour: 'numeric', 
-                                minute: '2-digit' 
+                        // Anonymous sign-in for seamless experience
+                        auth.signInAnonymously()
+                            .then(() => {
+                                console.log("ðŸ‘¤ Anonymous user created");
+                            })
+                            .catch((error) => {
+                                console.error("Auth error:", error);
+                                setSyncStatus('disconnected');
                             });
-                            timeStr = `${startFormatted} - ${endFormatted}`;
-                            durationStr = calculateDuration(event.startDate, event.startTime, event.endDate || event.startDate, event.endTime);
-                        } else {
-                            timeStr = startFormatted;
-                        }
                     }
-                    
-                    return `
-                        <div class="day-event-item">
-                            <div class="day-event-header">
-                                <div>
-                                    <div class="day-event-title">${event.title}</div>
-                                    ${dateRangeStr ? `<div class="day-event-time" style="color: var(--accent-primary); font-weight: 600;">${dateRangeStr}</div>` : ''}
-                                    ${timeStr ? `<div class="day-event-time">${timeStr}</div>` : ''}
-                                    ${durationStr ? `<div class="day-event-duration">${durationStr}</div>` : ''}
-                                </div>
-                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">&times;</button>
-                            </div>
-                            ${event.description ? `<div class="day-event-description">${event.description}</div>` : ''}
-                        </div>
-                    `;
-                }).join('');
-            }
-            
-            document.getElementById('dayViewModal').classList.add('active');
-        }
-
-        function toggleDayEventInput() {
-            const area = document.getElementById('dayEventInputArea');
-            area.classList.toggle('active');
-            
-            if (!area.classList.contains('active')) {
-                // Clear form but keep the dates
-                document.getElementById('dayEventTitle').value = '';
-                document.getElementById('dayEventStartTime').value = '';
-                document.getElementById('dayEventEndTime').value = '';
-                document.getElementById('dayEventDescription').value = '';
-            } else {
-                // Re-populate dates when opening
-                if (currentDayViewDate) {
-                    document.getElementById('dayEventStartDate').value = currentDayViewDate;
-                    document.getElementById('dayEventEndDate').value = currentDayViewDate;
-                }
-            }
-        }
-
-        function saveDayEvent() {
-            const title = document.getElementById('dayEventTitle').value.trim();
-            const startDate = document.getElementById('dayEventStartDate').value;
-            const endDate = document.getElementById('dayEventEndDate').value;
-            const startTime = document.getElementById('dayEventStartTime').value;
-            const endTime = document.getElementById('dayEventEndTime').value;
-            const description = document.getElementById('dayEventDescription').value.trim();
-            
-            if (title && startDate) {
-                events.push({
-                    id: Date.now(),
-                    title: title,
-                    startDate: startDate,
-                    endDate: endDate || startDate,
-                    startTime: startTime,
-                    endTime: endTime,
-                    description: description
                 });
+
+                return () => unsubscribe();
+            }, []);
+
+            // Firestore Real-time Sync
+            useEffect(() => {
+                if (!user || !db) return;
+
+                setSyncStatus('syncing');
+
+                // Subscribe to reminders
+                const remindersUnsub = db.collection('users').doc(user.uid).collection('reminders')
+                    .onSnapshot((snapshot) => {
+                        const data = {};
+                        snapshot.forEach(doc => {
+                            data[doc.id] = doc.data().events || [];
+                        });
+                        setReminders(data);
+                        setSyncStatus('connected');
+                    }, (error) => {
+                        console.error("Reminders sync error:", error);
+                        setSyncStatus('disconnected');
+                    });
+
+                // Subscribe to scratch notes
+                const scratchUnsub = db.collection('users').doc(user.uid).collection('scratchNotes')
+                    .orderBy('createdAt', 'desc')
+                    .onSnapshot((snapshot) => {
+                        const notes = [];
+                        snapshot.forEach(doc => {
+                            notes.push({ id: doc.id, ...doc.data() });
+                        });
+                        setScratchNotes(notes);
+                    }, (error) => {
+                        console.error("Scratch notes sync error:", error);
+                    });
+
+                // Subscribe to quick wins
+                const winsUnsub = db.collection('users').doc(user.uid).collection('quickWins')
+                    .orderBy('createdAt', 'desc')
+                    .onSnapshot((snapshot) => {
+                        const wins = [];
+                        snapshot.forEach(doc => {
+                            wins.push({ id: doc.id, ...doc.data() });
+                        });
+                        setQuickWins(wins);
+                    }, (error) => {
+                        console.error("Quick wins sync error:", error);
+                    });
+
+                unsubscribeRef.current = () => {
+                    remindersUnsub();
+                    scratchUnsub();
+                    winsUnsub();
+                };
+
+                return () => {
+                    if (unsubscribeRef.current) unsubscribeRef.current();
+                };
+            }, [user]);
+
+            // Fallback to localStorage if Firebase not configured
+            useEffect(() => {
+                if (isFirebaseConfigured) return;
                 
-                // Sort by start date and time
-                events.sort((a, b) => {
-                    const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
-                    const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
-                    return dateTimeA - dateTimeB;
-                });
+                const timer = setTimeout(() => {
+                    localStorage.setItem('cal-rem', JSON.stringify(reminders));
+                }, 500);
+                return () => clearTimeout(timer);
+            }, [reminders]);
+
+            useEffect(() => {
+                if (isFirebaseConfigured) return;
                 
-                saveToFirebase('events', events);
+                const timer = setTimeout(() => {
+                    localStorage.setItem('cal-scratch', JSON.stringify(scratchNotes));
+                }, 500);
+                return () => clearTimeout(timer);
+            }, [scratchNotes]);
+
+            useEffect(() => {
+                if (isFirebaseConfigured) return;
                 
-                // Clear form
-                document.getElementById('dayEventTitle').value = '';
-                document.getElementById('dayEventStartTime').value = '';
-                document.getElementById('dayEventEndTime').value = '';
-                document.getElementById('dayEventDescription').value = '';
-                
-                // Close the form
-                toggleDayEventInput();
-                
-                // Refresh the calendar and events
-                renderCalendar();
-                renderEvents();
-                
-                // Refresh the day view
-                if (currentDayViewDate) {
-                    openDayView(currentDayViewDate);
-                }
-            }
-        }
+                const timer = setTimeout(() => {
+                    localStorage.setItem('cal-wins', JSON.stringify(quickWins));
+                }, 500);
+                return () => clearTimeout(timer);
+            }, [quickWins]);
 
-        function closeDayView(event) {
-            if (!event || event.target.id === 'dayViewModal') {
-                document.getElementById('dayViewModal').classList.remove('active');
-                // Close the event input if it's open
-                const eventArea = document.getElementById('dayEventInputArea');
-                if (eventArea.classList.contains('active')) {
-                    eventArea.classList.remove('active');
-                }
-                currentDayViewDate = null;
-            }
-        }
+            const execCommand = useCallback((cmd, val = null) => {
+                document.execCommand(cmd, false, val);
+                if (editorRef.current) editorRef.current.focus();
+            }, []);
 
-        function deleteEventFromDay(id) {
-            deleteEvent(id);
-            // Check if there are still events on this day
-            const modal = document.getElementById('dayViewModal');
-            if (modal.classList.contains('active')) {
-                const dayTitle = document.getElementById('dayViewTitle').textContent;
-                // Re-render the day view
-                const date = new Date(dayTitle);
-                const dateStr = date.toISOString().split('T')[0];
-                
-                // Find all events that include this date
-                const dayEvents = events.filter(e => {
-                    const eventStart = new Date(e.startDate);
-                    const eventEnd = new Date(e.endDate || e.startDate);
-                    const currentDate = new Date(dateStr);
-                    return currentDate >= eventStart && currentDate <= eventEnd;
-                });
-                
-                const container = document.getElementById('dayViewEvents');
-                
-                if (dayEvents.length === 0) {
-                    container.innerHTML = '<div class="empty-state">No events scheduled for this day</div>';
-                } else {
-                    openDayView(dateStr);
-                }
-            }
-        }
-
-        // Initialize on load
-        init();
-        
-        // Add global mouseup listener to end date selection
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                endDateSelection();
-            }
-        });
-
-        // Task Detail Modal Functions
-        let currentTaskId = null;
-
-        function openTaskDetail(taskId) {
-            const task = tasks.find(t => t.id === taskId);
-            if (!task) return;
-
-            currentTaskId = taskId;
-            document.getElementById('taskDetailTitle').textContent = task.text;
+            const currentKey = formatKey(selectedDate);
             
-            const editor = document.getElementById('taskNotesEditor');
-            editor.innerHTML = task.notes || '';
+            // Memoized filtered lists
+            const activeWins = useMemo(() => 
+                quickWins.filter(w => !w.completed), 
+                [quickWins]
+            );
             
-            document.getElementById('taskDetailModal').classList.add('active');
-        }
-
-        function closeTaskDetail(event) {
-            if (!event || event.target.id === 'taskDetailModal') {
-                // Save notes before closing
-                if (currentTaskId) {
-                    const task = tasks.find(t => t.id === currentTaskId);
-                    if (task) {
-                        const editor = document.getElementById('taskNotesEditor');
-                        task.notes = editor.innerHTML;
-                        saveToFirebase('tasks', tasks);
-                    }
-                }
-                
-                // Reset the scheduling section
-                document.getElementById('eventSchedulingSection').style.display = 'none';
-                document.getElementById('addToCalendarBtn').style.display = 'block';
-                document.getElementById('saveEventBtn').style.display = 'none';
-                
-                document.getElementById('taskDetailModal').classList.remove('active');
-                currentTaskId = null;
-            }
-        }
-
-        function deleteTaskFromModal() {
-            if (currentTaskId && confirm('Are you sure you want to delete this task?')) {
-                deleteTask(currentTaskId);
-                closeTaskDetail();
-            }
-        }
-
-        function addTaskToCalendar() {
-            const task = tasks.find(t => t.id === currentTaskId);
-            if (!task) return;
-
-            // Save notes first
-            const editor = document.getElementById('taskNotesEditor');
-            task.notes = editor.innerHTML;
-            saveToFirebase('tasks', tasks);
-
-            // Convert notes to plain text for description
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = task.notes || '';
-            const plainTextNotes = tempDiv.textContent || '';
-
-            // Close task modal
-            document.getElementById('taskDetailModal').classList.remove('active');
-            currentTaskId = null;
-
-            // Open the calendar event form and pre-fill with task info
-            const eventArea = document.getElementById('eventInputArea');
-            eventArea.classList.add('active');
+            const completedWins = useMemo(() => 
+                quickWins.filter(w => w.completed), 
+                [quickWins]
+            );
             
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('eventTitle').value = task.text;
-            document.getElementById('eventStartDate').value = today;
-            document.getElementById('eventEndDate').value = today;
-            document.getElementById('eventStartTime').value = '';
-            document.getElementById('eventEndTime').value = '';
-            document.getElementById('eventDescription').value = plainTextNotes;
-
-            // Scroll to the calendar panel
-            document.querySelector('.calendar').scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
-            // Focus on the start time field
-            setTimeout(() => document.getElementById('eventStartTime').focus(), 500);
-        }
-
-        function toggleEventScheduling() {
-            const schedulingSection = document.getElementById('eventSchedulingSection');
-            const addBtn = document.getElementById('addToCalendarBtn');
-            const saveBtn = document.getElementById('saveEventBtn');
-            
-            if (schedulingSection.style.display === 'none') {
-                // Show scheduling form
-                schedulingSection.style.display = 'block';
-                addBtn.style.display = 'none';
-                saveBtn.style.display = 'block';
-                
-                // Pre-fill with today's date
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('taskEventStartDate').value = today;
-                document.getElementById('taskEventEndDate').value = today;
-            } else {
-                // Hide scheduling form
-                schedulingSection.style.display = 'none';
-                addBtn.style.display = 'block';
-                saveBtn.style.display = 'none';
-            }
-        }
-
-        function saveTaskAsEvent() {
-            const task = tasks.find(t => t.id === currentTaskId);
-            if (!task) return;
-
-            // Save notes first
-            const editor = document.getElementById('taskNotesEditor');
-            task.notes = editor.innerHTML;
-            saveToFirebase('tasks', tasks);
-
-            // Get event details from the form
-            const startDate = document.getElementById('taskEventStartDate').value;
-            const endDate = document.getElementById('taskEventEndDate').value;
-            const startTime = document.getElementById('taskEventStartTime').value;
-            const endTime = document.getElementById('taskEventEndTime').value;
-
-            if (!startDate) {
-                alert('Please select a start date');
-                return;
-            }
-
-            // Convert notes to plain text for description
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = task.notes || '';
-            const plainTextNotes = tempDiv.textContent || '';
-
-            // Create the event
-            events.push({
-                id: Date.now(),
-                title: task.text,
-                startDate: startDate,
-                endDate: endDate || startDate,
-                startTime: startTime,
-                endTime: endTime,
-                description: plainTextNotes
-            });
-            
-            // Sort by start date and time
-            events.sort((a, b) => {
-                const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
-                const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
-                return dateTimeA - dateTimeB;
-            });
-            
-            saveToFirebase('events', events);
-            
-            // Refresh the calendar and events
-            renderCalendar();
-            renderEvents();
-            renderAgenda();
-
-            // Close the modal
-            document.getElementById('taskDetailModal').classList.remove('active');
-            
-            // Reset the scheduling section
-            document.getElementById('eventSchedulingSection').style.display = 'none';
-            document.getElementById('addToCalendarBtn').style.display = 'block';
-            document.getElementById('saveEventBtn').style.display = 'none';
-            
-            currentTaskId = null;
-        }
-
-        // Rich Text Editor Functions
-        function formatText(command) {
-            document.execCommand(command, false, null);
-            document.getElementById('taskNotesEditor').focus();
-        }
-
-        function changeFontSize(size) {
-            document.execCommand('fontSize', false, size);
-            document.getElementById('taskNotesEditor').focus();
-        }
-
-        function clearFormatting() {
-            const editor = document.getElementById('taskNotesEditor');
-            const selection = window.getSelection();
-            
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const selectedText = range.toString();
-                
-                if (selectedText) {
-                    document.execCommand('removeFormat', false, null);
-                    document.execCommand('unlink', false, null);
-                }
-            }
-            
-            editor.focus();
-        }
-
-        // Rich Text Editor Functions for Note Modal
-        function formatNoteText(command) {
-            document.execCommand(command, false, null);
-            document.getElementById('noteDetailsEditor').focus();
-        }
-
-        function changeNoteFontSize(size) {
-            document.execCommand('fontSize', false, size);
-            document.getElementById('noteDetailsEditor').focus();
-        }
-
-        function clearNoteFormatting() {
-            const editor = document.getElementById('noteDetailsEditor');
-            const selection = window.getSelection();
-            
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const selectedText = range.toString();
-                
-                if (selectedText) {
-                    document.execCommand('removeFormat', false, null);
-                    document.execCommand('unlink', false, null);
-                }
-            }
-            
-            editor.focus();
-        }
-
-        // Initialize on load
-        init();
-        
-        // Add global mouseup listener to end date selection
-        document.addEventListener('mouseup', () => {
-            if (isDragging) {
-                endDateSelection();
-            }
-        });
-
-        // Close settings dropdown when clicking outside
-        document.addEventListener('click', (event) => {
-            const dropdown = document.getElementById('settingsDropdown');
-            const hamburger = document.querySelector('.hamburger-menu');
-            
-            if (!dropdown.contains(event.target) && !hamburger.contains(event.target)) {
-                dropdown.classList.remove('active');
-            }
-        });
-
-        // Settings Menu Functions
-        function toggleSettingsDropdown() {
-            const dropdown = document.getElementById('settingsDropdown');
-            dropdown.classList.toggle('active');
-        }
-
-        function openSettingsModal() {
-            document.getElementById('settingsModal').classList.add('active');
-            document.getElementById('settingsDropdown').classList.remove('active');
-        }
-
-        function closeSettingsModal(event) {
-            if (!event || event.target.id === 'settingsModal') {
-                document.getElementById('settingsModal').classList.remove('active');
-            }
-        }
-
-        // Note Detail Modal Functions
-        let currentNoteId = null;
-
-        function openNoteDetail(noteId) {
-            const note = notes.find(n => n.id === noteId);
-            if (!note) return;
-
-            currentNoteId = noteId;
-            
-            const date = new Date(note.createdAt);
-            const dateStr = date.toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric', 
-                year: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit'
-            });
-            
-            document.getElementById('noteDetailTimestamp').textContent = dateStr;
-            document.getElementById('noteDetailText').textContent = note.text;
-            
-            const editor = document.getElementById('noteDetailsEditor');
-            editor.innerHTML = note.detailedNotes || '';
-            
-            document.getElementById('noteDetailModal').classList.add('active');
-        }
-
-        function closeNoteDetail(event) {
-            if (!event || event.target.id === 'noteDetailModal') {
-                // Save detailed notes before closing
-                if (currentNoteId) {
-                    const note = notes.find(n => n.id === currentNoteId);
-                    if (note) {
-                        const editor = document.getElementById('noteDetailsEditor');
-                        note.detailedNotes = editor.innerHTML;
-                        saveToFirebase('notes', notes);
-                    }
-                }
-                
-                // Reset the scheduling section
-                document.getElementById('noteEventSchedulingSection').style.display = 'none';
-                document.getElementById('noteAddToCalendarBtn').style.display = 'block';
-                document.getElementById('noteSaveEventBtn').style.display = 'none';
-                
-                document.getElementById('noteDetailModal').classList.remove('active');
-                currentNoteId = null;
-            }
-        }
-
-        function addNoteToCalendar() {
-            const note = notes.find(n => n.id === currentNoteId);
-            if (!note) return;
-
-            // Save detailed notes first
-            const editor = document.getElementById('noteDetailsEditor');
-            note.detailedNotes = editor.innerHTML;
-            saveToFirebase('notes', notes);
-
-            // Combine original note and detailed notes for description
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = note.detailedNotes || '';
-            const plainTextDetails = tempDiv.textContent || '';
-            
-            const fullDescription = note.text + (plainTextDetails ? '\n\n' + plainTextDetails : '');
-
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Create the event with the full note content
-            events.push({
-                id: Date.now(),
-                title: note.text.substring(0, 100) + (note.text.length > 100 ? '...' : ''),
-                startDate: today,
-                endDate: today,
-                startTime: '',
-                endTime: '',
-                description: fullDescription
-            });
-            
-            // Sort by start date and time
-            events.sort((a, b) => {
-                const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
-                const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
-                return dateTimeA - dateTimeB;
-            });
-            
-            saveToFirebase('events', events);
-            
-            // Refresh the calendar and events
-            renderCalendar();
-            renderEvents();
-            renderAgenda();
-
-            // Close modal
-            closeNoteDetail();
-            
-            alert('Note added to calendar for today!');
-        }
-
-        function toggleNoteEventScheduling() {
-            const schedulingSection = document.getElementById('noteEventSchedulingSection');
-            const addBtn = document.getElementById('noteAddToCalendarBtn');
-            const saveBtn = document.getElementById('noteSaveEventBtn');
-            
-            if (schedulingSection.style.display === 'none') {
-                // Show scheduling form
-                schedulingSection.style.display = 'block';
-                addBtn.style.display = 'none';
-                saveBtn.style.display = 'block';
-                
-                // Pre-fill with today's date
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('noteEventStartDate').value = today;
-                document.getElementById('noteEventEndDate').value = today;
-            } else {
-                // Hide scheduling form
-                schedulingSection.style.display = 'none';
-                addBtn.style.display = 'block';
-                saveBtn.style.display = 'none';
-            }
-        }
-
-        function saveNoteAsEvent() {
-            const note = notes.find(n => n.id === currentNoteId);
-            if (!note) return;
-
-            // Save detailed notes first
-            const editor = document.getElementById('noteDetailsEditor');
-            note.detailedNotes = editor.innerHTML;
-            saveToFirebase('notes', notes);
-
-            // Get event details from the form
-            const startDate = document.getElementById('noteEventStartDate').value;
-            const endDate = document.getElementById('noteEventEndDate').value;
-            const startTime = document.getElementById('noteEventStartTime').value;
-            const endTime = document.getElementById('noteEventEndTime').value;
-
-            if (!startDate) {
-                alert('Please select a start date');
-                return;
-            }
-
-            // Combine original note and detailed notes for description
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = note.detailedNotes || '';
-            const plainTextDetails = tempDiv.textContent || '';
-            const fullDescription = note.text + (plainTextDetails ? '\n\n' + plainTextDetails : '');
-
-            // Ask if user wants to move or copy the note
-            const moveNote = confirm(
-                'Do you want to MOVE this note to calendar (deletes the note)?\n\n' +
-                'Click OK to MOVE the note\n' +
-                'Click Cancel to KEEP the note and create a calendar event'
+            const dailyAgenda = useMemo(() => 
+                reminders[currentKey] || [], 
+                [reminders, currentKey]
             );
 
-            // Create the event
-            events.push({
-                id: Date.now(),
-                title: note.text.substring(0, 100) + (note.text.length > 100 ? '...' : ''),
-                startDate: startDate,
-                endDate: endDate || startDate,
-                startTime: startTime,
-                endTime: endTime,
-                description: fullDescription
-            });
-            
-            // Sort by start date and time
-            events.sort((a, b) => {
-                const dateTimeA = new Date(a.startDate + ' ' + (a.startTime || '00:00'));
-                const dateTimeB = new Date(b.startDate + ' ' + (b.startTime || '00:00'));
-                return dateTimeA - dateTimeB;
-            });
-            
-            saveToFirebase('events', events);
+            // Firestore write helpers
+            const saveToFirestore = useCallback((collection, docId, data) => {
+                if (!user || !db) return;
+                
+                setSyncStatus('syncing');
+                db.collection('users').doc(user.uid).collection(collection).doc(docId)
+                    .set(data, { merge: true })
+                    .then(() => setSyncStatus('connected'))
+                    .catch((error) => {
+                        console.error(`Error saving to ${collection}:`, error);
+                        setSyncStatus('disconnected');
+                    });
+            }, [user]);
 
-            // If user chose to move, delete the note
-            if (moveNote) {
-                notes = notes.filter(n => n.id !== currentNoteId);
-                saveToFirebase('notes', notes);
-                renderNotes();
-            }
-            
-            // Refresh the calendar and events
-            renderCalendar();
-            renderEvents();
-            renderAgenda();
+            const deleteFromFirestore = useCallback((collection, docId) => {
+                if (!user || !db) return;
+                
+                setSyncStatus('syncing');
+                db.collection('users').doc(user.uid).collection(collection).doc(docId)
+                    .delete()
+                    .then(() => setSyncStatus('connected'))
+                    .catch((error) => {
+                        console.error(`Error deleting from ${collection}:`, error);
+                        setSyncStatus('disconnected');
+                    });
+            }, [user]);
 
-            // Close the modal and reset scheduling section
-            document.getElementById('noteEventSchedulingSection').style.display = 'none';
-            document.getElementById('noteAddToCalendarBtn').style.display = 'block';
-            document.getElementById('noteSaveEventBtn').style.display = 'none';
-            closeNoteDetail();
-            
-            if (moveNote) {
-                alert('Note moved to calendar!');
-            } else {
-                alert('Calendar event created! Note kept in notes.');
-            }
+            // Win handlers with Firestore sync
+            const handleWinToggle = useCallback((id) => {
+                setQuickWins(prev => {
+                    const updated = prev.map(w => 
+                        w.id === id ? {...w, completed: !w.completed} : w
+                    );
+                    const item = updated.find(w => w.id === id);
+                    if (item && user && db) {
+                        saveToFirestore('quickWins', id, item);
+                    }
+                    return updated;
+                });
+            }, [user, saveToFirestore]);
+
+            const handleWinDelete = useCallback((id) => {
+                setQuickWins(prev => prev.filter(w => w.id !== id));
+                deleteFromFirestore('quickWins', id);
+            }, [deleteFromFirestore]);
+
+            const handleWinStartEdit = useCallback((id, text, details) => {
+                setEditingNoteId(id);
+                setTempNoteText(text);
+                setTempNoteDetails(details);
+            }, []);
+
+            const handleWinSaveEdit = useCallback((id, text, details) => {
+                setQuickWins(prev => {
+                    const updated = prev.map(w => 
+                        w.id === id ? {...w, text, details} : w
+                    );
+                    const item = updated.find(w => w.id === id);
+                    if (item && user && db) {
+                        saveToFirestore('quickWins', id, item);
+                    }
+                    return updated;
+                });
+                setEditingNoteId(null);
+            }, [user, saveToFirestore]);
+
+            const handleWinCancelEdit = useCallback(() => {
+                setEditingNoteId(null);
+            }, []);
+
+            const handleWinStartSchedule = useCallback((id) => {
+                setSchedulingNoteId(id);
+                setEditingNoteId(null);
+            }, []);
+
+            const handleWinScheduleConfirm = useCallback((item, targetDate) => {
+                setReminders(prev => {
+                    const updated = { ...prev };
+                    const list = updated[targetDate] || [];
+                    const newEvent = { 
+                        id: Date.now(), 
+                        text: item.text, 
+                        notes: item.details, 
+                        startDate: targetDate, 
+                        type: 'win' 
+                    };
+                    list.push(newEvent);
+                    updated[targetDate] = list;
+                    
+                    if (user && db) {
+                        saveToFirestore('reminders', targetDate, { events: list });
+                    }
+                    return updated;
+                });
+                setSchedulingNoteId(null);
+            }, [user, saveToFirestore]);
+
+            // Scratch note handlers with Firestore sync
+            const handleNoteDelete = useCallback((id) => {
+                setScratchNotes(prev => prev.filter(n => n.id !== id));
+                deleteFromFirestore('scratchNotes', id);
+            }, [deleteFromFirestore]);
+
+            const handleNoteStartEdit = useCallback((id, text, details) => {
+                setEditingNoteId(id);
+                setSchedulingNoteId(null);
+                setTempNoteText(text);
+                setTempNoteDetails(details);
+            }, []);
+
+            const handleNoteSaveEdit = useCallback((id, text, details) => {
+                setScratchNotes(prev => {
+                    const updated = prev.map(n => 
+                        n.id === id ? {...n, text, details} : n
+                    );
+                    const item = updated.find(n => n.id === id);
+                    if (item && user && db) {
+                        saveToFirestore('scratchNotes', id, item);
+                    }
+                    return updated;
+                });
+                setEditingNoteId(null);
+            }, [user, saveToFirestore]);
+
+            const handleNoteStartSchedule = useCallback((id, text, details) => {
+                setEditingNoteId(null);
+                setSchedulingNoteId(id);
+                setFormData(prev => ({...prev, text, details}));
+            }, []);
+
+            const handleNoteScheduleConfirm = useCallback((note, targetDate) => {
+                setReminders(prev => {
+                    const updated = { ...prev };
+                    const list = updated[targetDate] || [];
+                    const newEvent = { 
+                        id: Date.now(), 
+                        text: note.text, 
+                        notes: note.details, 
+                        startDate: targetDate, 
+                        type: 'note' 
+                    };
+                    list.push(newEvent);
+                    updated[targetDate] = list;
+                    
+                    if (user && db) {
+                        saveToFirestore('reminders', targetDate, { events: list });
+                    }
+                    return updated;
+                });
+                setScratchNotes(prev => prev.filter(n => n.id !== note.id));
+                deleteFromFirestore('scratchNotes', note.id);
+                setSchedulingNoteId(null);
+            }, [user, saveToFirestore, deleteFromFirestore]);
+
+            // Agenda handlers with Firestore sync
+            const handleAgendaStartEdit = useCallback((id, text, notes) => {
+                setEditingNoteId(id);
+                setTempNoteText(text);
+                setTempNoteDetails(notes || "");
+            }, []);
+
+            const handleAgendaSaveEdit = useCallback((id, text, notes) => {
+                setReminders(prev => {
+                    const updated = { ...prev };
+                    updated[currentKey] = updated[currentKey].map(item => 
+                        item.id === id ? { ...item, text, notes } : item
+                    );
+                    
+                    if (user && db) {
+                        saveToFirestore('reminders', currentKey, { events: updated[currentKey] });
+                    }
+                    return updated;
+                });
+                setEditingNoteId(null);
+            }, [currentKey, user, saveToFirestore]);
+
+            const handleAgendaDelete = useCallback((id) => {
+                setReminders(prev => {
+                    const updated = { ...prev };
+                    updated[currentKey] = updated[currentKey].filter(item => item.id !== id);
+                    
+                    if (user && db) {
+                        saveToFirestore('reminders', currentKey, { events: updated[currentKey] });
+                    }
+                    return updated;
+                });
+            }, [currentKey, user, saveToFirestore]);
+
+            // Add new win handler
+            const handleAddWin = useCallback((text) => {
+                const newWin = { 
+                    id: Date.now().toString(), 
+                    text, 
+                    details: "", 
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                setScratchNotes(prev => [newWin, ...prev]);
+                
+                if (user && db) {
+                    saveToFirestore('quickWins', newWin.id, newWin);
+                }
+            }, [user, saveToFirestore]);
+
+            // Add new note handler
+            const handleAddNote = useCallback((text) => {
+                const newNote = {
+                    text,
+                    details: "",
+                    id: Date.now().toString(),
+                    createdAt: new Date().toISOString()
+                };
+                
+                setScratchNotes(prev => [newNote, ...prev]);
+                
+                if (user && db) {
+                    saveToFirestore('scratchNotes', newNote.id, newNote);
+                }
+            }, [user, saveToFirestore]);
+
+            // Memoized calendar days calculation
+            const calendarDays = useMemo(() => {
+                const year = navDate.getFullYear(); 
+                const month = navDate.getMonth(); 
+                const firstDay = new Date(year, month, 1).getDay(); 
+                const daysInMonth = new Date(year, month + 1, 0).getDate(); 
+                const days = [];
+                
+                for (let i = 0; i < firstDay; i++) days.push(<div key={`e-${i}`} />);
+                
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const d = new Date(year, month, i); 
+                    const k = formatKey(d);
+                    const hasWin = reminders[k] && reminders[k].some(r => r.type === 'win');
+                    const hasNote = reminders[k] && reminders[k].some(r => r.type === 'note' || !r.type);
+                    
+                    days.push(
+                        <div key={i} className="relative">
+                            <button 
+                                onClick={() => setSelectedDate(d)} 
+                                onDoubleClick={() => {
+                                    setSelectedDate(d);
+                                    setTempNoteText("");
+                                    setTempNoteDetails("");
+                                    setIsCreatingEvent(true);
+                                }}
+                                className={`w-full aspect-square text-[9px] font-bold rounded-md flex flex-col items-center justify-center transition-all ${formatKey(selectedDate) === k ? 'bg-gray-900 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
+                            >
+                                {i}
+                                <div className="flex gap-0.5 mt-0.5">
+                                    {hasWin && <div className="w-1 h-1 rounded-full bg-blue-500" />}
+                                    {hasNote && <div className="w-1 h-1 rounded-full bg-pink-500" />}
+                                </div>
+                            </button>
+
+                            {isCreatingEvent && formatKey(selectedDate) === k && (
+                                <div className="absolute top-0 left-full ml-2 w-48 bg-white border-2 border-pink-500 shadow-2xl rounded-2xl p-3 z-[110] animate-pop text-black">
+                                    <p className="text-[8px] font-black text-pink-500 uppercase mb-2">New Event: {k}</p>
+                                    <input 
+                                        autoFocus
+                                        placeholder="Event Title"
+                                        className="w-full text-[10px] font-bold p-2 bg-gray-50 rounded-lg mb-2 outline-none border border-transparent focus:border-pink-200"
+                                        value={tempNoteText}
+                                        onChange={e => setTempNoteText(e.target.value)}
+                                    />
+                                    <textarea 
+                                        placeholder="Details..."
+                                        className="w-full text-[9px] p-2 bg-gray-50 rounded-lg mb-3 outline-none min-h-[60px] resize-none"
+                                        value={tempNoteDetails}
+                                        onChange={e => setTempNoteDetails(e.target.value)}
+                                    />
+                                    <div className="flex gap-2">
+                                        <button 
+                                            onClick={() => {
+                                                if(!tempNoteText) return;
+                                                setReminders(prev => {
+                                                    const updated = { ...prev };
+                                                    const list = updated[k] || [];
+                                                    const newEvent = { 
+                                                        id: Date.now(), 
+                                                        text: tempNoteText, 
+                                                        notes: tempNoteDetails, 
+                                                        startDate: k, 
+                                                        type: 'note' 
+                                                    };
+                                                    list.push(newEvent);
+                                                    updated[k] = list;
+                                                    
+                                                    if (user && db) {
+                                                        saveToFirestore('reminders', k, { events: list });
+                                                    }
+                                                    return updated;
+                                                });
+                                                setIsCreatingEvent(false);
+                                                setTempNoteText("");
+                                                setTempNoteDetails("");
+                                            }}
+                                            className="flex-grow bg-pink-500 text-white text-[8px] font-black uppercase py-1.5 rounded-lg"
+                                        >
+                                            Create
+                                        </button>
+                                        <button 
+                                            onClick={() => setIsCreatingEvent(false)} 
+                                            className="bg-gray-100 text-gray-400 text-[8px] font-black uppercase px-2 py-1.5 rounded-lg"
+                                        >
+                                            Ã—
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+                return days;
+            }, [navDate, reminders, selectedDate, isCreatingEvent, tempNoteText, tempNoteDetails, user, saveToFirestore]);
+
+            return (
+                <>
+                    {/* Firebase Status Indicator */}
+                    <div className="firebase-status">
+                        <div className={`status-dot ${
+                            syncStatus === 'connected' ? 'status-connected' :
+                            syncStatus === 'syncing' ? 'status-syncing' :
+                            'status-disconnected'
+                        }`} />
+                        <span className="text-gray-600">
+                            {isFirebaseConfigured ? (
+                                syncStatus === 'connected' ? 'Cloud Synced' :
+                                syncStatus === 'syncing' ? 'Syncing...' :
+                                'Offline'
+                            ) : 'Local Mode'}
+                        </span>
+                    </div>
+
+                    <div className="max-w-[1600px] mx-auto grid lg:grid-cols-12 gap-6">
+                        <div className="lg:col-span-8 grid md:grid-cols-12 bg-white border-2 border-gray-100 rounded-[40px] shadow-sm overflow-hidden min-h-[800px]">
+                            
+                            <div className="md:col-span-4 border-r border-gray-100 bg-gray-50/30 p-8 flex flex-col h-full overflow-hidden">
+                                <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[.3em] mb-4">Quick Wins</h3>
+                                <input 
+                                    type="text" 
+                                    placeholder="+ Add Win" 
+                                    value={newWinText} 
+                                    onChange={e => setNewWinText(e.target.value)} 
+                                    onKeyDown={e => { 
+                                        if(e.key === 'Enter' && newWinText.trim()){ 
+                                            handleAddWin(newWinText);
+                                            setNewWinText(""); 
+                                        }
+                                    }} 
+                                    className="w-full bg-white border border-gray-100 rounded-xl p-3 text-[10px] font-bold outline-none mb-6 shadow-sm focus:border-blue-200 transition-all" 
+                                />
+                                
+                                <div className="flex-grow overflow-y-auto pr-2 custom-scroll space-y-3">
+                                    {activeWins.map(item => (
+                                        <WinItem 
+                                            key={item.id} 
+                                            item={item}
+                                            editingNoteId={editingNoteId}
+                                            schedulingNoteId={schedulingNoteId}
+                                            tempNoteText={tempNoteText}
+                                            tempNoteDetails={tempNoteDetails}
+                                            onStartEdit={handleWinStartEdit}
+                                            onStartSchedule={handleWinStartSchedule}
+                                            onSaveEdit={handleWinSaveEdit}
+                                            onCancelEdit={handleWinCancelEdit}
+                                            onToggleComplete={handleWinToggle}
+                                            onDelete={handleWinDelete}
+                                            onScheduleConfirm={handleWinScheduleConfirm}
+                                            formData={formData}
+                                            setFormData={setFormData}
+                                            execCommand={execCommand}
+                                            editorRef={editorRef}
+                                        />
+                                    ))}
+
+                                    {completedWins.length > 0 && (
+                                        <div className="pt-6">
+                                            <button 
+                                                onClick={() => setShowCompleted(!showCompleted)} 
+                                                className="flex items-center gap-2 mb-4 w-full group"
+                                            >
+                                                <div className="h-[1px] flex-grow bg-gray-200"></div>
+                                                <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter group-hover:text-blue-400 transition-colors">
+                                                    Completed ({completedWins.length})
+                                                </span>
+                                                <div className="h-[1px] flex-grow bg-gray-200"></div>
+                                            </button>
+                                            
+                                            {showCompleted && (
+                                                <div className="space-y-3 animate-pop">
+                                                    {completedWins.map(item => (
+                                                        <WinItem 
+                                                            key={item.id} 
+                                                            item={item}
+                                                            editingNoteId={editingNoteId}
+                                                            schedulingNoteId={schedulingNoteId}
+                                                            tempNoteText={tempNoteText}
+                                                            tempNoteDetails={tempNoteDetails}
+                                                            onStartEdit={handleWinStartEdit}
+                                                            onStartSchedule={handleWinStartSchedule}
+                                                            onSaveEdit={handleWinSaveEdit}
+                                                            onCancelEdit={handleWinCancelEdit}
+                                                            onToggleComplete={handleWinToggle}
+                                                            onDelete={handleWinDelete}
+                                                            onScheduleConfirm={handleWinScheduleConfirm}
+                                                            formData={formData}
+                                                            setFormData={setFormData}
+                                                            execCommand={execCommand}
+                                                            editorRef={editorRef}
+                                                        />
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="md:col-span-8 p-10">
+                                <h3 className="text-[10px] font-black text-pink-500 uppercase tracking-[.4em] mb-2">Workspace</h3>
+                                <h2 className="text-4xl font-black italic uppercase tracking-tighter text-gray-900 mb-8">QuickNotes</h2>
+                                <input 
+                                    type="text" 
+                                    placeholder="New note..." 
+                                    className="w-full bg-gray-50 border-2 border-gray-50 rounded-2xl p-6 text-lg font-bold outline-none focus:border-pink-100 mb-8" 
+                                    onKeyDown={e => { 
+                                        if(e.key === 'Enter' && e.target.value.trim()){ 
+                                            handleAddNote(e.target.value);
+                                            e.target.value=""; 
+                                        }
+                                    }} 
+                                />
+                                <div className="space-y-4">
+                                    {scratchNotes.map(note => (
+                                        <div key={note.id}>
+                                            {editingNoteId === note.id ? (
+                                                <div className="bg-white p-6 rounded-[32px] border-2 border-blue-500 shadow-xl animate-pop space-y-4">
+                                                    <input 
+                                                        className="text-xl font-bold text-gray-900 outline-none w-full bg-gray-50 p-4 rounded-xl" 
+                                                        value={tempNoteText} 
+                                                        onChange={e => setTempNoteText(e.target.value)} 
+                                                    />
+                                                    <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                                                        <button onClick={() => execCommand('bold')} className="p-1.5 hover:bg-gray-200 rounded font-bold w-8 text-xs">B</button>
+                                                        <button onClick={() => execCommand('underline')} className="p-1.5 hover:bg-gray-200 rounded underline w-8 text-xs">U</button>
+                                                        <button onClick={() => execCommand('insertUnorderedList')} className="p-1.5 hover:bg-gray-200 rounded text-xs">Bullets</button>
+                                                    </div>
+                                                    <div 
+                                                        ref={editorRef} 
+                                                        contentEditable 
+                                                        className="rich-editor w-full bg-gray-50 p-4 rounded-xl text-sm font-medium outline-none overflow-y-auto" 
+                                                        dangerouslySetInnerHTML={{ __html: tempNoteDetails }} 
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => handleNoteSaveEdit(note.id, tempNoteText, editorRef.current.innerHTML)} 
+                                                            className="bg-gray-900 text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button 
+                                                            onClick={handleWinCancelEdit} 
+                                                            className="bg-gray-100 text-gray-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : schedulingNoteId === note.id ? (
+                                                <div className="bg-white p-8 rounded-[32px] shadow-2xl border-pink-500 border-2 animate-pop">
+                                                    <h3 className="text-xl font-bold mb-4">{note.text}</h3>
+                                                    <div className="flex items-center gap-4">
+                                                        <InlineDatePicker 
+                                                            value={formData.startDate} 
+                                                            onChange={v => setFormData({...formData, startDate: v})} 
+                                                        />
+                                                        <button 
+                                                            onClick={() => handleNoteScheduleConfirm(note, formData.startDate)} 
+                                                            className="bg-gray-900 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase ml-auto"
+                                                        >
+                                                            Confirm
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div 
+                                                    onDoubleClick={() => handleNoteStartEdit(note.id, note.text, note.details || "")} 
+                                                    className="bg-gray-50/50 p-6 rounded-3xl hover:bg-white border border-transparent hover:border-gray-100 flex justify-between items-center cursor-pointer group transition-all"
+                                                >
+                                                    <div className="min-w-0">
+                                                        <span className="font-bold text-gray-700 block truncate">{note.text}</span>
+                                                        {note.details && (
+                                                            <div 
+                                                                className="text-[10px] text-gray-400 mt-1 italic line-clamp-1 opacity-60" 
+                                                                dangerouslySetInnerHTML={{ __html: note.details }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                                        <button 
+                                                            onClick={e => { 
+                                                                e.stopPropagation(); 
+                                                                handleNoteDelete(note.id);
+                                                            }} 
+                                                            className="p-2 text-gray-300 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                            </svg>
+                                                        </button>
+                                                        <button 
+                                                            onClick={e => { 
+                                                                e.stopPropagation(); 
+                                                                handleNoteStartSchedule(note.id, note.text, note.details || "");
+                                                            }} 
+                                                            className="bg-pink-50 text-pink-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase"
+                                                        >
+                                                            Schedule
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="lg:col-span-4 flex flex-col gap-4">
+                            <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-4">
+                                <div className="flex justify-between items-center mb-3">
+                                    <h4 className="text-[9px] font-black uppercase text-gray-400">
+                                        {navDate.toLocaleString('default', { month: 'short', year: 'numeric' })}
+                                    </h4>
+                                    <div className="flex gap-1">
+                                        <button 
+                                            onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() - 1, 1))} 
+                                            className="p-1 text-gray-300"
+                                        >
+                                            â†
+                                        </button>
+                                        <button 
+                                            onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() + 1, 1))} 
+                                            className="p-1 text-gray-300"
+                                        >
+                                            â†’
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className="day-grid gap-1">
+                                    {["S","M","T","W","T","F","S"].map(d => 
+                                        <div key={d} className="text-center text-[7px] font-black text-gray-200 mb-1">{d}</div>
+                                    )}
+                                    {calendarDays}
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex-grow flex flex-col overflow-hidden min-h-[400px]">
+                                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
+                                    <h3 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Daily Agenda</h3>
+                                    <span className="text-[8px] font-black text-gray-400">{currentKey}</span>
+                                </div>
+                                <div className="p-4 space-y-2 flex-grow overflow-y-auto custom-scroll">
+                                    {dailyAgenda.length === 0 && (
+                                        <p className="text-[9px] text-gray-300 text-center italic py-10 uppercase tracking-widest">Free Day</p>
+                                    )}
+                                    {dailyAgenda.map(r => (
+                                        <div key={r.id}>
+                                            {editingNoteId === r.id ? (
+                                                <div className={`p-4 rounded-2xl border-2 shadow-xl animate-pop space-y-3 bg-white ${r.type === 'win' ? 'border-blue-500' : 'border-pink-500'}`}>
+                                                    <input 
+                                                        autoFocus 
+                                                        className="text-[11px] font-black uppercase text-gray-900 outline-none w-full bg-gray-50 p-2 rounded-lg" 
+                                                        value={tempNoteText} 
+                                                        onChange={e => setTempNoteText(e.target.value)} 
+                                                    />
+                                                    <div className="flex gap-1 p-1 bg-gray-50 rounded-lg border border-gray-100">
+                                                        <button onClick={() => execCommand('bold')} className="p-1 hover:bg-gray-200 rounded font-bold w-6 text-[10px]">B</button>
+                                                        <button onClick={() => execCommand('underline')} className="p-1 hover:bg-gray-200 rounded underline w-6 text-[10px]">U</button>
+                                                    </div>
+                                                    <div 
+                                                        ref={editorRef} 
+                                                        contentEditable 
+                                                        className="rich-editor w-full bg-gray-50 p-3 rounded-lg text-[10px] font-medium min-h-[80px] outline-none overflow-y-auto" 
+                                                        dangerouslySetInnerHTML={{ __html: tempNoteDetails }} 
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <button 
+                                                            onClick={() => handleAgendaSaveEdit(r.id, tempNoteText, editorRef.current.innerHTML)} 
+                                                            className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button 
+                                                            onClick={handleWinCancelEdit} 
+                                                            className="bg-gray-100 text-gray-400 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div 
+                                                    onDoubleClick={() => handleAgendaStartEdit(r.id, r.text, r.notes || "")} 
+                                                    className={`p-3 rounded-xl border-l-4 cursor-pointer transition-all hover:brightness-95 ${
+                                                        r.type === 'win' ? 'bg-blue-50/50 border-blue-500' : 'bg-pink-50/50 border-pink-500'
+                                                    }`}
+                                                >
+                                                    <div className="flex justify-between items-start text-black">
+                                                        <p className={`text-[10px] font-black uppercase mb-1 ${r.type === 'win' ? 'text-blue-800' : 'text-gray-800'}`}>
+                                                            {r.text}
+                                                        </p>
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleAgendaDelete(r.id);
+                                                            }}
+                                                            className="text-gray-300 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    <div 
+                                                        className="text-[9px] text-gray-400 italic line-clamp-2" 
+                                                        dangerouslySetInnerHTML={{ __html: r.notes }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            );
         }
 
-        function addNoteToTask() {
-            const note = notes.find(n => n.id === currentNoteId);
-            if (!note) return;
-
-            // Save detailed notes first
-            const editor = document.getElementById('noteDetailsEditor');
-            note.detailedNotes = editor.innerHTML;
-            saveToFirebase('notes', notes);
-
-            // Create a new task with both the original note and detailed notes
-            tasks.push({
-                id: Date.now(),
-                text: note.text.substring(0, 100) + (note.text.length > 100 ? '...' : ''),
-                completed: false,
-                notes: (note.text.length > 100 ? note.text : '') + (note.detailedNotes || ''), // Combine original text (if truncated) and detailed notes
-                createdAt: new Date().toISOString()
-            });
-            
-            saveToFirebase('tasks', tasks);
-            renderTasks();
-
-            // Close modal
-            closeNoteDetail();
-            
-            alert('Note added to tasks!');
-        }
-
-        function deleteNoteFromModal() {
-            if (currentNoteId && confirm('Are you sure you want to delete this note?')) {
-                deleteNote(currentNoteId);
-                closeNoteDetail();
-            }
-        }
-
-        function clearAllData() {
-            const confirmText = 'Are you sure you want to clear all tasks, notes, and events? This action cannot be undone.';
-            
-            if (confirm(confirmText)) {
-                // Clear all data from localStorage
-                localStorage.removeItem('tasks');
-                localStorage.removeItem('notes');
-                localStorage.removeItem('events');
-                
-                // Reset in-memory state
-                tasks = [];
-                notes = [];
-                events = [];
-                selectedDates = [];
-                dragStartDate = null;
-                isDragging = false;
-                hasDragged = false;
-                
-                // Re-render all components
-                renderTasks();
-                renderNotes();
-                renderCalendar();
-                renderEvents();
-                
-                // Hide agenda if shown
-                document.getElementById('agendaView').classList.remove('active');
-                document.getElementById('eventsList').classList.remove('hidden');
-                
-                // Close the settings modal
-                closeSettingsModal();
-                
-                alert('All data has been cleared successfully.');
-            }
-        }
-
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CalendarApp />);
     </script>
 </body>
 </html>
