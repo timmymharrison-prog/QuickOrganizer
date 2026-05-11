@@ -83,12 +83,12 @@
                 db = firebase.firestore();
                 auth = firebase.auth();
                 isFirebaseConfigured = true;
-                console.log("âœ… Firebase initialized successfully");
+                console.log("✅ Firebase initialized successfully");
             } else {
-                console.warn("âš ï¸ Firebase not configured. Using localStorage only. Update firebaseConfig to enable cloud sync.");
+                console.warn("⚠️ Firebase not configured. Using localStorage only. Update firebaseConfig to enable cloud sync.");
             }
         } catch (error) {
-            console.error("âŒ Firebase initialization error:", error);
+            console.error("❌ Firebase initialization error:", error);
         }
 
         const formatKey = (d) => {
@@ -150,7 +150,7 @@
                                     onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))} 
                                     className="p-1 hover:bg-gray-100 rounded-lg"
                                 >
-                                    â†
+                                    ←
                                 </button>
                                 <span className="text-[9px] font-black uppercase">
                                     {viewDate.toLocaleString('default', { month: 'short' })} {viewDate.getFullYear()}
@@ -160,7 +160,7 @@
                                     onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))} 
                                     className="p-1 hover:bg-gray-100 rounded-lg"
                                 >
-                                    â†’
+                                    →
                                 </button>
                             </div>
                             <div className="day-grid gap-1">
@@ -308,9 +308,24 @@
             const [syncStatus, setSyncStatus] = useState('disconnected');
             const [selectedDate, setSelectedDate] = useState(new Date());
             const [navDate, setNavDate] = useState(new Date());
-            const [reminders, setReminders] = useState({});
-            const [scratchNotes, setScratchNotes] = useState([]);
-            const [quickWins, setQuickWins] = useState([]);
+            const [reminders, setReminders] = useState(() => {
+                if (!isFirebaseConfigured) {
+                    return JSON.parse(localStorage.getItem('cal-rem')) || {};
+                }
+                return {};
+            });
+            const [scratchNotes, setScratchNotes] = useState(() => {
+                if (!isFirebaseConfigured) {
+                    return JSON.parse(localStorage.getItem('cal-scratch')) || [];
+                }
+                return [];
+            });
+            const [quickWins, setQuickWins] = useState(() => {
+                if (!isFirebaseConfigured) {
+                    return JSON.parse(localStorage.getItem('cal-wins')) || [];
+                }
+                return [];
+            });
             const [showCompleted, setShowCompleted] = useState(true);
             const [isCreatingEvent, setIsCreatingEvent] = useState(false);
             
@@ -327,24 +342,17 @@
 
             // Firebase Authentication
             useEffect(() => {
-                if (!isFirebaseConfigured) {
-                    // Load from localStorage if Firebase not configured
-                    setReminders(JSON.parse(localStorage.getItem('cal-rem')) || {});
-                    setScratchNotes(JSON.parse(localStorage.getItem('cal-scratch')) || []);
-                    setQuickWins(JSON.parse(localStorage.getItem('cal-wins')) || []);
-                    return;
-                }
-
+                if (!isFirebaseConfigured) return;
                 const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
                     if (firebaseUser) {
                         setUser(firebaseUser);
                         setSyncStatus('connected');
-                        console.log("ðŸ‘¤ User signed in:", firebaseUser.email);
+                        console.log("👤 User signed in:", firebaseUser.email);
                     } else {
                         // Anonymous sign-in for seamless experience
                         auth.signInAnonymously()
                             .then(() => {
-                                console.log("ðŸ‘¤ Anonymous user created");
+                                console.log("👤 Anonymous user created");
                             })
                             .catch((error) => {
                                 console.error("Auth error:", error);
@@ -365,11 +373,13 @@
                 // Subscribe to reminders
                 const remindersUnsub = db.collection('users').doc(user.uid).collection('reminders')
                     .onSnapshot((snapshot) => {
-                        const data = {};
-                        snapshot.forEach(doc => {
-                            data[doc.id] = doc.data().events || [];
-                        });
-                        setReminders(data);
+                        if (!snapshot.empty) {
+                            const data = {};
+                            snapshot.forEach(doc => {
+                                data[doc.id] = doc.data().events || [];
+                            });
+                            setReminders(data);
+                        }
                         setSyncStatus('connected');
                     }, (error) => {
                         console.error("Reminders sync error:", error);
@@ -380,11 +390,13 @@
                 const scratchUnsub = db.collection('users').doc(user.uid).collection('scratchNotes')
                     .orderBy('createdAt', 'desc')
                     .onSnapshot((snapshot) => {
-                        const notes = [];
-                        snapshot.forEach(doc => {
-                            notes.push({ id: doc.id, ...doc.data() });
-                        });
-                        setScratchNotes(notes);
+                        if (!snapshot.empty) {
+                            const notes = [];
+                            snapshot.forEach(doc => {
+                                notes.push({ id: doc.id, ...doc.data() });
+                            });
+                            setScratchNotes(notes);
+                        }
                     }, (error) => {
                         console.error("Scratch notes sync error:", error);
                     });
@@ -393,11 +405,13 @@
                 const winsUnsub = db.collection('users').doc(user.uid).collection('quickWins')
                     .orderBy('createdAt', 'desc')
                     .onSnapshot((snapshot) => {
-                        const wins = [];
-                        snapshot.forEach(doc => {
-                            wins.push({ id: doc.id, ...doc.data() });
-                        });
-                        setQuickWins(wins);
+                        if (!snapshot.empty) {
+                            const wins = [];
+                            snapshot.forEach(doc => {
+                                wins.push({ id: doc.id, ...doc.data() });
+                            });
+                            setQuickWins(wins);
+                        }
                     }, (error) => {
                         console.error("Quick wins sync error:", error);
                     });
@@ -662,7 +676,7 @@
                     createdAt: new Date().toISOString()
                 };
                 
-                setScratchNotes(prev => [newWin, ...prev]);
+                setQuickWins(prev => [newWin, ...prev]);
                 
                 if (user && db) {
                     saveToFirestore('quickWins', newWin.id, newWin);
@@ -770,7 +784,7 @@
                                             onClick={() => setIsCreatingEvent(false)} 
                                             className="bg-gray-100 text-gray-400 text-[8px] font-black uppercase px-2 py-1.5 rounded-lg"
                                         >
-                                            Ã—
+                                            ×
                                         </button>
                                     </div>
                                 </div>
@@ -1005,13 +1019,13 @@
                                             onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() - 1, 1))} 
                                             className="p-1 text-gray-300"
                                         >
-                                            â†
+                                            ←
                                         </button>
                                         <button 
                                             onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() + 1, 1))} 
                                             className="p-1 text-gray-300"
                                         >
-                                            â†’
+                                            →
                                         </button>
                                     </div>
                                 </div>
