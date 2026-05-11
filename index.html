@@ -2,26 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Planner</title>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #fff5f0;
+            /* Premium neutrals - clean and sophisticated */
+            --bg-primary: #fafafa;
             --bg-secondary: #ffffff;
-            --bg-tertiary: #ffe8dd;
-            --text-primary: #2d1810;
-            --text-secondary: #5a4a42;
-            --text-tertiary: #9a8a82;
+            --bg-tertiary: #f5f5f7;
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            
+            /* Refined coral accent */
             --accent-primary: #ff6b35;
-            --accent-secondary: #ff8c61;
-            --accent-light: #fff0e8;
-            --border-color: #ffd4c4;
-            --shadow-sm: 0 1px 3px rgba(255, 107, 53, 0.08);
-            --shadow-md: 0 4px 12px rgba(255, 107, 53, 0.12);
-            --shadow-lg: 0 8px 24px rgba(255, 107, 53, 0.16);
-            --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #ffd166 100%);
+            --accent-secondary: #ff8a5b;
+            --accent-light: #fff3f0;
+            
+            /* Premium borders */
+            --border-color: #e5e7eb;
+            
+            /* Elevated shadows with subtle depth */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+            
+            /* Premium gradients */
+            --gradient-sunset: linear-gradient(135deg, #ff6b35 0%, #ff8a5b 100%);
+            --gradient-ocean: linear-gradient(135deg, #0ea5e9 0%, #38bdf8 100%);
+            --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
         }
 
         * {
@@ -31,11 +41,14 @@
         }
 
         body {
-            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #fafafa 0%, #f5f5f7 100%);
             color: var(--text-primary);
             line-height: 1.6;
             overflow-x: hidden;
+            font-size: 15px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .app-container {
@@ -50,7 +63,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Hamburger Menu */
+        /* Hamburger Menu - Premium Floating Action */
         .hamburger-menu {
             position: fixed;
             top: 1.5rem;
@@ -58,24 +71,25 @@
             z-index: 1001;
             background: var(--bg-secondary);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 0.75rem;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-md);
             display: flex;
             flex-direction: column;
             gap: 0.35rem;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             justify-content: center;
             align-items: center;
         }
 
         .hamburger-menu:hover {
-            background: var(--accent-light);
+            background: var(--bg-tertiary);
             border-color: var(--accent-primary);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
         }
 
         .hamburger-bar {
@@ -327,427 +341,6 @@
             color: #c00;
         }
 
-        /* Meetings Panel Modal */
-        .meetings-panel-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 22, 20, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .meetings-panel-modal.active {
-            display: flex;
-        }
-
-        .meetings-panel-content {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 900px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
-        }
-
-        .meetings-panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-
-        .meetings-panel-title {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            background: var(--gradient-ocean);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .meetings-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .meeting-card {
-            padding: 1.5rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            border-left: 4px solid #8b5cf6;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .meeting-card:hover {
-            background: #f3e8ff;
-            transform: translateX(4px);
-        }
-
-        .meeting-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 0.75rem;
-        }
-
-        .meeting-title {
-            font-weight: 700;
-            font-size: 1.1rem;
-            color: var(--text-primary);
-        }
-
-        .meeting-date-time {
-            font-size: 0.9rem;
-            color: #8b5cf6;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .meeting-task-count {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .meeting-actions-quick {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .meeting-action-icon {
-            background: none;
-            border: none;
-            color: var(--text-tertiary);
-            cursor: pointer;
-            font-size: 1.2rem;
-            padding: 0.25rem 0.5rem;
-            transition: all 0.2s ease;
-        }
-
-        .meeting-action-icon:hover {
-            color: #8b5cf6;
-            transform: scale(1.1);
-        }
-
-        /* Meeting Detail Modal */
-        .meeting-detail-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 22, 20, 0.6);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1001;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .meeting-detail-modal.active {
-            display: flex;
-        }
-
-        .meeting-detail-content {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
-            max-width: 700px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: var(--shadow-lg);
-            animation: slideUp 0.3s ease;
-        }
-
-        .meeting-detail-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
-        }
-
-        .meeting-detail-title {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .meeting-info-section {
-            margin-bottom: 1.5rem;
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-        }
-
-        .meeting-info-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-
-        .meeting-info-label {
-            font-weight: 600;
-            color: var(--text-secondary);
-        }
-
-        .meeting-info-value {
-            color: var(--text-primary);
-        }
-
-        .reminder-selector {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-top: 0.75rem;
-        }
-
-        .reminder-chip {
-            padding: 0.4rem 0.75rem;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .reminder-chip:hover {
-            border-color: #8b5cf6;
-        }
-
-        .reminder-chip.selected {
-            background: #8b5cf6;
-            color: white;
-            border-color: #8b5cf6;
-        }
-
-        .meeting-tasks-section {
-            margin-bottom: 1.5rem;
-        }
-
-        .meeting-task-input-area {
-            margin-bottom: 1rem;
-        }
-
-        .meeting-task-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .meeting-task-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            transition: all 0.2s ease;
-        }
-
-        .meeting-task-item:hover {
-            background: #f3e8ff;
-        }
-
-        /* Reminder Notification Modal */
-        .reminder-notification-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(26, 22, 20, 0.8);
-            backdrop-filter: blur(8px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .reminder-notification-modal.active {
-            display: flex;
-        }
-
-        .reminder-notification-content {
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2.5rem;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
-            animation: pulse 0.5s ease;
-            border: 3px solid #8b5cf6;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .reminder-notification-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .reminder-notification-title {
-            font-family: 'Crimson Pro', serif;
-            font-size: 2rem;
-            font-weight: 700;
-            color: #8b5cf6;
-            margin-bottom: 0.5rem;
-        }
-
-        .reminder-notification-subtitle {
-            font-size: 1.1rem;
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .reminder-notification-body {
-            margin-bottom: 1.5rem;
-        }
-
-        .reminder-notification-time {
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-            text-align: center;
-        }
-
-        .reminder-tasks-preview {
-            background: var(--bg-tertiary);
-            padding: 1rem;
-            border-radius: 4px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-
-        .reminder-task-preview-item {
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 0.9rem;
-        }
-
-        .reminder-task-preview-item:last-child {
-            border-bottom: none;
-        }
-
-        .reminder-notification-actions {
-            display: flex;
-            gap: 0.75rem;
-        }
-
-        .reminder-action-btn {
-            flex: 1;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.95rem;
-        }
-
-        .btn-open-meeting {
-            background: #8b5cf6;
-            color: white;
-        }
-
-        .btn-open-meeting:hover {
-            background: #7c3aed;
-        }
-
-        .btn-dismiss-reminder {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-dismiss-reminder:hover {
-            background: var(--bg-secondary);
-        }
-
-        /* Recurring meeting styles */
-        .recurrence-pattern-option {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .recurrence-pattern-option:hover {
-            border-color: #8b5cf6;
-            background: #f3e8ff;
-        }
-
-        .recurrence-pattern-option input[type="radio"] {
-            margin-right: 0.5rem;
-            accent-color: #8b5cf6;
-            cursor: pointer;
-        }
-
-        .recurrence-pattern-option span {
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
-
-        .day-checkbox-label {
-            display: flex;
-            align-items: center;
-            padding: 0.5rem;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .day-checkbox-label:hover {
-            border-color: #8b5cf6;
-            background: #f3e8ff;
-        }
-
-        .day-checkbox-label input[type="checkbox"] {
-            margin-right: 0.5rem;
-            accent-color: #8b5cf6;
-            cursor: pointer;
-        }
-
-        .day-checkbox-label span {
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            cursor: pointer;
-        }
-
         .header {
             margin-bottom: 3rem;
             animation: slideDown 0.7s ease-out;
@@ -759,14 +352,14 @@
         }
 
         .header h1 {
-            font-family: 'Crimson Pro', serif;
+            font-family: 'Playfair Display', Georgia, serif;
             font-size: 3.5rem;
             font-weight: 700;
             background: var(--gradient-sunset);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.03em;
             margin-bottom: 0.5rem;
         }
 
@@ -790,11 +383,12 @@
 
         .panel {
             background: var(--bg-secondary);
-            border-radius: 8px;
-            padding: 2rem;
+            border-radius: 16px;
+            padding: 0;
             box-shadow: var(--shadow-md);
             border: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
         }
 
         .panel:hover {
@@ -806,35 +400,41 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid var(--bg-tertiary);
+            padding: 1.5rem 2rem;
+            background: linear-gradient(to bottom, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-bottom: 1px solid #f3f4f6;
         }
 
         .panel-header h2 {
-            font-family: 'Crimson Pro', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 700;
             color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        /* Panel content padding */
+        .task-list, .notes-list, .calendar, .events-list, .task-input-area, .notes-area {
+            padding: 1.5rem 2rem 2rem 2rem;
         }
 
         .add-btn {
-            background: var(--accent-primary);
+            background: var(--gradient-sunset);
             color: white;
             border: none;
-            padding: 0.5rem 1.25rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(255, 107, 53, 0.2);
+            letter-spacing: 0.01em;
         }
 
         .add-btn:hover {
-            background: var(--accent-secondary);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
         .add-btn:active {
@@ -1099,19 +699,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 4px;
-            font-size: 0.9rem;
+            border-radius: 12px;
+            font-size: 0.9375rem;
+            font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
+            border: 1px solid transparent;
+            color: var(--text-primary);
         }
 
         .calendar-day:hover {
             background: var(--accent-light);
-            border-color: var(--accent-secondary);
+            color: var(--accent-primary);
             transform: scale(1.05);
+            box-shadow: var(--shadow-sm);
         }
 
         .calendar-day.other-month {
@@ -1124,6 +727,7 @@
             color: white;
             font-weight: 700;
             border: none;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
 
         .calendar-day.has-event::after {
@@ -1138,31 +742,6 @@
 
         .calendar-day.today.has-event::after {
             background: white;
-        }
-
-        .calendar-day.has-meeting::before {
-            content: '';
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 6px;
-            height: 6px;
-            background: #8b5cf6;
-            border-radius: 50%;
-        }
-
-        .calendar-day.today.has-meeting::before {
-            background: white;
-        }
-
-        .calendar-day.has-event.has-meeting::after {
-            bottom: 4px;
-            left: 4px;
-        }
-
-        .calendar-day.has-event.has-meeting::before {
-            top: 4px;
-            right: 4px;
         }
 
         .calendar-day.selected {
@@ -1833,6 +1412,34 @@
             }
         }
     </style>
+    
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDNRxK0VNsw0F8kM1rHkhgjXkpTi8P8sMU",
+            authDomain: "quick-organizer.firebaseapp.com",
+            projectId: "quick-organizer",
+            storageBucket: "quick-organizer.firebasestorage.app",
+            messagingSenderId: "744637037865",
+            appId: "1:744637037865:web:12e7869cd82d8cb6d34b38"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Make db available globally
+        window.db = db;
+        window.firestoreModules = { collection, doc, setDoc, getDoc, getDocs, deleteDoc, onSnapshot };
+        window.firebaseReady = true;
+
+        console.log('ðŸ”¥ Firebase connected successfully!');
+    </script>
 </head>
 <body>
     <!-- Hamburger Menu -->
@@ -1844,7 +1451,6 @@
 
     <!-- Settings Dropdown -->
     <div class="settings-dropdown" id="settingsDropdown">
-        <div class="settings-menu-item" onclick="openMeetingsPanel()">Meetings</div>
         <div class="settings-menu-item" onclick="openSettingsModal()">Settings</div>
     </div>
 
@@ -1852,13 +1458,14 @@
         <header class="header">
             <h1>Daily Planner</h1>
             <div class="date-display" id="currentDate"></div>
+            <div id="syncStatus" style="position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 600; opacity: 0; transition: opacity 0.3s ease; z-index: 1000;"></div>
         </header>
 
         <div class="main-grid">
-            <!-- Quick Wins Panel -->
+            <!-- Tasks Panel -->
             <div class="panel">
                 <div class="panel-header">
-                    <h2>Quick Wins</h2>
+                    <h2>Tasks</h2>
                     <button class="add-btn" onclick="toggleTaskInput()">+ Add</button>
                 </div>
                 
@@ -1875,9 +1482,10 @@
             <div class="panel">
                 <div class="panel-header">
                     <h2>Quick Notes</h2>
+                    <button class="add-btn" onclick="toggleNotesInput()">+ Add</button>
                 </div>
 
-                <div class="notes-area active" id="notesArea">
+                <div class="notes-area" id="notesArea">
                     <textarea class="note-input" id="noteInput" placeholder="Jot down your thoughts..."></textarea>
                     <button class="save-note-btn" onclick="saveNote()">Save Note</button>
                 </div>
@@ -1922,8 +1530,8 @@
                 <div class="calendar-nav">
                     <div class="calendar-month" id="calendarMonth"></div>
                     <div class="nav-btns">
-                        <button class="nav-btn" onclick="previousMonth()">&lsaquo;</button>
-                        <button class="nav-btn" onclick="nextMonth()">&rsaquo;</button>
+                        <button class="nav-btn" onclick="previousMonth()">â€¹</button>
+                        <button class="nav-btn" onclick="nextMonth()">â€º</button>
                     </div>
                 </div>
 
@@ -1961,7 +1569,7 @@
                     </div>
                     <div class="day-view-header-actions">
                         <button class="add-btn" onclick="toggleDayEventInput()" id="dayAddEventBtn">+ Add Event</button>
-                        <button class="close-modal-btn" onclick="closeDayView()">&times;</button>
+                        <button class="close-modal-btn" onclick="closeDayView()">Ã—</button>
                     </div>
                 </div>
                 
@@ -2000,7 +1608,7 @@
             <div class="task-detail-content" onclick="event.stopPropagation()">
                 <div class="task-detail-header">
                     <div class="task-detail-title" id="taskDetailTitle"></div>
-                    <button class="close-modal-btn" onclick="closeTaskDetail()">&times;</button>
+                    <button class="close-modal-btn" onclick="closeTaskDetail()">Ã—</button>
                 </div>
 
                 <div class="notes-section">
@@ -2032,22 +1640,6 @@
                          contenteditable="true" 
                          data-placeholder="Add detailed notes about this task...">
                     </div>
-                </div>
-
-                <!-- Reminder Section -->
-                <div class="notes-section">
-                    <label class="notes-section-label">Set Reminder</label>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
-                        <div>
-                            <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Date</label>
-                            <input type="date" id="taskReminderDate" class="task-input">
-                        </div>
-                        <div>
-                            <label style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Time</label>
-                            <input type="time" id="taskReminderTime" class="task-input" step="300">
-                        </div>
-                    </div>
-                    <button class="save-note-btn" onclick="saveTaskReminder()">Save Reminder</button>
                 </div>
 
                 <!-- Event Scheduling Section -->
@@ -2084,7 +1676,7 @@
             <div class="settings-modal-content" onclick="event.stopPropagation()">
                 <div class="settings-modal-header">
                     <div class="settings-modal-title">Settings</div>
-                    <button class="close-modal-btn" onclick="closeSettingsModal()">&times;</button>
+                    <button class="close-modal-btn" onclick="closeSettingsModal()">Ã—</button>
                 </div>
 
                 <div class="settings-section">
@@ -2102,7 +1694,7 @@
             <div class="note-detail-content" onclick="event.stopPropagation()">
                 <div class="note-detail-header">
                     <div class="note-detail-timestamp" id="noteDetailTimestamp"></div>
-                    <button class="close-modal-btn" onclick="closeNoteDetail()">&times;</button>
+                    <button class="close-modal-btn" onclick="closeNoteDetail()">Ã—</button>
                 </div>
 
                 <div class="note-detail-text" id="noteDetailText"></div>
@@ -2167,213 +1759,181 @@
                 </div>
             </div>
         </div>
-
-        <!-- Meetings Panel Modal -->
-        <div class="meetings-panel-modal" id="meetingsPanelModal" onclick="closeMeetingsPanel(event)">
-            <div class="meetings-panel-content" onclick="event.stopPropagation()">
-                <div class="meetings-panel-header">
-                    <div class="meetings-panel-title">Meetings</div>
-                    <div style="display: flex; gap: 0.5rem; align-items: center;">
-                        <button class="add-btn" onclick="openCreateMeetingForm()">+ New Meeting</button>
-                        <button class="close-modal-btn" onclick="closeMeetingsPanel()">&times;</button>
-                    </div>
-                </div>
-
-                <!-- Create Meeting Form -->
-                <div id="createMeetingForm" style="display: none; margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-tertiary); border-radius: 4px;">
-                    <h3 style="margin-bottom: 1rem; color: var(--text-primary);">Create New Meeting</h3>
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        <input type="text" id="newMeetingName" placeholder="Meeting name" class="task-input">
-                        <input type="date" id="newMeetingDate" class="task-input">
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
-                            <div>
-                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">Start time</label>
-                                <input type="time" id="newMeetingStartTime" class="task-input" step="300">
-                            </div>
-                            <div>
-                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.25rem; display: block;">End time</label>
-                                <input type="time" id="newMeetingEndTime" class="task-input" step="300">
-                            </div>
-                        </div>
-
-                        <!-- Recurring checkbox -->
-                        <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0;">
-                            <input type="checkbox" id="isRecurringMeeting" onchange="toggleRecurringOptions()" style="cursor: pointer; accent-color: #8b5cf6;">
-                            <label for="isRecurringMeeting" style="cursor: pointer; color: var(--text-primary); font-weight: 500;">Recurring meeting</label>
-                        </div>
-
-                        <!-- Recurring options (hidden by default) -->
-                        <div id="recurringOptions" style="display: none; padding: 1rem; background: var(--bg-secondary); border-radius: 4px; border: 1px solid var(--border-color);">
-                            <div style="margin-bottom: 0.75rem;">
-                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; font-weight: 600;">Recurrence pattern</label>
-                                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem;">
-                                    <label class="recurrence-pattern-option">
-                                        <input type="radio" name="recurrencePattern" value="daily" onchange="updateRecurrencePattern('daily')">
-                                        <span>Daily</span>
-                                    </label>
-                                    <label class="recurrence-pattern-option">
-                                        <input type="radio" name="recurrencePattern" value="weekly" checked onchange="updateRecurrencePattern('weekly')">
-                                        <span>Weekly</span>
-                                    </label>
-                                    <label class="recurrence-pattern-option">
-                                        <input type="radio" name="recurrencePattern" value="monthly" onchange="updateRecurrencePattern('monthly')">
-                                        <span>Monthly</span>
-                                    </label>
-                                    <label class="recurrence-pattern-option">
-                                        <input type="radio" name="recurrencePattern" value="yearly" onchange="updateRecurrencePattern('yearly')">
-                                        <span>Yearly</span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <!-- Recur every section -->
-                            <div style="margin-bottom: 0.75rem;">
-                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; font-weight: 600;">Recur every</label>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <input type="number" id="recurrenceInterval" value="1" min="1" max="99" class="task-input" style="width: 80px; text-align: center;">
-                                    <span id="recurrenceIntervalLabel" style="color: var(--text-primary);">week(s) on:</span>
-                                </div>
-                            </div>
-
-                            <!-- Day selection (for weekly) -->
-                            <div id="weeklyDaySelection" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.75rem;">
-                                <label class="day-checkbox-label">
-                                    <input type="checkbox" value="0" class="recurring-day-checkbox">
-                                    <span>Sunday</span>
-                                </label>
-                                <label class="day-checkbox-label">
-                                    <input type="checkbox" value="1" class="recurring-day-checkbox">
-                                    <span>Monday</span>
-                                </label>
-                                <label class="day-checkbox-label">
-                                    <input type="checkbox" value="2" class="recurring-day-checkbox">
-                                    <span>Tuesday</span>
-                                </label>
-                                <label class="day-checkbox-label">
-                                    <input type="checkbox" value="3" class="recurring-day-checkbox">
-                                    <span>Wednesday</span>
-                                </label>
-                                <label class="day-checkbox-label">
-                                    <input type="checkbox" value="4" class="recurring-day-checkbox">
-                                    <span>Thursday</span>
-                                </label>
-                                <label class="day-checkbox-label">
-                                    <input type="checkbox" value="5" class="recurring-day-checkbox">
-                                    <span>Friday</span>
-                                </label>
-                                <label class="day-checkbox-label">
-                                    <input type="checkbox" value="6" class="recurring-day-checkbox">
-                                    <span>Saturday</span>
-                                </label>
-                            </div>
-
-                            <!-- End date for recurring -->
-                            <div>
-                                <label style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 0.5rem; display: block; font-weight: 600;">End date (optional)</label>
-                                <input type="date" id="recurrenceEndDate" class="task-input">
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button class="add-btn" style="flex: 1;" onclick="createMeeting()">Create Meeting</button>
-                            <button class="add-btn" style="flex: 1; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="cancelCreateMeeting()">Cancel</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="meetings-list" id="meetingsList">
-                    <div class="empty-state">No meetings scheduled. Create your first meeting!</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Meeting Detail Modal -->
-        <div class="meeting-detail-modal" id="meetingDetailModal" onclick="closeMeetingDetail(event)">
-            <div class="meeting-detail-content" onclick="event.stopPropagation()">
-                <div class="meeting-detail-header">
-                    <div class="meeting-detail-title" id="meetingDetailTitle"></div>
-                    <button class="close-modal-btn" onclick="closeMeetingDetail()">&times;</button>
-                </div>
-
-                <div class="meeting-info-section">
-                    <div class="meeting-info-row">
-                        <span class="meeting-info-label">Date & Time:</span>
-                        <span class="meeting-info-value" id="meetingDetailDateTime"></span>
-                    </div>
-                    <div class="meeting-info-row">
-                        <span class="meeting-info-label">Reminders:</span>
-                    </div>
-                    <div class="reminder-selector" id="reminderSelector">
-                        <div class="reminder-chip" data-time="5" onclick="toggleReminder('5')">5 min before</div>
-                        <div class="reminder-chip" data-time="30" onclick="toggleReminder('30')">30 min before</div>
-                        <div class="reminder-chip" data-time="60" onclick="toggleReminder('60')">1 hour before</div>
-                        <div class="reminder-chip" data-time="360" onclick="toggleReminder('360')">6 hours before</div>
-                        <div class="reminder-chip" data-time="720" onclick="toggleReminder('720')">12 hours before</div>
-                        <div class="reminder-chip" data-time="1440" onclick="toggleReminder('1440')">1 day before</div>
-                    </div>
-                </div>
-
-                <div class="meeting-tasks-section">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                        <h3 style="color: var(--text-primary);">Meeting Tasks</h3>
-                        <button class="add-btn" onclick="toggleMeetingTaskInput()">+ Add Task</button>
-                    </div>
-
-                    <div class="meeting-task-input-area" id="meetingTaskInputArea" style="display: none; margin-bottom: 1rem;">
-                        <input type="text" class="task-input" id="meetingTaskInput" placeholder="Task for this meeting..." onkeypress="handleMeetingTaskKeypress(event)">
-                    </div>
-
-                    <div class="meeting-task-list" id="meetingTaskList">
-                        <div class="empty-state">No tasks for this meeting yet</div>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
-                    <button class="task-action-btn btn-add-to-calendar" style="flex: 1;" onclick="saveMeetingChanges()">Save Changes</button>
-                    <button class="task-action-btn btn-delete-task" style="flex: 1;" onclick="deleteMeetingFromDetail()">Delete Meeting</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Reminder Notification Modal -->
-        <div class="reminder-notification-modal" id="reminderNotificationModal">
-            <div class="reminder-notification-content">
-                <div class="reminder-notification-header">
-                    <div class="reminder-notification-title">â° Meeting Reminder</div>
-                    <div class="reminder-notification-subtitle" id="reminderMeetingTitle"></div>
-                </div>
-
-                <div class="reminder-notification-body">
-                    <div class="reminder-notification-time" id="reminderMeetingTime"></div>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <strong style="color: var(--text-primary);">Pending Tasks:</strong>
-                    </div>
-                    <div class="reminder-tasks-preview" id="reminderTasksPreview">
-                    </div>
-                </div>
-
-                <div class="reminder-notification-actions">
-                    <button class="reminder-action-btn btn-open-meeting" onclick="openMeetingFromReminder()">Open Meeting</button>
-                    <button class="reminder-action-btn btn-dismiss-reminder" onclick="dismissReminder()">Dismiss</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
         // State management
         let currentMonth = new Date();
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
-        let notes = JSON.parse(localStorage.getItem('notes')) || [];
-        let events = JSON.parse(localStorage.getItem('events')) || [];
-        let meetings = JSON.parse(localStorage.getItem('meetings')) || [];
+        let tasks = [];
+        let notes = [];
+        let events = [];
+        let meetings = [];
         let selectedDate = null;
         let selectedDates = [];
         let isDragging = false;
         let dragStartDate = null;
         let hasDragged = false;
+
+        // Firebase Sync System
+        let firebaseInitialized = false;
+        let syncEnabled = false;
+
+        // Wait for Firebase to be ready, then load data
+        function waitForFirebase() {
+            if (window.firebaseReady) {
+                initializeFirebaseSync();
+            } else {
+                setTimeout(waitForFirebase, 100);
+            }
+        }
+
+        // Initialize Firebase sync
+        async function initializeFirebaseSync() {
+            try {
+                firebaseInitialized = true;
+                console.log('ðŸ”„ Initializing Firebase sync...');
+                
+                // Load all data from Firebase
+                await loadFromFirebase();
+                
+                // Set up real-time listeners
+                setupRealtimeListeners();
+                
+                syncEnabled = true;
+                console.log('âœ… Firebase sync enabled!');
+                
+                // Show sync indicator
+                showSyncStatus('Synced with cloud â˜ï¸');
+            } catch (error) {
+                console.error('âŒ Firebase sync failed:', error);
+                // Fallback to localStorage
+                loadFromLocalStorage();
+                showSyncStatus('Offline mode (localStorage)');
+            }
+        }
+
+        // Load data from Firebase
+        async function loadFromFirebase() {
+            const { collection, getDocs } = window.firestoreModules;
+            
+            try {
+                // Load tasks
+                const tasksSnapshot = await getDocs(collection(window.db, 'tasks'));
+                tasks = tasksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Load notes
+                const notesSnapshot = await getDocs(collection(window.db, 'notes'));
+                notes = notesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Load events
+                const eventsSnapshot = await getDocs(collection(window.db, 'events'));
+                events = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                // Load meetings
+                const meetingsSnapshot = await getDocs(collection(window.db, 'meetings'));
+                meetings = meetingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                console.log('ðŸ“¥ Data loaded from Firebase');
+            } catch (error) {
+                console.error('Error loading from Firebase:', error);
+                throw error;
+            }
+        }
+
+        // Fallback: Load from localStorage
+        function loadFromLocalStorage() {
+            tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            notes = JSON.parse(localStorage.getItem('notes')) || [];
+            events = JSON.parse(localStorage.getItem('events')) || [];
+            meetings = JSON.parse(localStorage.getItem('meetings')) || [];
+            console.log('ðŸ“¥ Data loaded from localStorage');
+        }
+
+        // Save to Firebase
+        async function saveToFirebase(collectionName, data) {
+            if (!syncEnabled) {
+                // Fallback to localStorage
+                localStorage.setItem(collectionName, JSON.stringify(data));
+                return;
+            }
+
+            const { collection, doc, setDoc } = window.firestoreModules;
+            
+            try {
+                // Save each item
+                for (const item of data) {
+                    await setDoc(doc(window.db, collectionName, String(item.id)), item);
+                }
+                
+                // Also backup to localStorage
+                localStorage.setItem(collectionName, JSON.stringify(data));
+                
+                showSyncStatus('Saved to cloud â˜ï¸');
+            } catch (error) {
+                console.error(`Error saving ${collectionName}:`, error);
+                // Fallback to localStorage
+                localStorage.setItem(collectionName, JSON.stringify(data));
+            }
+        }
+
+        // Delete from Firebase
+        async function deleteFromFirebase(collectionName, itemId) {
+            if (!syncEnabled) return;
+
+            const { collection, doc, deleteDoc } = window.firestoreModules;
+            
+            try {
+                await deleteDoc(doc(window.db, collectionName, String(itemId)));
+                showSyncStatus('Deleted from cloud â˜ï¸');
+            } catch (error) {
+                console.error(`Error deleting from ${collectionName}:`, error);
+            }
+        }
+
+        // Real-time sync listeners
+        function setupRealtimeListeners() {
+            const { collection, onSnapshot } = window.firestoreModules;
+            
+            // Listen to tasks changes
+            onSnapshot(collection(window.db, 'tasks'), (snapshot) => {
+                tasks = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTasks();
+            });
+            
+            // Listen to notes changes
+            onSnapshot(collection(window.db, 'notes'), (snapshot) => {
+                notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderNotes();
+            });
+            
+            // Listen to events changes
+            onSnapshot(collection(window.db, 'events'), (snapshot) => {
+                events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderEvents();
+                renderCalendar();
+            });
+            
+            // Listen to meetings changes
+            onSnapshot(collection(window.db, 'meetings'), (snapshot) => {
+                meetings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderCalendar();
+                renderEvents();
+            });
+            
+            console.log('ðŸ‘‚ Real-time listeners active');
+        }
+
+        // Show sync status
+        function showSyncStatus(message) {
+            const statusEl = document.getElementById('syncStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.style.opacity = '1';
+                setTimeout(() => {
+                    statusEl.style.opacity = '0';
+                }, 2000);
+            }
+        }
 
         // Initialize app
         function init() {
@@ -2382,6 +1942,9 @@
             renderTasks();
             renderNotes();
             renderEvents();
+            
+            // Start Firebase sync
+            waitForFirebase();
         }
 
         // Date display
@@ -2416,12 +1979,10 @@
                     text: text,
                     completed: false,
                     notes: '',
-                    reminderDate: null,
-                    reminderTime: null,
                     createdAt: new Date().toISOString()
                 });
                 
-                localStorage.setItem('tasks', JSON.stringify(tasks));
+                saveToFirebase('tasks', tasks);
                 input.value = '';
                 renderTasks();
                 toggleTaskInput();
@@ -2432,14 +1993,14 @@
             const task = tasks.find(t => t.id === id);
             if (task) {
                 task.completed = !task.completed;
-                localStorage.setItem('tasks', JSON.stringify(tasks));
+                saveToFirebase('tasks', tasks);
                 renderTasks();
             }
         }
 
         function deleteTask(id) {
             tasks = tasks.filter(t => t.id !== id);
-            localStorage.setItem('tasks', JSON.stringify(tasks));
+            saveToFirebase('tasks', tasks);
             renderTasks();
         }
 
@@ -2458,7 +2019,7 @@
                            onchange="toggleTask(${task.id})"
                            onclick="event.stopPropagation()">
                     <span class="task-text">${task.text}</span>
-                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">&times;</button>
+                    <button class="delete-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">Ã—</button>
                 </div>
             `).join('');
         }
@@ -2485,7 +2046,7 @@
                     createdAt: new Date().toISOString()
                 });
                 
-                localStorage.setItem('notes', JSON.stringify(notes));
+                saveToFirebase('notes', notes);
                 input.value = '';
                 renderNotes();
                 toggleNotesInput();
@@ -2494,7 +2055,7 @@
 
         function deleteNote(id) {
             notes = notes.filter(n => n.id !== id);
-            localStorage.setItem('notes', JSON.stringify(notes));
+            saveToFirebase('notes', notes);
             renderNotes();
         }
 
@@ -2514,7 +2075,7 @@
                     <div class="note-item" ondblclick="openNoteDetail(${note.id})">
                         <div class="note-header">
                             <span class="note-time">${timeStr}</span>
-                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">&times;</button>
+                            <button class="delete-btn" onclick="event.stopPropagation(); deleteNote(${note.id})">Ã—</button>
                         </div>
                         <div class="note-text">${note.text}</div>
                     </div>
@@ -2559,14 +2120,11 @@
                     const currentDate = new Date(dateStr);
                     return currentDate >= eventStart && currentDate <= eventEnd;
                 });
-
-                // Check if there's a meeting on this date
-                const hasMeeting = meetings.some(m => m.date === dateStr);
                 
                 const isSelected = selectedDates.includes(dateStr);
                 const isInRange = selectedDates.length > 1 && isDateInRange(dateStr);
                 
-                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${hasMeeting ? 'has-meeting' : ''} ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''}" 
+                html += `<div class="calendar-day ${isToday ? 'today' : ''} ${hasEvent ? 'has-event' : ''} ${isSelected ? 'selected' : ''} ${isInRange ? 'in-range' : ''}" 
                          data-date="${dateStr}"
                          ondblclick="openDayView('${dateStr}')"
                          onmousedown="startDateSelection('${dateStr}')"
@@ -2635,7 +2193,7 @@
                     return dateTimeA - dateTimeB;
                 });
                 
-                localStorage.setItem('events', JSON.stringify(events));
+                saveToFirebase('events', events);
                 toggleEventInput();
                 renderCalendar();
                 renderEvents();
@@ -2644,7 +2202,7 @@
 
         function deleteEvent(id) {
             events = events.filter(e => e.id !== id);
-            localStorage.setItem('events', JSON.stringify(events));
+            saveToFirebase('events', events);
             renderCalendar();
             renderEvents();
             renderAgenda();
@@ -3039,7 +2597,7 @@
                     <div class="event-item">
                         <div class="note-header">
                             <div class="event-date">${dateStr}</div>
-                            <button class="delete-btn" onclick="deleteEvent(${event.id})">&times;</button>
+                            <button class="delete-btn" onclick="deleteEvent(${event.id})">Ã—</button>
                         </div>
                         <div class="event-title">${event.title}</div>
                         ${timeStr ? `<div class="event-time">${timeStr}</div>` : ''}
@@ -3131,7 +2689,7 @@
                                     ${timeStr ? `<div class="day-event-time">${timeStr}</div>` : ''}
                                     ${durationStr ? `<div class="day-event-duration">${durationStr}</div>` : ''}
                                 </div>
-                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">&times;</button>
+                                <button class="delete-btn" onclick="deleteEventFromDay(${event.id})">Ã—</button>
                             </div>
                             ${event.description ? `<div class="day-event-description">${event.description}</div>` : ''}
                         </div>
@@ -3187,7 +2745,7 @@
                     return dateTimeA - dateTimeB;
                 });
                 
-                localStorage.setItem('events', JSON.stringify(events));
+                saveToFirebase('events', events);
                 
                 // Clear form
                 document.getElementById('dayEventTitle').value = '';
@@ -3272,24 +2830,18 @@
             const editor = document.getElementById('taskNotesEditor');
             editor.innerHTML = task.notes || '';
             
-            // Load reminder data
-            document.getElementById('taskReminderDate').value = task.reminderDate || '';
-            document.getElementById('taskReminderTime').value = task.reminderTime || '';
-            
             document.getElementById('taskDetailModal').classList.add('active');
         }
 
         function closeTaskDetail(event) {
             if (!event || event.target.id === 'taskDetailModal') {
-                // Save notes and reminder before closing
+                // Save notes before closing
                 if (currentTaskId) {
                     const task = tasks.find(t => t.id === currentTaskId);
                     if (task) {
                         const editor = document.getElementById('taskNotesEditor');
                         task.notes = editor.innerHTML;
-                        task.reminderDate = document.getElementById('taskReminderDate').value || null;
-                        task.reminderTime = document.getElementById('taskReminderTime').value || null;
-                        localStorage.setItem('tasks', JSON.stringify(tasks));
+                        saveToFirebase('tasks', tasks);
                     }
                 }
                 
@@ -3317,7 +2869,7 @@
             // Save notes first
             const editor = document.getElementById('taskNotesEditor');
             task.notes = editor.innerHTML;
-            localStorage.setItem('tasks', JSON.stringify(tasks));
+            saveToFirebase('tasks', tasks);
 
             // Convert notes to plain text for description
             const tempDiv = document.createElement('div');
@@ -3377,7 +2929,7 @@
             // Save notes first
             const editor = document.getElementById('taskNotesEditor');
             task.notes = editor.innerHTML;
-            localStorage.setItem('tasks', JSON.stringify(tasks));
+            saveToFirebase('tasks', tasks);
 
             // Get event details from the form
             const startDate = document.getElementById('taskEventStartDate').value;
@@ -3413,7 +2965,7 @@
                 return dateTimeA - dateTimeB;
             });
             
-            localStorage.setItem('events', JSON.stringify(events));
+            saveToFirebase('events', events);
             
             // Refresh the calendar and events
             renderCalendar();
@@ -3560,7 +3112,7 @@
                     if (note) {
                         const editor = document.getElementById('noteDetailsEditor');
                         note.detailedNotes = editor.innerHTML;
-                        localStorage.setItem('notes', JSON.stringify(notes));
+                        saveToFirebase('notes', notes);
                     }
                 }
                 
@@ -3581,7 +3133,7 @@
             // Save detailed notes first
             const editor = document.getElementById('noteDetailsEditor');
             note.detailedNotes = editor.innerHTML;
-            localStorage.setItem('notes', JSON.stringify(notes));
+            saveToFirebase('notes', notes);
 
             // Combine original note and detailed notes for description
             const tempDiv = document.createElement('div');
@@ -3610,7 +3162,7 @@
                 return dateTimeA - dateTimeB;
             });
             
-            localStorage.setItem('events', JSON.stringify(events));
+            saveToFirebase('events', events);
             
             // Refresh the calendar and events
             renderCalendar();
@@ -3653,7 +3205,7 @@
             // Save detailed notes first
             const editor = document.getElementById('noteDetailsEditor');
             note.detailedNotes = editor.innerHTML;
-            localStorage.setItem('notes', JSON.stringify(notes));
+            saveToFirebase('notes', notes);
 
             // Get event details from the form
             const startDate = document.getElementById('noteEventStartDate').value;
@@ -3697,12 +3249,12 @@
                 return dateTimeA - dateTimeB;
             });
             
-            localStorage.setItem('events', JSON.stringify(events));
+            saveToFirebase('events', events);
 
             // If user chose to move, delete the note
             if (moveNote) {
                 notes = notes.filter(n => n.id !== currentNoteId);
-                localStorage.setItem('notes', JSON.stringify(notes));
+                saveToFirebase('notes', notes);
                 renderNotes();
             }
             
@@ -3731,7 +3283,7 @@
             // Save detailed notes first
             const editor = document.getElementById('noteDetailsEditor');
             note.detailedNotes = editor.innerHTML;
-            localStorage.setItem('notes', JSON.stringify(notes));
+            saveToFirebase('notes', notes);
 
             // Create a new task with both the original note and detailed notes
             tasks.push({
@@ -3742,7 +3294,7 @@
                 createdAt: new Date().toISOString()
             });
             
-            localStorage.setItem('tasks', JSON.stringify(tasks));
+            saveToFirebase('tasks', tasks);
             renderTasks();
 
             // Close modal
@@ -3757,615 +3309,6 @@
                 closeNoteDetail();
             }
         }
-
-        function clearAllData() {
-            const confirmText = 'Are you sure you want to clear all tasks, notes, and events? This action cannot be undone.';
-            
-            if (confirm(confirmText)) {
-                // Clear all data from localStorage
-                localStorage.removeItem('tasks');
-                localStorage.removeItem('notes');
-                localStorage.removeItem('events');
-                localStorage.removeItem('meetings');
-                
-                // Reset in-memory state
-                tasks = [];
-                notes = [];
-                events = [];
-                meetings = [];
-                selectedDates = [];
-                dragStartDate = null;
-                isDragging = false;
-                hasDragged = false;
-                
-                // Re-render all components
-                renderTasks();
-                renderNotes();
-                renderCalendar();
-                renderEvents();
-                
-                // Hide agenda if shown
-                document.getElementById('agendaView').classList.remove('active');
-                document.getElementById('eventsList').classList.remove('hidden');
-                
-                // Close the settings modal
-                closeSettingsModal();
-                
-                alert('All data has been cleared successfully.');
-            }
-        }
-
-        // Meetings Management Functions
-        let currentMeetingId = null;
-        let currentReminderMeetingId = null;
-
-        function openMeetingsPanel() {
-            document.getElementById('meetingsPanelModal').classList.add('active');
-            document.getElementById('settingsDropdown').classList.remove('active');
-            renderMeetingsList();
-            checkReminders(); // Check for any pending reminders when opening
-        }
-
-        function closeMeetingsPanel(event) {
-            if (!event || event.target.id === 'meetingsPanelModal') {
-                document.getElementById('meetingsPanelModal').classList.remove('active');
-                document.getElementById('createMeetingForm').style.display = 'none';
-            }
-        }
-
-        function openCreateMeetingForm() {
-            document.getElementById('createMeetingForm').style.display = 'block';
-            document.getElementById('newMeetingDate').value = new Date().toISOString().split('T')[0];
-        }
-
-        function toggleRecurringOptions() {
-            const checkbox = document.getElementById('isRecurringMeeting');
-            const options = document.getElementById('recurringOptions');
-            options.style.display = checkbox.checked ? 'block' : 'none';
-        }
-
-        function updateRecurrencePattern(pattern) {
-            const intervalLabel = document.getElementById('recurrenceIntervalLabel');
-            const weeklyDaySelection = document.getElementById('weeklyDaySelection');
-            
-            switch(pattern) {
-                case 'daily':
-                    intervalLabel.textContent = 'day(s)';
-                    weeklyDaySelection.style.display = 'none';
-                    break;
-                case 'weekly':
-                    intervalLabel.textContent = 'week(s) on:';
-                    weeklyDaySelection.style.display = 'grid';
-                    break;
-                case 'monthly':
-                    intervalLabel.textContent = 'month(s)';
-                    weeklyDaySelection.style.display = 'none';
-                    break;
-                case 'yearly':
-                    intervalLabel.textContent = 'year(s)';
-                    weeklyDaySelection.style.display = 'none';
-                    break;
-            }
-        }
-
-        function cancelCreateMeeting() {
-            document.getElementById('createMeetingForm').style.display = 'none';
-            document.getElementById('newMeetingName').value = '';
-            document.getElementById('newMeetingDate').value = '';
-            document.getElementById('newMeetingStartTime').value = '';
-            document.getElementById('newMeetingEndTime').value = '';
-            document.getElementById('isRecurringMeeting').checked = false;
-            document.getElementById('recurringOptions').style.display = 'none';
-            document.getElementById('recurrenceInterval').value = '1';
-            document.getElementById('recurrenceEndDate').value = '';
-            document.querySelectorAll('.recurring-day-checkbox').forEach(cb => cb.checked = false);
-        }
-
-        function createMeeting() {
-            const name = document.getElementById('newMeetingName').value.trim();
-            const date = document.getElementById('newMeetingDate').value;
-            const startTime = document.getElementById('newMeetingStartTime').value;
-            const endTime = document.getElementById('newMeetingEndTime').value;
-            const isRecurring = document.getElementById('isRecurringMeeting').checked;
-
-            if (!name || !date) {
-                alert('Please provide a meeting name and date');
-                return;
-            }
-
-            const baseMeeting = {
-                id: Date.now(),
-                name: name,
-                date: date,
-                startTime: startTime,
-                endTime: endTime,
-                tasks: [],
-                reminders: [],
-                createdAt: new Date().toISOString()
-            };
-
-            if (isRecurring) {
-                // Get recurrence settings
-                const pattern = document.querySelector('input[name="recurrencePattern"]:checked').value;
-                const interval = parseInt(document.getElementById('recurrenceInterval').value);
-                const endDate = document.getElementById('recurrenceEndDate').value;
-                
-                baseMeeting.isRecurring = true;
-                baseMeeting.recurrence = {
-                    pattern: pattern,
-                    interval: interval,
-                    endDate: endDate || null
-                };
-
-                if (pattern === 'weekly') {
-                    const selectedDays = Array.from(document.querySelectorAll('.recurring-day-checkbox:checked'))
-                        .map(cb => parseInt(cb.value));
-                    
-                    if (selectedDays.length === 0) {
-                        alert('Please select at least one day for weekly recurrence');
-                        return;
-                    }
-                    baseMeeting.recurrence.daysOfWeek = selectedDays;
-                }
-
-                // Generate recurring meetings
-                const generatedMeetings = generateRecurringMeetings(baseMeeting);
-                meetings.push(...generatedMeetings);
-            } else {
-                baseMeeting.isRecurring = false;
-                meetings.push(baseMeeting);
-            }
-
-            localStorage.setItem('meetings', JSON.stringify(meetings));
-            
-            cancelCreateMeeting();
-            renderMeetingsList();
-            renderCalendar();
-            renderEvents();
-        }
-
-        function generateRecurringMeetings(baseMeeting) {
-            const generatedMeetings = [];
-            const startDate = new Date(baseMeeting.date);
-            const endDate = baseMeeting.recurrence.endDate ? new Date(baseMeeting.recurrence.endDate) : null;
-            const maxOccurrences = endDate ? 365 : 52; // Limit to 1 year if no end date, or 52 occurrences
-            
-            let currentDate = new Date(startDate);
-            let occurrenceCount = 0;
-
-            while (occurrenceCount < maxOccurrences) {
-                if (endDate && currentDate > endDate) break;
-
-                let shouldAdd = false;
-
-                switch (baseMeeting.recurrence.pattern) {
-                    case 'daily':
-                        shouldAdd = true;
-                        break;
-                    
-                    case 'weekly':
-                        const dayOfWeek = currentDate.getDay();
-                        shouldAdd = baseMeeting.recurrence.daysOfWeek.includes(dayOfWeek);
-                        break;
-                    
-                    case 'monthly':
-                        shouldAdd = currentDate.getDate() === startDate.getDate();
-                        break;
-                    
-                    case 'yearly':
-                        shouldAdd = currentDate.getMonth() === startDate.getMonth() && 
-                                    currentDate.getDate() === startDate.getDate();
-                        break;
-                }
-
-                if (shouldAdd && (occurrenceCount === 0 || currentDate >= startDate)) {
-                    generatedMeetings.push({
-                        ...baseMeeting,
-                        id: baseMeeting.id + occurrenceCount,
-                        date: currentDate.toISOString().split('T')[0],
-                        tasks: [], // Each occurrence gets its own task list
-                        reminders: [...baseMeeting.reminders],
-                        seriesId: baseMeeting.id // Link to original series
-                    });
-                    occurrenceCount++;
-                }
-
-                // Increment date based on pattern
-                switch (baseMeeting.recurrence.pattern) {
-                    case 'daily':
-                        currentDate.setDate(currentDate.getDate() + baseMeeting.recurrence.interval);
-                        break;
-                    case 'weekly':
-                        currentDate.setDate(currentDate.getDate() + 1); // Check each day
-                        break;
-                    case 'monthly':
-                        currentDate.setMonth(currentDate.getMonth() + baseMeeting.recurrence.interval);
-                        break;
-                    case 'yearly':
-                        currentDate.setFullYear(currentDate.getFullYear() + baseMeeting.recurrence.interval);
-                        break;
-                }
-            }
-
-            return generatedMeetings;
-        }
-
-        function renderMeetingsList() {
-            const container = document.getElementById('meetingsList');
-            
-            if (meetings.length === 0) {
-                container.innerHTML = '<div class="empty-state">No meetings scheduled. Create your first meeting!</div>';
-                return;
-            }
-
-            // Sort by date/time
-            const sortedMeetings = [...meetings].sort((a, b) => {
-                const dateTimeA = new Date(a.date + ' ' + (a.startTime || '00:00'));
-                const dateTimeB = new Date(b.date + ' ' + (b.startTime || '00:00'));
-                return dateTimeA - dateTimeB;
-            });
-
-            container.innerHTML = sortedMeetings.map(meeting => {
-                const date = new Date(meeting.date);
-                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                
-                let timeStr = 'All day';
-                if (meeting.startTime) {
-                    const startFormatted = new Date('2000-01-01 ' + meeting.startTime).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit' 
-                    });
-                    
-                    if (meeting.endTime) {
-                        const endFormatted = new Date('2000-01-01 ' + meeting.endTime).toLocaleTimeString('en-US', { 
-                            hour: 'numeric', 
-                            minute: '2-digit' 
-                        });
-                        timeStr = `${startFormatted} - ${endFormatted}`;
-                    } else {
-                        timeStr = startFormatted;
-                    }
-                }
-
-                const incompleteTasks = meeting.tasks.filter(t => !t.completed).length;
-                const totalTasks = meeting.tasks.length;
-                const recurringBadge = meeting.isRecurring ? '<span style="background: #8b5cf6; color: white; padding: 0.2rem 0.5rem; border-radius: 12px; font-size: 0.75rem; margin-left: 0.5rem;">Recurring</span>' : '';
-
-                return `
-                    <div class="meeting-card" onclick="openMeetingDetail(${meeting.id})">
-                        <div class="meeting-card-header">
-                            <div>
-                                <div class="meeting-title">${meeting.name}${recurringBadge}</div>
-                                <div class="meeting-date-time">${dateStr} at ${timeStr}</div>
-                                <div class="meeting-task-count">${incompleteTasks} of ${totalTasks} tasks pending</div>
-                            </div>
-                            <div class="meeting-actions-quick">
-                                <button class="meeting-action-icon" onclick="event.stopPropagation(); deleteMeeting(${meeting.id})" title="Delete">&times;</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function openMeetingDetail(meetingId) {
-            const meeting = meetings.find(m => m.id === meetingId);
-            if (!meeting) return;
-
-            currentMeetingId = meetingId;
-
-            document.getElementById('meetingDetailTitle').textContent = meeting.name;
-            
-            const date = new Date(meeting.date);
-            const dateStr = date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-            
-            let timeStr = 'All day';
-            if (meeting.startTime) {
-                const startFormatted = new Date('2000-01-01 ' + meeting.startTime).toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit' 
-                });
-                
-                if (meeting.endTime) {
-                    const endFormatted = new Date('2000-01-01 ' + meeting.endTime).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit' 
-                    });
-                    timeStr = `${startFormatted} - ${endFormatted}`;
-                } else {
-                    timeStr = startFormatted;
-                }
-            }
-            
-            document.getElementById('meetingDetailDateTime').textContent = `${dateStr} at ${timeStr}`;
-
-            // Update reminder chips
-            document.querySelectorAll('.reminder-chip').forEach(chip => {
-                const time = chip.getAttribute('data-time');
-                if (meeting.reminders.includes(parseInt(time))) {
-                    chip.classList.add('selected');
-                } else {
-                    chip.classList.remove('selected');
-                }
-            });
-
-            renderMeetingTasks();
-            
-            document.getElementById('meetingDetailModal').classList.add('active');
-        }
-
-        function closeMeetingDetail(event) {
-            if (!event || event.target.id === 'meetingDetailModal') {
-                saveMeetingChanges(); // Auto-save on close
-                document.getElementById('meetingDetailModal').classList.remove('active');
-                document.getElementById('meetingTaskInputArea').style.display = 'none';
-                currentMeetingId = null;
-            }
-        }
-
-        function toggleReminder(minutes) {
-            const meeting = meetings.find(m => m.id === currentMeetingId);
-            if (!meeting) return;
-
-            const time = parseInt(minutes);
-            const index = meeting.reminders.indexOf(time);
-
-            if (index > -1) {
-                meeting.reminders.splice(index, 1);
-            } else {
-                meeting.reminders.push(time);
-            }
-
-            // Update UI
-            const chip = document.querySelector(`.reminder-chip[data-time="${minutes}"]`);
-            chip.classList.toggle('selected');
-        }
-
-        function toggleMeetingTaskInput() {
-            const area = document.getElementById('meetingTaskInputArea');
-            const input = document.getElementById('meetingTaskInput');
-            
-            if (area.style.display === 'none') {
-                area.style.display = 'block';
-                setTimeout(() => input.focus(), 100);
-            } else {
-                area.style.display = 'none';
-            }
-        }
-
-        function handleMeetingTaskKeypress(event) {
-            if (event.key === 'Enter') {
-                addMeetingTask();
-            }
-        }
-
-        function addMeetingTask() {
-            const meeting = meetings.find(m => m.id === currentMeetingId);
-            if (!meeting) return;
-
-            const input = document.getElementById('meetingTaskInput');
-            const text = input.value.trim();
-
-            if (text) {
-                meeting.tasks.push({
-                    id: Date.now(),
-                    text: text,
-                    completed: false,
-                    createdAt: new Date().toISOString()
-                });
-
-                input.value = '';
-                renderMeetingTasks();
-                document.getElementById('meetingTaskInputArea').style.display = 'none';
-            }
-        }
-
-        function toggleMeetingTask(taskId) {
-            const meeting = meetings.find(m => m.id === currentMeetingId);
-            if (!meeting) return;
-
-            const task = meeting.tasks.find(t => t.id === taskId);
-            if (task) {
-                task.completed = !task.completed;
-                renderMeetingTasks();
-            }
-        }
-
-        function deleteMeetingTask(taskId) {
-            const meeting = meetings.find(m => m.id === currentMeetingId);
-            if (!meeting) return;
-
-            meeting.tasks = meeting.tasks.filter(t => t.id !== taskId);
-            renderMeetingTasks();
-        }
-
-        function renderMeetingTasks() {
-            const meeting = meetings.find(m => m.id === currentMeetingId);
-            if (!meeting) return;
-
-            const container = document.getElementById('meetingTaskList');
-
-            if (meeting.tasks.length === 0) {
-                container.innerHTML = '<div class="empty-state">No tasks for this meeting yet</div>';
-                return;
-            }
-
-            container.innerHTML = meeting.tasks.map(task => `
-                <div class="meeting-task-item ${task.completed ? 'completed' : ''}">
-                    <input type="checkbox" class="task-checkbox" 
-                           ${task.completed ? 'checked' : ''} 
-                           onchange="toggleMeetingTask(${task.id})"
-                           onclick="event.stopPropagation()">
-                    <span class="task-text" style="flex: 1;">${task.text}</span>
-                    <button class="delete-btn" onclick="event.stopPropagation(); deleteMeetingTask(${task.id})">&times;</button>
-                </div>
-            `).join('');
-        }
-
-        function saveMeetingChanges() {
-            localStorage.setItem('meetings', JSON.stringify(meetings));
-            renderMeetingsList();
-            renderCalendar(); // Refresh calendar
-            renderEvents();
-        }
-
-        function deleteMeeting(meetingId) {
-            if (confirm('Are you sure you want to delete this meeting and all its tasks?')) {
-                meetings = meetings.filter(m => m.id !== meetingId);
-                localStorage.setItem('meetings', JSON.stringify(meetings));
-                renderMeetingsList();
-                renderCalendar();
-                renderEvents();
-            }
-        }
-
-        function deleteMeetingFromDetail() {
-            if (currentMeetingId && confirm('Are you sure you want to delete this meeting and all its tasks?')) {
-                meetings = meetings.filter(m => m.id !== currentMeetingId);
-                localStorage.setItem('meetings', JSON.stringify(meetings));
-                closeMeetingDetail();
-                renderMeetingsList();
-                renderCalendar();
-                renderEvents();
-            }
-        }
-
-        // Reminder System
-        function checkReminders() {
-            const now = new Date();
-            
-            meetings.forEach(meeting => {
-                const meetingDateTime = new Date(meeting.date + ' ' + (meeting.startTime || '00:00'));
-                
-                meeting.reminders.forEach(reminderMinutes => {
-                    const reminderTime = new Date(meetingDateTime.getTime() - (reminderMinutes * 60000));
-                    
-                    // Check if reminder time has passed and is within the last 5 minutes
-                    const timeDiff = now - reminderTime;
-                    if (timeDiff >= 0 && timeDiff < 300000) { // Within last 5 minutes
-                        // Check if we haven't already shown this reminder
-                        const reminderKey = `reminder_${meeting.id}_${reminderMinutes}`;
-                        if (!sessionStorage.getItem(reminderKey)) {
-                            showReminder(meeting);
-                            sessionStorage.setItem(reminderKey, 'shown');
-                            flashBrowserTab(meeting.name);
-                        }
-                    }
-                });
-            });
-        }
-
-        function showReminder(meeting) {
-            currentReminderMeetingId = meeting.id;
-            
-            document.getElementById('reminderMeetingTitle').textContent = meeting.name;
-            
-            const date = new Date(meeting.date);
-            const dateStr = date.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
-            
-            let timeStr = 'All day';
-            if (meeting.startTime) {
-                const startFormatted = new Date('2000-01-01 ' + meeting.startTime).toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit' 
-                });
-                
-                if (meeting.endTime) {
-                    const endFormatted = new Date('2000-01-01 ' + meeting.endTime).toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit' 
-                    });
-                    timeStr = `${startFormatted} - ${endFormatted}`;
-                } else {
-                    timeStr = startFormatted;
-                }
-            }
-            
-            document.getElementById('reminderMeetingTime').textContent = `${dateStr} at ${timeStr}`;
-
-            const incompleteTasks = meeting.tasks.filter(t => !t.completed);
-            const previewContainer = document.getElementById('reminderTasksPreview');
-            
-            if (incompleteTasks.length === 0) {
-                previewContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">All tasks completed!</div>';
-            } else {
-                previewContainer.innerHTML = incompleteTasks.map(task => `
-                    <div class="reminder-task-preview-item">â€¢ ${task.text}</div>
-                `).join('');
-            }
-
-            document.getElementById('reminderNotificationModal').classList.add('active');
-        }
-
-        function flashBrowserTab(meetingName) {
-            const originalTitle = document.title;
-            let count = 0;
-            const interval = setInterval(() => {
-                document.title = count % 2 === 0 ? `â° ${meetingName}` : originalTitle;
-                count++;
-                if (count >= 10) {
-                    clearInterval(interval);
-                    document.title = originalTitle;
-                }
-            }, 500);
-        }
-
-        function dismissReminder() {
-            document.getElementById('reminderNotificationModal').classList.remove('active');
-            currentReminderMeetingId = null;
-        }
-
-        function openMeetingFromReminder() {
-            dismissReminder();
-            openMeetingsPanel();
-            setTimeout(() => {
-                openMeetingDetail(currentReminderMeetingId);
-            }, 300);
-        }
-
-        // Check reminders every minute
-        setInterval(checkReminders, 60000);
-
-        // Task Reminder System
-        function checkTaskReminders() {
-            const now = new Date();
-            
-            tasks.forEach(task => {
-                if (!task.reminderDate || !task.reminderTime || task.completed) return;
-                
-                const reminderDateTime = new Date(task.reminderDate + ' ' + task.reminderTime);
-                
-                // Check if reminder time has passed and is within the last 5 minutes
-                const timeDiff = now - reminderDateTime;
-                if (timeDiff >= 0 && timeDiff < 300000) { // Within last 5 minutes
-                    // Check if we haven't already shown this reminder
-                    const reminderKey = `task_reminder_${task.id}`;
-                    if (!sessionStorage.getItem(reminderKey)) {
-                        showTaskReminder(task);
-                        sessionStorage.setItem(reminderKey, 'shown');
-                        flashBrowserTab(task.text);
-                    }
-                }
-            });
-        }
-
-        function showTaskReminder(task) {
-            // Use a simpler alert-style reminder for tasks
-            const message = `â° Quick Win Reminder:\n\n${task.text}\n\nTime to tackle this task!`;
-            
-            if (confirm(message + '\n\nOpen task details?')) {
-                openTaskDetail(task.id);
-            }
-        }
-
-        // Check both meeting and task reminders
-        setInterval(() => {
-            checkReminders();
-            checkTaskReminders();
-        }, 60000);
-
-        // Check on load
-        checkTaskReminders();
 
         function clearAllData() {
             const confirmText = 'Are you sure you want to clear all tasks, notes, and events? This action cannot be undone.';
