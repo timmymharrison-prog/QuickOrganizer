@@ -405,6 +405,10 @@
             const [searchQuery, setSearchQuery] = useState("");
             const [darkMode, setDarkMode] = useState(false);
             const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+            const [showFolderModal, setShowFolderModal] = useState(false);
+            const [activeFolderModal, setActiveFolderModal] = useState(null);
+            const [newFolderEventText, setNewFolderEventText] = useState("");
+            const [newFolderEventDate, setNewFolderEventDate] = useState("");
             
             const [editingNoteId, setEditingNoteId] = useState(null); 
             const [tempNoteText, setTempNoteText] = useState("");
@@ -748,6 +752,18 @@
                 setTempEventFolderId("");
             };
 
+            // Folder modal handlers
+            const handleOpenFolderModal = (folderId) => {
+                setActiveFolderModal(folderId);
+                setShowFolderModal(true);
+                setMenuOpen(false);
+            };
+
+            const handleCloseFolderModal = () => {
+                setShowFolderModal(false);
+                setActiveFolderModal(null);
+            };
+
             // Folder handlers
             const handleAddFolder = useCallback(() => {
                 if (!newFolderName.trim()) return;
@@ -1014,17 +1030,25 @@
                                     </span>
                                 </div>
 
-                                <h3 className="text-xs font-black uppercase text-gray-400 mb-4">Folders</h3>
+                                <h3 className="text-xs font-black uppercase text-gray-400 mb-1">Folders</h3>
+                                <p className="text-[9px] text-gray-400 mb-3 italic">Double-click to view folder contents</p>
                                 
                                 <div className="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll">
                                     {folders.map(folder => (
-                                        <div key={folder.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 group">
+                                        <div 
+                                            key={folder.id} 
+                                            onDoubleClick={() => handleOpenFolderModal(folder.id)}
+                                            className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 group cursor-pointer transition-all"
+                                        >
                                             <div className="flex items-center gap-2">
                                                 <div className={`w-6 h-6 rounded-lg ${colorClasses[folder.color] || 'bg-gray-400'}`}></div>
                                                 <span className="text-sm font-bold text-gray-700">{folder.name}</span>
                                             </div>
                                             <button
-                                                onClick={() => handleDeleteFolder(folder.id)}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteFolder(folder.id);
+                                                }}
                                                 className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
                                             >
                                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -1594,6 +1618,304 @@
                             )}
                         </div>
                     </div>
+
+                    {/* Folder Modal */}
+                    {showFolderModal && activeFolderModal && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 z-[3000] flex items-center justify-center p-4 animate-pop" onClick={handleCloseFolderModal}>
+                            <div className="bg-white rounded-[40px] shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+                                {(() => {
+                                    const folder = folders.find(f => f.id === activeFolderModal);
+                                    if (!folder) return null;
+
+                                    const folderWins = quickWins.filter(w => w.folderId === activeFolderModal);
+                                    const folderNotes = scratchNotes.filter(n => n.folderId === activeFolderModal);
+                                    const folderEvents = calendarEvents.filter(e => e.folderId === activeFolderModal);
+                                    const activeWinsInFolder = folderWins.filter(w => !w.completed);
+                                    const completedWinsInFolder = folderWins.filter(w => w.completed);
+
+                                    return (
+                                        <>
+                                            {/* Modal Header */}
+                                            <div className="p-8 border-b border-gray-100">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-12 h-12 rounded-2xl ${colorClasses[folder.color]}`}></div>
+                                                        <h2 className="text-3xl font-black uppercase tracking-tighter text-gray-900">{folder.name}</h2>
+                                                    </div>
+                                                    <button
+                                                        onClick={handleCloseFolderModal}
+                                                        className="p-2 hover:bg-gray-100 rounded-xl transition-all"
+                                                    >
+                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                                <p className="text-sm text-gray-500">
+                                                    {folderWins.length} tasks · {folderNotes.length} notes · {folderEvents.length} events
+                                                </p>
+                                            </div>
+
+                                            {/* Modal Content */}
+                                            <div className="p-8 overflow-y-auto max-h-[calc(90vh-180px)] custom-scroll">
+                                                {/* Quick Wins Section */}
+                                                <div className="mb-8">
+                                                    <h3 className="text-xs font-black uppercase text-blue-500 tracking-wider mb-4">Quick Wins</h3>
+                                                    
+                                                    {/* Add Win Input */}
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="+ Add Win to this folder" 
+                                                        onKeyDown={e => { 
+                                                            if(e.key === 'Enter' && e.target.value.trim()){ 
+                                                                const newWin = { 
+                                                                    id: Date.now().toString(), 
+                                                                    text: e.target.value, 
+                                                                    details: "", 
+                                                                    folderId: activeFolderModal,
+                                                                    completed: false,
+                                                                    createdAt: new Date().toISOString()
+                                                                };
+                                                                setQuickWins(prev => [newWin, ...prev]);
+                                                                saveToFirestore('quickWins', newWin.id, newWin);
+                                                                e.target.value = ""; 
+                                                            }
+                                                        }} 
+                                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-[10px] font-bold outline-none mb-6 shadow-sm focus:border-blue-200 transition-all" 
+                                                    />
+
+                                                    {folderWins.length > 0 && (
+                                                        <div className="space-y-3">
+                                                            {activeWinsInFolder.map(item => (
+                                                                <TaskItem 
+                                                                    key={item.id} 
+                                                                    item={item}
+                                                                    editingId={editingNoteId}
+                                                                    tempText={tempNoteText}
+                                                                    tempDetails={tempNoteDetails}
+                                                                    tempFolderId={tempFolderId}
+                                                                    folders={folders}
+                                                                    onStartEdit={handleWinStartEdit}
+                                                                    onSaveEdit={handleWinSaveEdit}
+                                                                    onCancelEdit={handleWinCancelEdit}
+                                                                    onToggleComplete={handleWinToggle}
+                                                                    onDelete={handleWinDelete}
+                                                                    onFolderChange={setTempFolderId}
+                                                                    execCommand={execCommand}
+                                                                    editorRef={editorRef}
+                                                                />
+                                                            ))}
+                                                            {completedWinsInFolder.length > 0 && (
+                                                                <div className="pt-4">
+                                                                    <div className="text-[8px] font-black uppercase text-gray-400 mb-3">
+                                                                        Completed ({completedWinsInFolder.length})
+                                                                    </div>
+                                                                    {completedWinsInFolder.map(item => (
+                                                                        <TaskItem 
+                                                                            key={item.id} 
+                                                                            item={item}
+                                                                            editingId={editingNoteId}
+                                                                            tempText={tempNoteText}
+                                                                            tempDetails={tempNoteDetails}
+                                                                            tempFolderId={tempFolderId}
+                                                                            folders={folders}
+                                                                            onStartEdit={handleWinStartEdit}
+                                                                            onSaveEdit={handleWinSaveEdit}
+                                                                            onCancelEdit={handleWinCancelEdit}
+                                                                            onToggleComplete={handleWinToggle}
+                                                                            onDelete={handleWinDelete}
+                                                                            onFolderChange={setTempFolderId}
+                                                                            execCommand={execCommand}
+                                                                            editorRef={editorRef}
+                                                                        />
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Notes Section */}
+                                                <div className="mb-8">
+                                                    <h3 className="text-xs font-black uppercase text-pink-500 tracking-wider mb-4">QuickNotes</h3>
+                                                    
+                                                    {/* Add Note Input */}
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder="+ Add Note to this folder" 
+                                                        onKeyDown={e => { 
+                                                            if(e.key === 'Enter' && e.target.value.trim()){ 
+                                                                const newNote = {
+                                                                    text: e.target.value,
+                                                                    details: "",
+                                                                    folderId: activeFolderModal,
+                                                                    id: Date.now().toString(),
+                                                                    createdAt: new Date().toISOString()
+                                                                };
+                                                                setScratchNotes(prev => [newNote, ...prev]);
+                                                                saveToFirestore('scratchNotes', newNote.id, newNote);
+                                                                e.target.value = "";
+                                                            }
+                                                        }} 
+                                                        className="w-full bg-gray-50 border-2 border-gray-50 rounded-2xl p-6 text-lg font-bold outline-none focus:border-pink-100 mb-8" 
+                                                    />
+
+                                                    {folderNotes.length > 0 && (
+                                                        <div className="space-y-3">
+                                                            {folderNotes.map(note => {
+                                                                if (editingNoteId === note.id) {
+                                                                    return (
+                                                                        <div key={note.id} className="bg-white p-6 rounded-[32px] border-2 border-blue-500 shadow-xl animate-pop space-y-4">
+                                                                            <input 
+                                                                                className="text-xl font-bold text-gray-900 outline-none w-full bg-gray-50 p-4 rounded-xl" 
+                                                                                value={tempNoteText} 
+                                                                                onChange={e => setTempNoteText(e.target.value)} 
+                                                                            />
+                                                                            <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 rounded-xl border border-gray-100">
+                                                                                <button onClick={() => execCommand('bold')} className="p-1.5 hover:bg-gray-200 rounded font-bold w-8 text-xs">B</button>
+                                                                                <button onClick={() => execCommand('underline')} className="p-1.5 hover:bg-gray-200 rounded underline w-8 text-xs">U</button>
+                                                                                <button onClick={() => execCommand('insertUnorderedList')} className="p-1.5 hover:bg-gray-200 rounded text-xs">Bullets</button>
+                                                                            </div>
+                                                                            <div 
+                                                                                ref={editorRef} 
+                                                                                contentEditable 
+                                                                                className="rich-editor w-full bg-gray-50 p-4 rounded-xl text-sm font-medium outline-none overflow-y-auto" 
+                                                                                dangerouslySetInnerHTML={{ __html: tempNoteDetails }} 
+                                                                            />
+                                                                            <div className="flex gap-2">
+                                                                                <button 
+                                                                                    onClick={() => handleNoteSaveEdit(note.id, tempNoteText, editorRef.current.innerHTML, tempFolderId)} 
+                                                                                    className="bg-gray-900 text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                                                                                >
+                                                                                    Save
+                                                                                </button>
+                                                                                <button 
+                                                                                    onClick={handleWinCancelEdit} 
+                                                                                    className="bg-gray-100 text-gray-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest"
+                                                                                >
+                                                                                    Cancel
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    );
+                                                                }
+
+                                                                return (
+                                                                    <div 
+                                                                        key={note.id}
+                                                                        onClick={() => handleNoteStartEdit(note.id, note.text, note.details || "", note.folderId || "")} 
+                                                                        className="bg-gray-50/50 p-6 rounded-3xl hover:bg-white border border-transparent hover:border-gray-100 flex justify-between items-center cursor-pointer group transition-all"
+                                                                    >
+                                                                        <div className="min-w-0 flex-grow">
+                                                                            <span className="font-bold text-gray-700 block">{note.text}</span>
+                                                                            {note.details && (
+                                                                                <div 
+                                                                                    className="text-[10px] text-gray-400 mt-1 italic line-clamp-1 opacity-60" 
+                                                                                    dangerouslySetInnerHTML={{ __html: note.details }}
+                                                                                />
+                                                                            )}
+                                                                        </div>
+                                                                        <button 
+                                                                            onClick={e => { 
+                                                                                e.stopPropagation(); 
+                                                                                handleNoteDelete(note.id);
+                                                                            }} 
+                                                                            className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-colors"
+                                                                        >
+                                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Events Section */}
+                                                <div>
+                                                    <h3 className="text-xs font-black uppercase text-purple-500 tracking-wider mb-4">Calendar Events</h3>
+                                                    
+                                                    {/* Add Event Inputs */}
+                                                    <div className="mb-4 space-y-2">
+                                                        <input 
+                                                            type="text" 
+                                                            placeholder="+ Add Event to this folder" 
+                                                            value={newFolderEventText}
+                                                            onChange={(e) => setNewFolderEventText(e.target.value)}
+                                                            className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-[10px] font-bold outline-none shadow-sm focus:border-purple-200 transition-all" 
+                                                        />
+                                                        <div className="flex gap-2">
+                                                            <input 
+                                                                type="date" 
+                                                                value={newFolderEventDate}
+                                                                onChange={(e) => setNewFolderEventDate(e.target.value)}
+                                                                className="flex-1 bg-gray-50 border border-gray-100 rounded-xl p-3 text-[10px] font-bold outline-none shadow-sm focus:border-purple-200 transition-all" 
+                                                            />
+                                                            <button
+                                                                onClick={() => {
+                                                                    if (newFolderEventText.trim() && newFolderEventDate) {
+                                                                        const newEvent = {
+                                                                            id: Date.now().toString(),
+                                                                            text: newFolderEventText,
+                                                                            details: "",
+                                                                            date: newFolderEventDate,
+                                                                            folderId: activeFolderModal,
+                                                                            recurring: "none",
+                                                                            completed: false,
+                                                                            createdAt: new Date().toISOString()
+                                                                        };
+                                                                        setCalendarEvents(prev => [...prev, newEvent]);
+                                                                        saveToFirestore('calendarEvents', newEvent.id, newEvent);
+                                                                        setNewFolderEventText("");
+                                                                        setNewFolderEventDate("");
+                                                                    }
+                                                                }}
+                                                                className="bg-purple-500 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase hover:bg-purple-600 transition-all"
+                                                            >
+                                                                Add
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
+                                                    {folderEvents.length > 0 && (
+                                                        <div className="space-y-2">
+                                                            {folderEvents.map(event => (
+                                                                <div key={event.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-white border border-transparent hover:border-gray-100 transition-all">
+                                                                    <div className="flex-grow min-w-0">
+                                                                        <p className="text-[10px] font-bold text-gray-700">{event.text}</p>
+                                                                        <p className="text-[8px] text-gray-400 mt-1">
+                                                                            {new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                        </p>
+                                                                        {event.recurring && event.recurring !== 'none' && (
+                                                                            <span className="inline-block mt-1 px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase bg-purple-500 text-white">
+                                                                                🔄 {event.recurring}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Empty State */}
+                                                {folderWins.length === 0 && folderNotes.length === 0 && folderEvents.length === 0 && (
+                                                    <div className="text-center py-12">
+                                                        <div className={`w-24 h-24 ${colorClasses[folder.color]} rounded-3xl mx-auto mb-4 opacity-20`}></div>
+                                                        <p className="text-gray-400 text-sm font-bold">No items in this folder yet</p>
+                                                        <p className="text-gray-400 text-xs mt-2">Tag tasks, notes, or events with this folder to see them here</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </>
+                                    );
+                                })()}
+                            </div>
+                        </div>
+                    )}
                 </>
             );
         }
