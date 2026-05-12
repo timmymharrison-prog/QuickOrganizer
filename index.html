@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Code Jefferson v5.2.0 - Cloud Edition</title>
+    <title>Code Jefferson - With Calendar</title>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -17,7 +17,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f9fafb; margin: 0; }
-        .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); }
         .animate-pop { animation: pop 0.2s ease-out; }
         @keyframes pop { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
         .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -27,23 +26,6 @@
         .rich-editor ol { list-style-type: decimal; padding-left: 1.5rem; }
         .rich-editor b { font-weight: bold; }
         .rich-editor u { text-decoration: underline; }
-        .firebase-status { 
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: white;
-            padding: 8px 16px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
         .status-dot { 
             width: 8px; 
             height: 8px; 
@@ -53,13 +35,24 @@
         .status-disconnected { background: #ef4444; }
         .status-syncing { background: #f59e0b; animation: pulse 1s infinite; }
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        
-        /* Prevent text selection on double-click */
-        .no-select {
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
+        .calendar-day { 
+            aspect-ratio: 1; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .calendar-day:hover { background: #f3f4f6; }
+        .calendar-day.selected { background: #dbeafe; border: 2px solid #3b82f6; }
+        .calendar-day.today { background: #fef3c7; }
+        .event-dot {
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            margin: 1px;
         }
     </style>
 </head>
@@ -83,22 +76,23 @@
         // Initialize Firebase
         let db = null;
         let auth = null;
-        let isFirebaseConfigured = false;
 
         try {
             firebase.initializeApp(firebaseConfig);
             db = firebase.firestore();
             auth = firebase.auth();
-            isFirebaseConfigured = true;
-            console.log("âœ… Firebase initialized successfully");
+            console.log("✅ Firebase initialized successfully");
         } catch (error) {
-            console.error("âŒ Firebase initialization error:", error);
-            isFirebaseConfigured = false;
+            console.error("❌ Firebase initialization error:", error);
         }
 
-        const formatKey = (d) => {
-            const dateObj = d instanceof Date ? d : new Date(d);
-            return `${String(dateObj.getMonth() + 1).padStart(2, '0')}/${String(dateObj.getDate()).padStart(2, '0')}/${dateObj.getFullYear()}`;
+        const colorClasses = {
+            blue: 'bg-blue-500',
+            purple: 'bg-purple-500',
+            pink: 'bg-pink-500',
+            red: 'bg-red-500',
+            orange: 'bg-orange-500',
+            green: 'bg-green-500'
         };
 
         // Auth Screen Component
@@ -109,8 +103,6 @@
             const [confirmPassword, setConfirmPassword] = useState('');
             const [error, setError] = useState('');
             const [loading, setLoading] = useState(false);
-            const [resetMode, setResetMode] = useState(false);
-            const [resetSent, setResetSent] = useState(false);
 
             const handleAuth = async (e) => {
                 e.preventDefault();
@@ -118,13 +110,6 @@
                 setLoading(true);
 
                 try {
-                    if (resetMode) {
-                        await auth.sendPasswordResetEmail(email);
-                        setResetSent(true);
-                        setLoading(false);
-                        return;
-                    }
-
                     if (isLogin) {
                         await auth.signInWithEmailAndPassword(email, password);
                     } else {
@@ -155,42 +140,11 @@
                         case 'auth/wrong-password':
                             setError('Incorrect password');
                             break;
-                        case 'auth/weak-password':
-                            setError('Password should be at least 6 characters');
-                            break;
                         default:
                             setError(err.message);
                     }
                 }
             };
-
-            if (resetMode && resetSent) {
-                return (
-                    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-pink-50">
-                        <div className="bg-white rounded-[40px] shadow-2xl p-12 max-w-md w-full border-2 border-gray-100">
-                            <div className="text-center mb-8">
-                                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                </div>
-                                <h2 className="text-2xl font-black text-gray-900 mb-2">Check Your Email</h2>
-                                <p className="text-sm text-gray-500">We sent a password reset link to <strong>{email}</strong></p>
-                            </div>
-                            <button
-                                onClick={() => {
-                                    setResetMode(false);
-                                    setResetSent(false);
-                                    setEmail('');
-                                }}
-                                className="w-full bg-gray-900 text-white py-3 rounded-xl font-black uppercase text-sm tracking-wider hover:bg-gray-800 transition-all"
-                            >
-                                Back to Login
-                            </button>
-                        </div>
-                    </div>
-                );
-            }
 
             return (
                 <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-pink-50">
@@ -200,7 +154,7 @@
                                 Code Jefferson
                             </h1>
                             <p className="text-xs font-black uppercase tracking-widest text-gray-400">
-                                {resetMode ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}
+                                {isLogin ? 'Welcome Back' : 'Create Account'}
                             </p>
                         </div>
 
@@ -219,23 +173,21 @@
                                 />
                             </div>
 
-                            {!resetMode && (
-                                <div>
-                                    <label className="block text-xs font-black uppercase tracking-wider text-gray-600 mb-2">
-                                        Password
-                                    </label>
-                                    <input
-                                        type="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-blue-500 outline-none transition-all font-medium"
-                                        placeholder="Enter your password"
-                                        required
-                                    />
-                                </div>
-                            )}
+                            <div>
+                                <label className="block text-xs font-black uppercase tracking-wider text-gray-600 mb-2">
+                                    Password
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-blue-500 outline-none transition-all font-medium"
+                                    placeholder="••••••••"
+                                    required
+                                />
+                            </div>
 
-                            {!isLogin && !resetMode && (
+                            {!isLogin && (
                                 <div>
                                     <label className="block text-xs font-black uppercase tracking-wider text-gray-600 mb-2">
                                         Confirm Password
@@ -245,7 +197,7 @@
                                         value={confirmPassword}
                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                         className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-blue-500 outline-none transition-all font-medium"
-                                        placeholder="Confirm your password"
+                                        placeholder="••••••••"
                                         required
                                     />
                                 </div>
@@ -262,205 +214,55 @@
                                 disabled={loading}
                                 className="w-full bg-gray-900 text-white py-4 rounded-xl font-black uppercase text-sm tracking-wider hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {loading ? 'Please wait...' : resetMode ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create Account'}
+                                {loading ? 'Please wait...' : isLogin ? 'Sign In' : 'Create Account'}
                             </button>
                         </form>
 
-                        <div className="mt-6 text-center space-y-3">
-                            {!resetMode && (
-                                <>
-                                    <button
-                                        onClick={() => {
-                                            setIsLogin(!isLogin);
-                                            setError('');
-                                            setPassword('');
-                                            setConfirmPassword('');
-                                        }}
-                                        className="text-sm text-gray-600 hover:text-gray-900 font-bold transition-colors"
-                                    >
-                                        {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
-                                    </button>
-                                    
-                                    {isLogin && (
-                                        <div>
-                                            <button
-                                                onClick={() => {
-                                                    setResetMode(true);
-                                                    setError('');
-                                                }}
-                                                className="text-sm text-blue-600 hover:text-blue-700 font-bold transition-colors"
-                                            >
-                                                Forgot password?
-                                            </button>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-
-                            {resetMode && (
-                                <button
-                                    onClick={() => {
-                                        setResetMode(false);
-                                        setError('');
-                                        setEmail('');
-                                    }}
-                                    className="text-sm text-gray-600 hover:text-gray-900 font-bold transition-colors"
-                                >
-                                    Back to login
-                                </button>
-                            )}
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={() => {
+                                    setIsLogin(!isLogin);
+                                    setError('');
+                                    setPassword('');
+                                    setConfirmPassword('');
+                                }}
+                                className="text-sm text-gray-600 hover:text-gray-900 font-bold transition-colors"
+                            >
+                                {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                            </button>
                         </div>
                     </div>
                 </div>
             );
         }
 
-        function InlineDatePicker({ value, onChange }) {
-            const [isOpen, setIsOpen] = useState(false);
-            const [viewDate, setViewDate] = useState(new Date());
-            const ref = useRef(null);
-            
-            useEffect(() => {
-                const clickOut = (e) => { if (ref.current && !ref.current.contains(e.target)) setIsOpen(false); };
-                document.addEventListener("mousedown", clickOut);
-                return () => document.removeEventListener("mousedown", clickOut);
-            }, []);
-            
-            const renderDays = useMemo(() => {
-                const year = viewDate.getFullYear(); 
-                const month = viewDate.getMonth();
-                const firstDay = new Date(year, month, 1).getDay();
-                const daysInMonth = new Date(year, month + 1, 0).getDate();
-                const days = [];
-                
-                for (let i = 0; i < firstDay; i++) days.push(<div key={`e-${i}`} />);
-                for (let i = 1; i <= daysInMonth; i++) {
-                    days.push(
-                        <button 
-                            key={i} 
-                            type="button" 
-                            onClick={() => { 
-                                onChange(formatKey(new Date(year, month, i))); 
-                                setIsOpen(false); 
-                            }} 
-                            className="text-[9px] p-1.5 hover:bg-gray-800 hover:text-white rounded-md font-bold"
-                        >
-                            {i}
-                        </button>
-                    );
-                }
-                return days;
-            }, [viewDate, onChange]);
-            
-            return (
-                <div className="relative w-full" ref={ref}>
-                    <button 
-                        type="button" 
-                        onClick={() => setIsOpen(!isOpen)} 
-                        className="text-[9px] font-black px-2 py-1.5 rounded-lg uppercase tracking-wider w-full text-center bg-gray-100 text-gray-900 hover:bg-gray-200 transition-all"
-                    >
-                        {value}
-                    </button>
-                    {isOpen && (
-                        <div className="absolute top-full left-0 mt-2 bg-white border border-gray-100 shadow-2xl rounded-2xl p-3 z-[100] w-56 text-black animate-pop">
-                            <div className="flex justify-between items-center mb-2">
-                                <button 
-                                    type="button" 
-                                    onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1))} 
-                                    className="p-1 hover:bg-gray-100 rounded-lg"
-                                >
-                                    â†
-                                </button>
-                                <span className="text-[9px] font-black uppercase">
-                                    {viewDate.toLocaleString('default', { month: 'short' })} {viewDate.getFullYear()}
-                                </span>
-                                <button 
-                                    type="button" 
-                                    onClick={() => setViewDate(new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1))} 
-                                    className="p-1 hover:bg-gray-100 rounded-lg"
-                                >
-                                    â†’
-                                </button>
-                            </div>
-                            <div className="day-grid gap-1">
-                                {["S","M","T","W","T","F","S"].map(d => 
-                                    <div key={d} className="text-center text-[7px] font-black text-gray-300">{d}</div>
-                                )}
-                                {renderDays}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            );
-        }
-
-        const WinItem = React.memo(({ 
+        const TaskItem = React.memo(({ 
             item, 
-            editingNoteId, 
-            schedulingNoteId,
-            tempNoteText,
-            tempNoteDetails,
+            editingId,
+            tempText,
+            tempDetails,
+            tempFolderId,
+            folders,
             onStartEdit,
-            onStartSchedule,
             onSaveEdit,
             onCancelEdit,
             onToggleComplete,
             onDelete,
-            onScheduleConfirm,
-            formData,
-            setFormData,
+            onFolderChange,
             execCommand,
-            editorRef,
-            folders,
-            reminders
+            editorRef
         }) => {
-            if (editingNoteId === item.id) {
+            const itemFolder = folders.find(f => f.id === item.folderId);
+
+            if (editingId === item.id) {
                 return (
                     <div className="bg-white p-4 rounded-2xl border-2 border-blue-500 shadow-xl animate-pop space-y-3">
                         <input 
                             autoFocus 
                             className="text-[11px] font-black uppercase text-gray-900 outline-none w-full bg-gray-50 p-2 rounded-lg" 
-                            value={tempNoteText} 
-                            onChange={e => onStartEdit(item.id, e.target.value, tempNoteDetails)} 
+                            value={tempText} 
+                            onChange={e => onStartEdit(item.id, e.target.value, tempDetails, tempFolderId)} 
                         />
-                        
-                        {/* Folder Dropdown */}
-                        <div>
-                            <label className="block text-[9px] font-black uppercase tracking-wider text-gray-600 mb-1">
-                                Add to Folder
-                            </label>
-                            <select
-                                value={formData.folderId || ''}
-                                onChange={e => setFormData({...formData, folderId: e.target.value})}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-100 focus:border-blue-500 outline-none transition-all text-[10px] font-medium"
-                            >
-                                <option value="">No folder</option>
-                                {folders.map(folder => (
-                                    <option key={folder.id} value={folder.id}>
-                                        {folder.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* Priority Dropdown */}
-                        <div>
-                            <label className="block text-[9px] font-black uppercase tracking-wider text-gray-600 mb-1">
-                                Priority
-                            </label>
-                            <select
-                                value={formData.priority || '3'}
-                                onChange={e => setFormData({...formData, priority: e.target.value})}
-                                className="w-full px-3 py-2 rounded-lg border border-gray-100 focus:border-blue-500 outline-none transition-all text-[10px] font-medium"
-                            >
-                                <option value="1">ðŸ”´ Priority 1 - Urgent</option>
-                                <option value="2">ðŸŸ  Priority 2 - High</option>
-                                <option value="3">ðŸŸ¡ Priority 3 - Medium</option>
-                                <option value="4">ðŸŸ¢ Priority 4 - Low</option>
-                                <option value="5">âšª Priority 5 - Lowest</option>
-                            </select>
-                        </div>
-                        
                         <div className="flex gap-1 p-1 bg-gray-50 rounded-lg border border-gray-100">
                             <button onClick={() => execCommand('bold')} className="p-1 hover:bg-gray-200 rounded font-bold w-6 text-[10px]">B</button>
                             <button onClick={() => execCommand('underline')} className="p-1 hover:bg-gray-200 rounded underline w-6 text-[10px]">U</button>
@@ -470,11 +272,26 @@
                             ref={editorRef} 
                             contentEditable 
                             className="rich-editor w-full bg-gray-50 p-3 rounded-lg text-[10px] font-medium min-h-[80px] outline-none overflow-y-auto" 
-                            dangerouslySetInnerHTML={{ __html: tempNoteDetails }} 
+                            dangerouslySetInnerHTML={{ __html: tempDetails }} 
                         />
+                        <div>
+                            <label className="block text-[8px] font-black uppercase tracking-wider text-gray-600 mb-1">
+                                Folder
+                            </label>
+                            <select
+                                value={tempFolderId}
+                                onChange={(e) => onFolderChange(e.target.value)}
+                                className="w-full text-[10px] p-2 bg-gray-50 rounded-lg border border-gray-100 outline-none"
+                            >
+                                <option value="">No Folder</option>
+                                {folders.map(folder => (
+                                    <option key={folder.id} value={folder.id}>{folder.name}</option>
+                                ))}
+                            </select>
+                        </div>
                         <div className="flex gap-2">
                             <button 
-                                onClick={() => onSaveEdit(item.id, tempNoteText, editorRef.current.innerHTML)} 
+                                onClick={() => onSaveEdit(item.id, tempText, editorRef.current.innerHTML, tempFolderId)} 
                                 className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
                             >
                                 Save
@@ -490,40 +307,11 @@
                 );
             }
             
-            if (schedulingNoteId === item.id) {
-                return (
-                    <div className="bg-white p-4 rounded-2xl border-2 border-blue-500 shadow-xl animate-pop space-y-3">
-                        <p className="text-[9px] font-black text-blue-500 uppercase tracking-widest text-center">Schedule Win</p>
-                        <h4 className="text-[10px] font-bold text-center">{item.text}</h4>
-                        <InlineDatePicker 
-                            value={formData.startDate} 
-                            onChange={v => setFormData({...formData, startDate: v})} 
-                        />
-                        <button 
-                            onClick={() => onScheduleConfirm(item, formData.startDate)} 
-                            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase w-full"
-                        >
-                            Confirm Add
-                        </button>
-                    </div>
-                );
-            }
-            
             return (
                 <div 
-                    onDoubleClick={() => onStartEdit(item.id, item.text, item.details || "")} 
-                    className={`flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm transition-all group hover:border-blue-200 cursor-pointer no-select relative overflow-hidden ${item.completed ? 'opacity-60 bg-gray-50' : ''}`}
+                    onDoubleClick={() => onStartEdit(item.id, item.text, item.details || "", item.folderId || "")} 
+                    className={`flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-100 shadow-sm transition-all group hover:border-blue-200 cursor-pointer ${item.completed ? 'opacity-60 bg-gray-50' : ''}`}
                 >
-                    {/* Priority Color Bar - Left Side */}
-                    {item.priority && item.priority !== '3' && (
-                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                            item.priority === '1' ? 'bg-red-500' :
-                            item.priority === '2' ? 'bg-orange-500' :
-                            item.priority === '4' ? 'bg-green-500' :
-                            'bg-gray-300'
-                        }`} />
-                    )}
-                    
                     <input 
                         type="checkbox" 
                         checked={item.completed} 
@@ -534,93 +322,69 @@
                         className="w-4 h-4 accent-blue-500 cursor-pointer" 
                     />
                     <div className="flex-grow min-w-0">
-                        <div className="flex items-center gap-2">
-                            <p className={`text-[11px] font-black uppercase text-gray-900 truncate ${item.completed ? 'line-through' : ''}`}>
-                                {item.text}
-                            </p>
-                            {/* Scheduled Calendar Icon - Always Visible */}
-                            {(() => {
-                                const isScheduled = Object.values(reminders).some(dayEvents => 
-                                    dayEvents.some(event => event.linkedNoteId === item.id)
-                                );
-                                return isScheduled ? (
-                                    <div className="flex items-center gap-1 bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider shrink-0">
-                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                                        </svg>
-                                    </div>
-                                ) : null;
-                            })()}
-                        </div>
+                        <p className={`text-[11px] font-black uppercase text-gray-900 ${item.completed ? 'line-through' : ''}`}>
+                            {item.text}
+                        </p>
+                        {itemFolder && (
+                            <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[7px] font-black uppercase text-white ${colorClasses[itemFolder.color] || 'bg-gray-400'}`}>
+                                {itemFolder.name}
+                            </span>
+                        )}
                         {item.details && (
                             <div 
-                                className="text-[8px] text-gray-400 italic truncate opacity-60" 
+                                className="text-[8px] text-gray-400 italic truncate opacity-60 mt-1" 
                                 dangerouslySetInnerHTML={{ __html: item.details }}
                             />
                         )}
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 items-center">
-                        <button 
-                            onClick={(e) => { 
-                                e.stopPropagation(); 
-                                onDelete(item.id);
-                            }} 
-                            className="p-1 text-gray-300 hover:text-red-500 transition-colors"
-                        >
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
-                        </button>
-                        {!item.completed && (
-                            <button 
-                                onClick={(e) => { 
-                                    e.stopPropagation(); 
-                                    onStartSchedule(item.id);
-                                }} 
-                                className="bg-blue-50 text-blue-600 px-2 py-1 rounded-md text-[8px] font-black uppercase tracking-tighter"
-                            >
-                                Add
-                            </button>
-                        )}
-                    </div>
+                    <button 
+                        onClick={(e) => { 
+                            e.stopPropagation(); 
+                            onDelete(item.id);
+                        }} 
+                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-red-500 transition-colors"
+                    >
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
                 </div>
             );
         });
 
-        function CalendarApp({ user, onSignOut }) {
+        function MainApp({ user, onSignOut }) {
             const [syncStatus, setSyncStatus] = useState('disconnected');
-            const [selectedDate, setSelectedDate] = useState(new Date());
-            const [navDate, setNavDate] = useState(new Date());
-            const [reminders, setReminders] = useState({});
             const [scratchNotes, setScratchNotes] = useState([]);
             const [quickWins, setQuickWins] = useState([]);
-            const [showCompleted, setShowCompleted] = useState(true);
-            const [isCreatingEvent, setIsCreatingEvent] = useState(false);
-            const [menuOpen, setMenuOpen] = useState(false);
-            const [selectedFolder, setSelectedFolder] = useState(null);
-            const [searchQuery, setSearchQuery] = useState('');
-            const [showSearch, setShowSearch] = useState(false);
-            const [winFilter, setWinFilter] = useState('all'); // all, folder, priority, date
+            const [calendarEvents, setCalendarEvents] = useState([]);
             const [folders, setFolders] = useState([]);
+            const [showCompleted, setShowCompleted] = useState(true);
+            const [menuOpen, setMenuOpen] = useState(false);
             const [showFolderInput, setShowFolderInput] = useState(false);
             const [newFolderName, setNewFolderName] = useState('');
-            const [newFolderType, setNewFolderType] = useState('blue');
-            const [editingFolderId, setEditingFolderId] = useState(null);
-            const [editFolderName, setEditFolderName] = useState('');
-            const [editFolderColor, setEditFolderColor] = useState('blue');
+            const [newFolderColor, setNewFolderColor] = useState('blue');
             
             const [editingNoteId, setEditingNoteId] = useState(null); 
-            const [schedulingNoteId, setSchedulingNoteId] = useState(null);
             const [tempNoteText, setTempNoteText] = useState("");
             const [tempNoteDetails, setTempNoteDetails] = useState("");
+            const [tempFolderId, setTempFolderId] = useState("");
             const [newWinText, setNewWinText] = useState("");
-            const [formData, setFormData] = useState({ text: "", details: "", startDate: formatKey(new Date()) });
+
+            // Calendar state
+            const [currentMonth, setCurrentMonth] = useState(new Date());
+            const [selectedDate, setSelectedDate] = useState(null);
+            const [showEventModal, setShowEventModal] = useState(false);
+            const [newEventText, setNewEventText] = useState("");
+            const [newEventFolderId, setNewEventFolderId] = useState("");
+            const [editingEventId, setEditingEventId] = useState(null);
+            const [tempEventText, setTempEventText] = useState("");
+            const [tempEventDetails, setTempEventDetails] = useState("");
+            const [tempEventFolderId, setTempEventFolderId] = useState("");
+            const [showNewEventFolders, setShowNewEventFolders] = useState(false);
+            
+            const eventEditorRef = useRef(null);
 
             const editorRef = useRef(null);
-            const unsubscribeRef = useRef(null);
             const menuRef = useRef(null);
 
             // Close menu when clicking outside
@@ -634,127 +398,11 @@
                 return () => document.removeEventListener('mousedown', handleClickOutside);
             }, []);
 
-            const handleAddFolder = () => {
-                if (newFolderName.trim()) {
-                    const newFolder = {
-                        id: Date.now().toString(),
-                        name: newFolderName,
-                        type: newFolderType,
-                        createdAt: new Date().toISOString()
-                    };
-                    setFolders(prev => [...prev, newFolder]);
-                    if (user && db) {
-                        saveToFirestore('folders', newFolder.id, newFolder);
-                    }
-                    setNewFolderName('');
-                    setShowFolderInput(false);
-                }
-            };
-
-            const handleDeleteFolder = (id) => {
-                setFolders(prev => prev.filter(f => f.id !== id));
-                if (user && db) {
-                    deleteFromFirestore('folders', id);
-                }
-            };
-
-            const handleStartEditFolder = (folder) => {
-                setEditingFolderId(folder.id);
-                setEditFolderName(folder.name);
-                setEditFolderColor(folder.type);
-            };
-
-            const handleSaveEditFolder = () => {
-                if (editFolderName.trim()) {
-                    setFolders(prev => prev.map(f => 
-                        f.id === editingFolderId 
-                            ? {...f, name: editFolderName, type: editFolderColor}
-                            : f
-                    ));
-                    if (user && db) {
-                        const updatedFolder = folders.find(f => f.id === editingFolderId);
-                        if (updatedFolder) {
-                            saveToFirestore('folders', editingFolderId, {
-                                ...updatedFolder,
-                                name: editFolderName,
-                                type: editFolderColor
-                            });
-                        }
-                    }
-                    setEditingFolderId(null);
-                }
-            };
-
-            const handleCancelEditFolder = () => {
-                setEditingFolderId(null);
-                setEditFolderName('');
-                setEditFolderColor('blue');
-            };
-
-            const handleOpenFolder = (folder) => {
-                setSelectedFolder(folder);
-                setMenuOpen(false);
-            };
-
-            const handleCloseFolder = () => {
-                setSelectedFolder(null);
-            };
-
-            // Get notes for selected folder (includes both quick wins and scratch notes)
-            const folderNotes = useMemo(() => {
-                if (!selectedFolder) return [];
-                const notes = scratchNotes.filter(note => note.folderId === selectedFolder.id)
-                    .map(n => ({...n, type: 'note'}));
-                const wins = quickWins.filter(win => win.folderId === selectedFolder.id)
-                    .map(w => ({...w, type: 'win'}));
-                return [...notes, ...wins].sort((a, b) => 
-                    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-                );
-            }, [selectedFolder, scratchNotes, quickWins]);
-
-            // Search results
-            const searchResults = useMemo(() => {
-                if (!searchQuery.trim()) return [];
-                const query = searchQuery.toLowerCase();
-                
-                const matchingNotes = scratchNotes
-                    .filter(note => 
-                        note.text.toLowerCase().includes(query) || 
-                        (note.details && note.details.toLowerCase().includes(query))
-                    )
-                    .map(n => ({...n, type: 'note'}));
-                
-                const matchingWins = quickWins
-                    .filter(win => 
-                        win.text.toLowerCase().includes(query) || 
-                        (win.details && win.details.toLowerCase().includes(query))
-                    )
-                    .map(w => ({...w, type: 'win'}));
-                
-                return [...matchingNotes, ...matchingWins];
-            }, [searchQuery, scratchNotes, quickWins]);
-
             // Firestore Real-time Sync
             useEffect(() => {
-                if (!user || !db) {
-                    setSyncStatus('disconnected');
-                    return;
-                }
+                if (!user || !db) return;
 
                 setSyncStatus('syncing');
-
-                const remindersUnsub = db.collection('users').doc(user.uid).collection('reminders')
-                    .onSnapshot((snapshot) => {
-                        const data = {};
-                        snapshot.forEach(doc => {
-                            data[doc.id] = doc.data().events || [];
-                        });
-                        setReminders(data);
-                        setSyncStatus('connected');
-                    }, (error) => {
-                        console.error("Reminders sync error:", error);
-                        setSyncStatus('disconnected');
-                    });
 
                 const scratchUnsub = db.collection('users').doc(user.uid).collection('scratchNotes')
                     .orderBy('createdAt', 'desc')
@@ -764,8 +412,10 @@
                             notes.push({ id: doc.id, ...doc.data() });
                         });
                         setScratchNotes(notes);
+                        setSyncStatus('connected');
                     }, (error) => {
                         console.error("Scratch notes sync error:", error);
+                        setSyncStatus('disconnected');
                     });
 
                 const winsUnsub = db.collection('users').doc(user.uid).collection('quickWins')
@@ -780,8 +430,18 @@
                         console.error("Quick wins sync error:", error);
                     });
 
+                const eventsUnsub = db.collection('users').doc(user.uid).collection('calendarEvents')
+                    .onSnapshot((snapshot) => {
+                        const events = [];
+                        snapshot.forEach(doc => {
+                            events.push({ id: doc.id, ...doc.data() });
+                        });
+                        setCalendarEvents(events);
+                    }, (error) => {
+                        console.error("Calendar events sync error:", error);
+                    });
+
                 const foldersUnsub = db.collection('users').doc(user.uid).collection('folders')
-                    .orderBy('createdAt', 'desc')
                     .onSnapshot((snapshot) => {
                         const folderList = [];
                         snapshot.forEach(doc => {
@@ -792,15 +452,11 @@
                         console.error("Folders sync error:", error);
                     });
 
-                unsubscribeRef.current = () => {
-                    remindersUnsub();
+                return () => {
                     scratchUnsub();
                     winsUnsub();
+                    eventsUnsub();
                     foldersUnsub();
-                };
-
-                return () => {
-                    if (unsubscribeRef.current) unsubscribeRef.current();
                 };
             }, [user]);
 
@@ -808,88 +464,20 @@
                 document.execCommand(cmd, false, val);
                 if (editorRef.current) editorRef.current.focus();
             }, []);
-
-            const currentKey = formatKey(selectedDate);
             
-            const activeWins = useMemo(() => {
-                let filtered = quickWins.filter(w => !w.completed);
-                
-                // Apply sorting based on filter
-                if (winFilter === 'priority') {
-                    filtered.sort((a, b) => (a.priority || '3').localeCompare(b.priority || '3'));
-                } else if (winFilter === 'date') {
-                    // Check if task is scheduled
-                    const getEarliestDate = (winId) => {
-                        const dates = Object.entries(reminders)
-                            .filter(([date, events]) => events.some(e => e.linkedNoteId === winId))
-                            .map(([date]) => new Date(date));
-                        return dates.length > 0 ? Math.min(...dates) : Infinity;
-                    };
-                    filtered.sort((a, b) => getEarliestDate(a.id) - getEarliestDate(b.id));
-                } else if (winFilter === 'folder') {
-                    filtered.sort((a, b) => {
-                        const folderA = a.folderId ? folders.find(f => f.id === a.folderId)?.name || '' : 'zzz';
-                        const folderB = b.folderId ? folders.find(f => f.id === b.folderId)?.name || '' : 'zzz';
-                        return folderA.localeCompare(folderB);
-                    });
-                }
-                
-                return filtered;
-            }, [quickWins, winFilter, reminders, folders]);
-            
-            // Group wins by folder for folder view
-            const groupedByFolder = useMemo(() => {
-                if (winFilter !== 'folder') return null;
-                
-                const groups = {};
-                const unsorted = [];
-                
-                activeWins.forEach(win => {
-                    if (win.folderId) {
-                        const folder = folders.find(f => f.id === win.folderId);
-                        if (folder) {
-                            if (!groups[folder.id]) {
-                                groups[folder.id] = { folder, wins: [] };
-                            }
-                            groups[folder.id].wins.push(win);
-                        } else {
-                            unsorted.push(win);
-                        }
-                    } else {
-                        unsorted.push(win);
-                    }
-                });
-                
-                // Sort groups alphabetically by folder name
-                const sortedGroups = Object.values(groups).sort((a, b) => 
-                    a.folder.name.localeCompare(b.folder.name)
-                );
-                
-                // Add unsorted group at the end if it has items
-                if (unsorted.length > 0) {
-                    sortedGroups.push({ folder: { name: 'Unsorted', id: 'unsorted' }, wins: unsorted });
-                }
-                
-                return sortedGroups;
-            }, [activeWins, winFilter, folders]);
+            const activeWins = useMemo(() => 
+                quickWins.filter(w => !w.completed), 
+                [quickWins]
+            );
             
             const completedWins = useMemo(() => 
                 quickWins.filter(w => w.completed), 
                 [quickWins]
             );
-            
-            const dailyAgenda = useMemo(() => 
-                reminders[currentKey] || [], 
-                [reminders, currentKey]
-            );
 
             const saveToFirestore = useCallback((collection, docId, data) => {
                 if (!user || !db) {
-                    console.warn('âš ï¸ Firebase not configured - data will not persist!');
-                    console.warn('Please complete Firebase setup:');
-                    console.warn('1. Enable Email/Password Authentication');
-                    console.warn('2. Create Firestore Database');
-                    console.warn('3. Set Security Rules');
+                    console.warn('⚠️ Firebase not configured');
                     return;
                 }
                 
@@ -897,12 +485,11 @@
                 db.collection('users').doc(user.uid).collection(collection).doc(docId)
                     .set(data, { merge: true })
                     .then(() => {
-                        console.log(`âœ“ Saved ${collection}/${docId} to Firebase`);
+                        console.log(`✓ Saved ${collection}/${docId}`);
                         setSyncStatus('connected');
                     })
                     .catch((error) => {
-                        console.error(`âœ— Error saving to ${collection}:`, error);
-                        console.error('Check that Firestore is enabled and rules are set correctly');
+                        console.error(`Error saving to ${collection}:`, error);
                         setSyncStatus('disconnected');
                     });
             }, [user]);
@@ -920,983 +507,394 @@
                     });
             }, [user]);
 
+            // Calendar helpers
+            const getDaysInMonth = (date) => {
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                const firstDay = new Date(year, month, 1);
+                const lastDay = new Date(year, month + 1, 0);
+                const daysInMonth = lastDay.getDate();
+                const startingDayOfWeek = firstDay.getDay();
+                
+                return { daysInMonth, startingDayOfWeek, year, month };
+            };
+
+            const getEventsForDate = (date) => {
+                if (!date) return [];
+                const dateStr = date.toISOString().split('T')[0];
+                return calendarEvents.filter(e => e.date === dateStr);
+            };
+
+            const handleDateClick = (day) => {
+                const year = currentMonth.getFullYear();
+                const month = currentMonth.getMonth();
+                const date = new Date(year, month, day);
+                setSelectedDate(date);
+                setShowEventModal(true);
+            };
+
+            const handleAddEvent = () => {
+                if (!newEventText.trim() || !selectedDate) return;
+
+                const dateStr = selectedDate.toISOString().split('T')[0];
+                const newEvent = {
+                    id: Date.now().toString(),
+                    text: newEventText,
+                    details: "",
+                    date: dateStr,
+                    folderId: newEventFolderId,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+
+                setCalendarEvents(prev => [...prev, newEvent]);
+                saveToFirestore('calendarEvents', newEvent.id, newEvent);
+                setNewEventText('');
+                setNewEventFolderId('');
+                setShowNewEventFolders(false);
+            };
+
+            const handleDeleteEvent = (id) => {
+                setCalendarEvents(prev => prev.filter(e => e.id !== id));
+                deleteFromFirestore('calendarEvents', id);
+            };
+
+            const handleToggleEventComplete = (id) => {
+                setCalendarEvents(prev => {
+                    const updated = prev.map(e => 
+                        e.id === id ? {...e, completed: !e.completed} : e
+                    );
+                    const item = updated.find(e => e.id === id);
+                    if (item) {
+                        saveToFirestore('calendarEvents', id, item);
+                    }
+                    return updated;
+                });
+            };
+
+            const handleEventStartEdit = (id, text, details, folderId) => {
+                setEditingEventId(id);
+                setTempEventText(text);
+                setTempEventDetails(details);
+                setTempEventFolderId(folderId || "");
+            };
+
+            const handleEventSaveEdit = (id, text, details, folderId) => {
+                setCalendarEvents(prev => {
+                    const updated = prev.map(e => 
+                        e.id === id ? {...e, text, details, folderId} : e
+                    );
+                    const item = updated.find(e => e.id === id);
+                    if (item) {
+                        saveToFirestore('calendarEvents', id, item);
+                    }
+                    return updated;
+                });
+                setEditingEventId(null);
+            };
+
+            const handleEventCancelEdit = () => {
+                setEditingEventId(null);
+                setTempEventFolderId("");
+            };
+
+            // Folder handlers
+            const handleAddFolder = useCallback(() => {
+                if (!newFolderName.trim()) return;
+
+                const newFolder = {
+                    id: Date.now().toString(),
+                    name: newFolderName,
+                    color: newFolderColor,
+                    createdAt: new Date().toISOString()
+                };
+
+                setFolders(prev => [...prev, newFolder]);
+                saveToFirestore('folders', newFolder.id, newFolder);
+                setNewFolderName('');
+                setShowFolderInput(false);
+            }, [newFolderName, newFolderColor, saveToFirestore]);
+
+            const handleDeleteFolder = useCallback((id) => {
+                setFolders(prev => prev.filter(f => f.id !== id));
+                deleteFromFirestore('folders', id);
+            }, [deleteFromFirestore]);
+
             const handleWinToggle = useCallback((id) => {
                 setQuickWins(prev => {
                     const updated = prev.map(w => 
                         w.id === id ? {...w, completed: !w.completed} : w
                     );
                     const item = updated.find(w => w.id === id);
-                    if (item && user && db) {
+                    if (item) {
                         saveToFirestore('quickWins', id, item);
                     }
                     return updated;
                 });
-            }, [user, saveToFirestore]);
+            }, [saveToFirestore]);
 
             const handleWinDelete = useCallback((id) => {
                 setQuickWins(prev => prev.filter(w => w.id !== id));
                 deleteFromFirestore('quickWins', id);
             }, [deleteFromFirestore]);
 
-            const handleWinStartEdit = useCallback((id, text, details) => {
+            const handleWinStartEdit = useCallback((id, text, details, folderId) => {
                 setEditingNoteId(id);
                 setTempNoteText(text);
                 setTempNoteDetails(details);
-                // Find the win's current folder and priority
-                const win = quickWins.find(w => w.id === id);
-                setFormData(prev => ({
-                    ...prev, 
-                    folderId: win?.folderId || '',
-                    priority: win?.priority || '3'
-                }));
-            }, [quickWins]);
+                setTempFolderId(folderId || "");
+            }, []);
 
-            const handleWinSaveEdit = useCallback((id, text, details) => {
+            const handleWinSaveEdit = useCallback((id, text, details, folderId) => {
                 setQuickWins(prev => {
                     const updated = prev.map(w => 
-                        w.id === id ? {
-                            ...w, 
-                            text, 
-                            details, 
-                            folderId: formData.folderId || null,
-                            priority: formData.priority || '3'
-                        } : w
+                        w.id === id ? {...w, text, details, folderId} : w
                     );
                     const item = updated.find(w => w.id === id);
-                    if (item && user && db) {
+                    if (item) {
                         saveToFirestore('quickWins', id, item);
                     }
                     return updated;
                 });
                 setEditingNoteId(null);
-            }, [user, saveToFirestore, formData]);
+            }, [saveToFirestore]);
 
             const handleWinCancelEdit = useCallback(() => {
                 setEditingNoteId(null);
+                setTempFolderId("");
             }, []);
-
-            const handleWinStartSchedule = useCallback((id) => {
-                setSchedulingNoteId(id);
-                setEditingNoteId(null);
-            }, []);
-
-            const handleWinScheduleConfirm = useCallback((item, targetDate) => {
-                setReminders(prev => {
-                    const updated = { ...prev };
-                    const list = updated[targetDate] || [];
-                    const newEvent = { 
-                        id: Date.now(), 
-                        text: item.text, 
-                        notes: item.details, 
-                        startDate: targetDate, 
-                        type: 'win',
-                        linkedNoteId: item.id
-                    };
-                    list.push(newEvent);
-                    updated[targetDate] = list;
-                    
-                    if (user && db) {
-                        saveToFirestore('reminders', targetDate, { events: list });
-                    }
-                    return updated;
-                });
-                setSchedulingNoteId(null);
-            }, [user, saveToFirestore]);
-
-            const handleNoteDelete = useCallback((id) => {
-                setScratchNotes(prev => prev.filter(n => n.id !== id));
-                deleteFromFirestore('scratchNotes', id);
-            }, [deleteFromFirestore]);
-
-            const handleNoteStartEdit = useCallback((id, text, details) => {
-                setEditingNoteId(id);
-                setSchedulingNoteId(null);
-                setTempNoteText(text);
-                setTempNoteDetails(details);
-                // Find the note's current folder
-                const note = scratchNotes.find(n => n.id === id);
-                setFormData(prev => ({...prev, folderId: note?.folderId || ''}));
-            }, [scratchNotes]);
-
-            const handleNoteSaveEdit = useCallback((id, text, details) => {
-                setScratchNotes(prev => {
-                    const updated = prev.map(n => 
-                        n.id === id ? {...n, text, details, folderId: formData.folderId || null} : n
-                    );
-                    const item = updated.find(n => n.id === id);
-                    if (item && user && db) {
-                        saveToFirestore('scratchNotes', id, item);
-                    }
-                    return updated;
-                });
-                
-                setReminders(prev => {
-                    const updated = { ...prev };
-                    let hasChanges = false;
-                    
-                    Object.keys(updated).forEach(dateKey => {
-                        updated[dateKey] = updated[dateKey].map(event => {
-                            if (event.linkedNoteId === id) {
-                                hasChanges = true;
-                                return { ...event, text, notes: details };
-                            }
-                            return event;
-                        });
-                        
-                        if (hasChanges && user && db) {
-                            saveToFirestore('reminders', dateKey, { events: updated[dateKey] });
-                        }
-                    });
-                    
-                    return updated;
-                });
-                
-                setEditingNoteId(null);
-            }, [user, saveToFirestore, formData]);
-
-            const handleNoteStartSchedule = useCallback((id, text, details) => {
-                setEditingNoteId(null);
-                setSchedulingNoteId(id);
-                setFormData(prev => ({...prev, text, details}));
-            }, []);
-
-            const handleNoteScheduleConfirm = useCallback((note, targetDate) => {
-                setReminders(prev => {
-                    const updated = { ...prev };
-                    const list = updated[targetDate] || [];
-                    const newEvent = { 
-                        id: Date.now(), 
-                        text: note.text, 
-                        notes: note.details, 
-                        startDate: targetDate, 
-                        type: 'note',
-                        linkedNoteId: note.id
-                    };
-                    list.push(newEvent);
-                    updated[targetDate] = list;
-                    
-                    if (user && db) {
-                        saveToFirestore('reminders', targetDate, { events: list });
-                    }
-                    return updated;
-                });
-                setSchedulingNoteId(null);
-            }, [user, saveToFirestore]);
-
-            const handleAgendaStartEdit = useCallback((id, text, notes) => {
-                setEditingNoteId(id);
-                setTempNoteText(text);
-                setTempNoteDetails(notes || "");
-            }, []);
-
-            const handleAgendaSaveEdit = useCallback((id, text, notes) => {
-                setReminders(prev => {
-                    const updated = { ...prev };
-                    updated[currentKey] = updated[currentKey].map(item => 
-                        item.id === id ? { ...item, text, notes } : item
-                    );
-                    
-                    if (user && db) {
-                        saveToFirestore('reminders', currentKey, { events: updated[currentKey] });
-                    }
-                    return updated;
-                });
-                setEditingNoteId(null);
-            }, [currentKey, user, saveToFirestore]);
-
-            const handleAgendaDelete = useCallback((id) => {
-                setReminders(prev => {
-                    const updated = { ...prev };
-                    updated[currentKey] = updated[currentKey].filter(item => item.id !== id);
-                    
-                    if (user && db) {
-                        saveToFirestore('reminders', currentKey, { events: updated[currentKey] });
-                    }
-                    return updated;
-                });
-            }, [currentKey, user, saveToFirestore]);
 
             const handleAddWin = useCallback((text) => {
                 const newWin = { 
                     id: Date.now().toString(), 
                     text, 
                     details: "", 
+                    folderId: "",
                     completed: false,
                     createdAt: new Date().toISOString()
                 };
                 
                 setQuickWins(prev => [newWin, ...prev]);
-                
-                if (user && db) {
-                    saveToFirestore('quickWins', newWin.id, newWin);
-                }
-            }, [user, saveToFirestore]);
+                saveToFirestore('quickWins', newWin.id, newWin);
+            }, [saveToFirestore]);
+
+            const handleNoteDelete = useCallback((id) => {
+                setScratchNotes(prev => prev.filter(n => n.id !== id));
+                deleteFromFirestore('scratchNotes', id);
+            }, [deleteFromFirestore]);
+
+            const handleNoteStartEdit = useCallback((id, text, details, folderId) => {
+                setEditingNoteId(id);
+                setTempNoteText(text);
+                setTempNoteDetails(details);
+                setTempFolderId(folderId || "");
+            }, []);
+
+            const handleNoteSaveEdit = useCallback((id, text, details, folderId) => {
+                setScratchNotes(prev => {
+                    const updated = prev.map(n => 
+                        n.id === id ? {...n, text, details, folderId} : n
+                    );
+                    const item = updated.find(n => n.id === id);
+                    if (item) {
+                        saveToFirestore('scratchNotes', id, item);
+                    }
+                    return updated;
+                });
+                setEditingNoteId(null);
+            }, [saveToFirestore]);
 
             const handleAddNote = useCallback((text) => {
                 const newNote = {
                     text,
                     details: "",
+                    folderId: "",
                     id: Date.now().toString(),
                     createdAt: new Date().toISOString()
                 };
                 
                 setScratchNotes(prev => [newNote, ...prev]);
-                
-                if (user && db) {
-                    saveToFirestore('scratchNotes', newNote.id, newNote);
-                }
-            }, [user, saveToFirestore]);
+                saveToFirestore('scratchNotes', newNote.id, newNote);
+            }, [saveToFirestore]);
 
-            const calendarDays = useMemo(() => {
-                const year = navDate.getFullYear(); 
-                const month = navDate.getMonth(); 
-                const firstDay = new Date(year, month, 1).getDay(); 
-                const daysInMonth = new Date(year, month + 1, 0).getDate(); 
+            // Render calendar grid
+            const renderCalendar = () => {
+                const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(currentMonth);
                 const days = [];
-                
-                for (let i = 0; i < firstDay; i++) days.push(<div key={`e-${i}`} />);
-                
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const d = new Date(year, month, i); 
-                    const k = formatKey(d);
-                    const hasWin = reminders[k] && reminders[k].some(r => r.type === 'win');
-                    const hasNote = reminders[k] && reminders[k].some(r => r.type === 'note' || !r.type);
-                    
-                    days.push(
-                        <div key={i} className="relative">
-                            <button 
-                                onClick={() => setSelectedDate(d)} 
-                                onDoubleClick={() => {
-                                    setSelectedDate(d);
-                                    setTempNoteText("");
-                                    setTempNoteDetails("");
-                                    setIsCreatingEvent(true);
-                                }}
-                                className={`w-full aspect-square text-[9px] font-bold rounded-md flex flex-col items-center justify-center transition-all ${formatKey(selectedDate) === k ? 'bg-gray-900 text-white' : 'hover:bg-gray-50 text-gray-500'}`}
-                            >
-                                {i}
-                                <div className="flex gap-0.5 mt-0.5">
-                                    {hasWin && <div className="w-1 h-1 rounded-full bg-blue-500" />}
-                                    {hasNote && <div className="w-1 h-1 rounded-full bg-pink-500" />}
-                                </div>
-                            </button>
+                const today = new Date();
+                const isToday = (day) => {
+                    return today.getDate() === day && 
+                           today.getMonth() === month && 
+                           today.getFullYear() === year;
+                };
 
-                            {isCreatingEvent && formatKey(selectedDate) === k && (
-                                <div className="absolute top-0 left-full ml-2 w-48 bg-white border-2 border-pink-500 shadow-2xl rounded-2xl p-3 z-[110] animate-pop text-black">
-                                    <p className="text-[8px] font-black text-pink-500 uppercase mb-2">New Event: {k}</p>
-                                    <input 
-                                        autoFocus
-                                        placeholder="Event Title"
-                                        className="w-full text-[10px] font-bold p-2 bg-gray-50 rounded-lg mb-2 outline-none border border-transparent focus:border-pink-200"
-                                        value={tempNoteText}
-                                        onChange={e => setTempNoteText(e.target.value)}
-                                    />
-                                    <textarea 
-                                        placeholder="Details..."
-                                        className="w-full text-[9px] p-2 bg-gray-50 rounded-lg mb-3 outline-none min-h-[60px] resize-none"
-                                        value={tempNoteDetails}
-                                        onChange={e => setTempNoteDetails(e.target.value)}
-                                    />
-                                    <div className="flex gap-2">
-                                        <button 
-                                            onClick={() => {
-                                                if(!tempNoteText) return;
-                                                setReminders(prev => {
-                                                    const updated = { ...prev };
-                                                    const list = updated[k] || [];
-                                                    const newEvent = { 
-                                                        id: Date.now(), 
-                                                        text: tempNoteText, 
-                                                        notes: tempNoteDetails, 
-                                                        startDate: k, 
-                                                        type: 'note' 
-                                                    };
-                                                    list.push(newEvent);
-                                                    updated[k] = list;
-                                                    
-                                                    if (user && db) {
-                                                        saveToFirestore('reminders', k, { events: list });
-                                                    }
-                                                    return updated;
-                                                });
-                                                setIsCreatingEvent(false);
-                                                setTempNoteText("");
-                                                setTempNoteDetails("");
-                                            }}
-                                            className="flex-grow bg-pink-500 text-white text-[8px] font-black uppercase py-1.5 rounded-lg"
-                                        >
-                                            Create
-                                        </button>
-                                        <button 
-                                            onClick={() => setIsCreatingEvent(false)} 
-                                            className="bg-gray-100 text-gray-400 text-[8px] font-black uppercase px-2 py-1.5 rounded-lg"
-                                        >
-                                            Ã—
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
+                // Add empty cells for days before month starts
+                for (let i = 0; i < startingDayOfWeek; i++) {
+                    days.push(<div key={`empty-${i}`} className="calendar-day"></div>);
+                }
+
+                // Add days of the month
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const date = new Date(year, month, day);
+                    const events = getEventsForDate(date);
+                    const isSelected = selectedDate && 
+                                      selectedDate.getDate() === day && 
+                                      selectedDate.getMonth() === month && 
+                                      selectedDate.getFullYear() === year;
+
+                    days.push(
+                        <div
+                            key={day}
+                            onClick={() => handleDateClick(day)}
+                            className={`calendar-day rounded-lg ${isToday(day) ? 'today' : ''} ${isSelected ? 'selected' : ''}`}
+                        >
+                            <span className="text-[10px] font-black text-gray-700">{day}</span>
+                            <div className="flex gap-0.5 mt-1 flex-wrap justify-center">
+                                {events.slice(0, 3).map(event => {
+                                    const folder = folders.find(f => f.id === event.folderId);
+                                    const colorClass = folder ? colorClasses[folder.color] : 'bg-gray-400';
+                                    return (
+                                        <div key={event.id} className={`event-dot ${colorClass}`} />
+                                    );
+                                })}
+                            </div>
                         </div>
                     );
                 }
+
                 return days;
-            }, [navDate, reminders, selectedDate, isCreatingEvent, tempNoteText, tempNoteDetails, user, saveToFirestore]);
+            };
 
             return (
                 <>
-                    {/* Hamburger Menu */}
-                    <div ref={menuRef} className="fixed top-6 left-6 z-[2000] flex gap-3">
+                    {/* Hamburger Menu with Status */}
+                    <div className="fixed top-20 left-4 z-[2000]" ref={menuRef}>
                         <button
                             onClick={() => setMenuOpen(!menuOpen)}
-                            className="relative bg-white rounded-2xl p-4 shadow-lg border-2 border-gray-100 hover:border-gray-200 transition-all"
+                            className="p-3 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all relative"
                         >
-                            {/* Online Status Dot */}
-                            <div className={`absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${
-                                syncStatus === 'connected' ? 'bg-green-500' :
-                                syncStatus === 'syncing' ? 'bg-orange-500' :
-                                'bg-red-500'
+                            <div className={`absolute -top-1 -right-1 status-dot ${
+                                syncStatus === 'connected' ? 'status-connected' :
+                                syncStatus === 'syncing' ? 'status-syncing' :
+                                'status-disconnected'
                             }`} />
-                            
-                            {/* Hamburger Icon */}
-                            <div className="space-y-1.5">
-                                <div className="w-6 h-6 bg-gray-900"></div>
-                                <div className="w-6 h-0.5 bg-gray-900"></div>
-                                <div className="w-6 h-0.5 bg-gray-900"></div>
-                            </div>
-                        </button>
-
-                        {/* Search Button */}
-                        <button
-                            onClick={() => setShowSearch(!showSearch)}
-                            className="bg-white rounded-2xl p-4 shadow-lg border-2 border-gray-100 hover:border-gray-200 transition-all"
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-900">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <path d="m21 21-4.35-4.35"></path>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
                         </button>
 
-                        {/* Menu Dropdown */}
                         {menuOpen && (
-                            <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 overflow-hidden animate-pop">
-                                {/* Status Header */}
-                                <div className="p-4 bg-gray-50 border-b border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-2 h-2 rounded-full ${
-                                            syncStatus === 'connected' ? 'bg-green-500' :
-                                            syncStatus === 'syncing' ? 'bg-orange-500 animate-pulse' :
-                                            'bg-red-500'
-                                        }`} />
-                                        <div>
-                                            <p className="text-xs font-black uppercase tracking-wider text-gray-900">
-                                                {syncStatus === 'connected' ? 'Online' :
-                                                syncStatus === 'syncing' ? 'Syncing' :
-                                                'Offline'}
-                                            </p>
-                                            <p className="text-[10px] text-gray-500 truncate">{user.email}</p>
-                                        </div>
-                                    </div>
+                            <div className="absolute top-16 left-0 w-72 bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 animate-pop">
+                                {/* Status Display */}
+                                <div className="flex items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
+                                    <div className={`status-dot ${
+                                        syncStatus === 'connected' ? 'status-connected' :
+                                        syncStatus === 'syncing' ? 'status-syncing' :
+                                        'status-disconnected'
+                                    }`} />
+                                    <span className="text-[10px] font-black uppercase text-gray-600 tracking-wider">
+                                        {syncStatus === 'connected' ? 'Cloud Synced' :
+                                        syncStatus === 'syncing' ? 'Syncing...' :
+                                        'Offline'}
+                                    </span>
                                 </div>
 
-                                {/* Folders Section */}
-                                <div className="p-4 max-h-96 overflow-y-auto custom-scroll">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <h3 className="text-xs font-black uppercase tracking-wider text-gray-600">Folders</h3>
-                                        <button
-                                            onClick={() => setShowFolderInput(!showFolderInput)}
-                                            className="text-blue-600 hover:text-blue-700 font-black text-lg leading-none"
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-
-                                    {showFolderInput && (
-                                        <div className="mb-4 p-3 bg-gray-50 rounded-xl space-y-2">
-                                            <input
-                                                type="text"
-                                                placeholder="Folder name"
-                                                value={newFolderName}
-                                                onChange={(e) => setNewFolderName(e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') handleAddFolder();
-                                                }}
-                                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-500"
-                                                autoFocus
-                                            />
-                                            <div>
-                                                <label className="block text-[9px] font-black uppercase tracking-wider text-gray-600 mb-2">
-                                                    Folder Color
-                                                </label>
-                                                <div className="grid grid-cols-6 gap-2">
-                                                    {['blue', 'purple', 'pink', 'red', 'orange', 'green'].map(color => (
-                                                        <button
-                                                            key={color}
-                                                            onClick={() => setNewFolderType(color)}
-                                                            className={`w-8 h-8 rounded-lg transition-all ${
-                                                                newFolderType === color ? 'ring-2 ring-offset-2 ring-gray-900' : ''
-                                                            } ${
-                                                                color === 'blue' ? 'bg-blue-500' :
-                                                                color === 'purple' ? 'bg-purple-500' :
-                                                                color === 'pink' ? 'bg-pink-500' :
-                                                                color === 'red' ? 'bg-red-500' :
-                                                                color === 'orange' ? 'bg-orange-500' :
-                                                                'bg-green-500'
-                                                            }`}
-                                                        />
-                                                    ))}
-                                                </div>
+                                <h3 className="text-xs font-black uppercase text-gray-400 mb-4">Folders</h3>
+                                
+                                <div className="space-y-2 mb-4 max-h-60 overflow-y-auto custom-scroll">
+                                    {folders.map(folder => (
+                                        <div key={folder.id} className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 group">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-6 h-6 rounded-lg ${colorClasses[folder.color] || 'bg-gray-400'}`}></div>
+                                                <span className="text-sm font-bold text-gray-700">{folder.name}</span>
                                             </div>
                                             <button
-                                                onClick={handleAddFolder}
-                                                className="w-full bg-gray-900 text-white py-2 rounded-lg text-xs font-black uppercase"
+                                                onClick={() => handleDeleteFolder(folder.id)}
+                                                className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
                                             >
-                                                Create Folder
+                                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                </svg>
                                             </button>
                                         </div>
-                                    )}
+                                    ))}
+                                </div>
 
-                                    {/* Folder List */}
-                                    <div className="space-y-2">
-                                        {folders.map(folder => {
-                                            const noteCount = scratchNotes.filter(n => n.folderId === folder.id).length;
-                                            const winCount = quickWins.filter(w => w.folderId === folder.id).length;
-                                            const totalCount = noteCount + winCount;
-                                            
-                                            const colorClasses = {
-                                                blue: 'bg-blue-500',
-                                                purple: 'bg-purple-500',
-                                                pink: 'bg-pink-500',
-                                                red: 'bg-red-500',
-                                                orange: 'bg-orange-500',
-                                                green: 'bg-green-500'
-                                            };
-                                            
-                                            return (
-                                                <div key={folder.id}>
-                                                    {editingFolderId === folder.id ? (
-                                                        // Edit Mode
-                                                        <div className="p-3 bg-white rounded-xl border-2 border-blue-500 space-y-2">
-                                                            <input
-                                                                type="text"
-                                                                value={editFolderName}
-                                                                onChange={(e) => setEditFolderName(e.target.value)}
-                                                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-500"
-                                                                autoFocus
-                                                            />
-                                                            <div>
-                                                                <label className="block text-[9px] font-black uppercase tracking-wider text-gray-600 mb-2">
-                                                                    Folder Color
-                                                                </label>
-                                                                <div className="grid grid-cols-6 gap-2">
-                                                                    {['blue', 'purple', 'pink', 'red', 'orange', 'green'].map(color => (
-                                                                        <button
-                                                                            key={color}
-                                                                            onClick={() => setEditFolderColor(color)}
-                                                                            className={`w-6 h-6 rounded-lg transition-all ${
-                                                                                editFolderColor === color ? 'ring-2 ring-offset-1 ring-gray-900' : ''
-                                                                            } ${
-                                                                                color === 'blue' ? 'bg-blue-500' :
-                                                                                color === 'purple' ? 'bg-purple-500' :
-                                                                                color === 'pink' ? 'bg-pink-500' :
-                                                                                color === 'red' ? 'bg-red-500' :
-                                                                                color === 'orange' ? 'bg-orange-500' :
-                                                                                'bg-green-500'
-                                                                            }`}
-                                                                        />
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex gap-2">
-                                                                <button
-                                                                    onClick={handleSaveEditFolder}
-                                                                    className="flex-1 bg-blue-600 text-white py-1.5 rounded-lg text-xs font-black uppercase"
-                                                                >
-                                                                    Save
-                                                                </button>
-                                                                <button
-                                                                    onClick={handleCancelEditFolder}
-                                                                    className="flex-1 bg-gray-200 text-gray-600 py-1.5 rounded-lg text-xs font-black uppercase"
-                                                                >
-                                                                    Cancel
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        // View Mode
-                                                        <div
-                                                            onClick={() => handleOpenFolder(folder)}
-                                                            className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all group cursor-pointer"
-                                                        >
-                                                            <div className="flex items-center gap-3 flex-grow min-w-0">
-                                                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${colorClasses[folder.type] || 'bg-gray-400'}`}>
-                                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                                                                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                                                    </svg>
-                                                                </div>
-                                                                <div className="min-w-0 flex-grow">
-                                                                    <p className="text-sm font-bold text-gray-900 truncate">{folder.name}</p>
-                                                                    <p className="text-[10px] text-gray-500 uppercase">{totalCount} items</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex gap-1 opacity-0 group-hover:opacity-100 shrink-0">
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleStartEditFolder(folder);
-                                                                    }}
-                                                                    className="p-1.5 text-gray-400 hover:text-blue-500 transition-all"
-                                                                    title="Edit folder"
-                                                                >
-                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                                    </svg>
-                                                                </button>
-                                                                <button
-                                                                    onClick={(e) => {
-                                                                        e.stopPropagation();
-                                                                        handleDeleteFolder(folder.id);
-                                                                    }}
-                                                                    className="p-1.5 text-gray-400 hover:text-red-500 transition-all"
-                                                                    title="Delete folder"
-                                                                >
-                                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                        <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                        
-                                        {folders.length === 0 && !showFolderInput && (
-                                            <p className="text-xs text-gray-400 text-center py-6 italic">No folders yet</p>
-                                        )}
+                                {showFolderInput ? (
+                                    <div className="space-y-2 border-t pt-3">
+                                        <input
+                                            autoFocus
+                                            placeholder="Folder name"
+                                            value={newFolderName}
+                                            onChange={(e) => setNewFolderName(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') handleAddFolder();
+                                            }}
+                                            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-500"
+                                        />
+                                        <div className="flex gap-2">
+                                            {['blue', 'purple', 'pink', 'red', 'orange', 'green'].map(color => (
+                                                <button
+                                                    key={color}
+                                                    onClick={() => setNewFolderColor(color)}
+                                                    className={`w-6 h-6 rounded-lg ${colorClasses[color]} ${
+                                                        newFolderColor === color ? 'ring-2 ring-offset-1 ring-gray-900' : ''
+                                                    }`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={handleAddFolder}
+                                                className="flex-1 bg-blue-600 text-white py-2 rounded-lg text-xs font-black uppercase"
+                                            >
+                                                Add
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setShowFolderInput(false);
+                                                    setNewFolderName('');
+                                                }}
+                                                className="flex-1 bg-gray-200 text-gray-600 py-2 rounded-lg text-xs font-black uppercase"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-
-                                {/* Sign Out Button */}
-                                <div className="p-4 border-t border-gray-100">
+                                ) : (
                                     <button
-                                        onClick={() => {
-                                            setMenuOpen(false);
-                                            onSignOut();
-                                        }}
-                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 text-white rounded-xl font-black uppercase text-xs tracking-wider hover:bg-gray-800 transition-all"
+                                        onClick={() => setShowFolderInput(true)}
+                                        className="w-full p-2 border-2 border-dashed border-gray-200 rounded-lg text-xs font-black uppercase text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-all mb-3"
                                     >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                            <polyline points="16 17 21 12 16 7"></polyline>
-                                            <line x1="21" y1="12" x2="9" y2="12"></line>
-                                        </svg>
-                                        Sign Out
+                                        + New Folder
                                     </button>
-                                </div>
+                                )}
+
+                                {/* Logout Button */}
+                                <button
+                                    onClick={() => {
+                                        setMenuOpen(false);
+                                        onSignOut();
+                                    }}
+                                    className="w-full p-2 border-2 border-gray-200 rounded-lg text-xs font-black uppercase text-gray-600 hover:border-red-300 hover:text-red-600 transition-all flex items-center justify-center gap-2"
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                        <polyline points="16 17 21 12 16 7"></polyline>
+                                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                                    </svg>
+                                    Sign Out
+                                </button>
                             </div>
                         )}
                     </div>
 
-                    {/* Search Modal */}
-                    {showSearch && (
-                        <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-[2000] p-4 pt-20">
-                            <div className="bg-white rounded-[40px] shadow-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden flex flex-col animate-pop">
-                                {/* Search Header */}
-                                <div className="p-6 border-b border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-gray-400">
-                                            <circle cx="11" cy="11" r="8"></circle>
-                                            <path d="m21 21-4.35-4.35"></path>
-                                        </svg>
-                                        <input
-                                            type="text"
-                                            placeholder="Search notes and tasks..."
-                                            value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
-                                            autoFocus
-                                            className="flex-grow text-xl font-bold outline-none"
-                                        />
-                                        <button
-                                            onClick={() => {
-                                                setShowSearch(false);
-                                                setSearchQuery('');
-                                            }}
-                                            className="p-2 hover:bg-gray-100 rounded-xl transition-all"
-                                        >
-                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Search Results */}
-                                <div className="flex-grow overflow-y-auto p-6 space-y-3 custom-scroll">
-                                    {searchQuery.trim() === '' ? (
-                                        <div className="text-center py-20">
-                                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto text-gray-300 mb-4">
-                                                <circle cx="11" cy="11" r="8"></circle>
-                                                <path d="m21 21-4.35-4.35"></path>
-                                            </svg>
-                                            <p className="text-gray-400 text-sm">Type to search notes and tasks</p>
-                                        </div>
-                                    ) : searchResults.length === 0 ? (
-                                        <div className="text-center py-20">
-                                            <p className="text-gray-400 text-sm">No results found for "{searchQuery}"</p>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <p className="text-xs font-black uppercase tracking-wider text-gray-400 mb-4">
-                                                {searchResults.length} result{searchResults.length === 1 ? '' : 's'}
-                                            </p>
-                                            {searchResults.map(item => {
-                                                const folder = item.folderId ? folders.find(f => f.id === item.folderId) : null;
-                                                const isScheduled = Object.values(reminders).some(dayEvents => 
-                                                    dayEvents.some(event => event.linkedNoteId === item.id)
-                                                );
-                                                
-                                                return (
-                                                    <div
-                                                        key={item.id}
-                                                        onClick={() => {
-                                                            setShowSearch(false);
-                                                            setSearchQuery('');
-                                                            if (item.type === 'note') {
-                                                                handleNoteStartEdit(item.id, item.text, item.details || "");
-                                                            } else {
-                                                                handleWinStartEdit(item.id, item.text, item.details || "");
-                                                            }
-                                                        }}
-                                                        className="p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 cursor-pointer transition-all group no-select"
-                                                    >
-                                                        <div className="flex items-start justify-between gap-3">
-                                                            <div className="flex-grow min-w-0">
-                                                                <div className="flex items-center gap-2 mb-1">
-                                                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
-                                                                        item.type === 'win' ? 'bg-blue-100' : 'bg-pink-100'
-                                                                    }`}>
-                                                                        {item.type === 'win' ? (
-                                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
-                                                                                <polyline points="9 11 12 14 22 4"></polyline>
-                                                                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                                                            </svg>
-                                                                        ) : (
-                                                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-pink-600">
-                                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                                            </svg>
-                                                                        )}
-                                                                    </div>
-                                                                    <span className="font-bold text-gray-900">{item.text}</span>
-                                                                </div>
-                                                                {item.details && (
-                                                                    <div 
-                                                                        className="text-xs text-gray-500 line-clamp-2 ml-8" 
-                                                                        dangerouslySetInnerHTML={{ __html: item.details }}
-                                                                    />
-                                                                )}
-                                                                <div className="flex items-center gap-2 mt-2 ml-8">
-                                                                    {folder && (
-                                                                        <span className="text-[10px] px-2 py-0.5 bg-gray-200 text-gray-600 rounded-full font-bold">
-                                                                            ðŸ“ {folder.name}
-                                                                        </span>
-                                                                    )}
-                                                                    {isScheduled && (
-                                                                        <span className="text-[10px] px-2 py-0.5 bg-pink-100 text-pink-600 rounded-full font-bold">
-                                                                            ðŸ“… Scheduled
-                                                                        </span>
-                                                                    )}
-                                                                    {item.completed && (
-                                                                        <span className="text-[10px] px-2 py-0.5 bg-green-100 text-green-600 rounded-full font-bold">
-                                                                            âœ“ Complete
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })}
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Folder View Modal */}
-                    {selectedFolder && (
-                        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[2000] p-4">
-                            <div className="bg-white rounded-[40px] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-pop">
-                                {/* Header */}
-                                <div className={`p-6 border-b border-gray-100 ${
-                                    selectedFolder.type === 'blue' ? 'bg-blue-50' :
-                                    selectedFolder.type === 'purple' ? 'bg-purple-50' :
-                                    selectedFolder.type === 'pink' ? 'bg-pink-50' :
-                                    selectedFolder.type === 'red' ? 'bg-red-50' :
-                                    selectedFolder.type === 'orange' ? 'bg-orange-50' :
-                                    selectedFolder.type === 'green' ? 'bg-green-50' :
-                                    'bg-gray-50'
-                                }`}>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3 flex-grow">
-                                            {editingFolderId === selectedFolder.id ? (
-                                                // Edit Mode in Modal
-                                                <div className="flex items-center gap-3 flex-grow">
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                                                        editFolderColor === 'blue' ? 'bg-blue-500' :
-                                                        editFolderColor === 'purple' ? 'bg-purple-500' :
-                                                        editFolderColor === 'pink' ? 'bg-pink-500' :
-                                                        editFolderColor === 'red' ? 'bg-red-500' :
-                                                        editFolderColor === 'orange' ? 'bg-orange-500' :
-                                                        editFolderColor === 'green' ? 'bg-green-500' :
-                                                        'bg-gray-500'
-                                                    }`}>
-                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                                                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                                        </svg>
-                                                    </div>
-                                                    <div className="flex-grow space-y-2">
-                                                        <input
-                                                            type="text"
-                                                            value={editFolderName}
-                                                            onChange={(e) => setEditFolderName(e.target.value)}
-                                                            className="w-full px-3 py-2 text-lg font-bold border-2 border-gray-300 rounded-xl outline-none focus:border-blue-500"
-                                                            autoFocus
-                                                        />
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-black uppercase text-gray-500">Color:</span>
-                                                            {['blue', 'purple', 'pink', 'red', 'orange', 'green'].map(color => (
-                                                                <button
-                                                                    key={color}
-                                                                    onClick={() => setEditFolderColor(color)}
-                                                                    className={`w-6 h-6 rounded-lg transition-all ${
-                                                                        editFolderColor === color ? 'ring-2 ring-offset-2 ring-gray-900' : ''
-                                                                    } ${
-                                                                        color === 'blue' ? 'bg-blue-500' :
-                                                                        color === 'purple' ? 'bg-purple-500' :
-                                                                        color === 'pink' ? 'bg-pink-500' :
-                                                                        color === 'red' ? 'bg-red-500' :
-                                                                        color === 'orange' ? 'bg-orange-500' :
-                                                                        'bg-green-500'
-                                                                    }`}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                // View Mode
-                                                <>
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                                                        selectedFolder.type === 'blue' ? 'bg-blue-500' :
-                                                        selectedFolder.type === 'purple' ? 'bg-purple-500' :
-                                                        selectedFolder.type === 'pink' ? 'bg-pink-500' :
-                                                        selectedFolder.type === 'red' ? 'bg-red-500' :
-                                                        selectedFolder.type === 'orange' ? 'bg-orange-500' :
-                                                        selectedFolder.type === 'green' ? 'bg-green-500' :
-                                                        'bg-gray-500'
-                                                    }`}>
-                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-                                                            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                                                        </svg>
-                                                    </div>
-                                                    <div>
-                                                        <h2 className="text-2xl font-black text-gray-900">{selectedFolder.name}</h2>
-                                                        <p className="text-sm text-gray-500 uppercase font-bold">{folderNotes.length} items</p>
-                                                    </div>
-                                                </>
-                                            )}
-                                        </div>
-                                        <div className="flex gap-2">
-                                            {editingFolderId === selectedFolder.id ? (
-                                                // Edit mode buttons
-                                                <>
-                                                    <button
-                                                        onClick={handleSaveEditFolder}
-                                                        className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-black uppercase hover:bg-blue-700 transition-all"
-                                                    >
-                                                        Save
-                                                    </button>
-                                                    <button
-                                                        onClick={handleCancelEditFolder}
-                                                        className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl text-sm font-black uppercase hover:bg-gray-300 transition-all"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                // View mode buttons
-                                                <>
-                                                    <button
-                                                        onClick={() => handleStartEditFolder(selectedFolder)}
-                                                        className="p-2 hover:bg-white/50 rounded-xl transition-all"
-                                                        title="Edit folder"
-                                                    >
-                                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                        </svg>
-                                                    </button>
-                                                    <button
-                                                        onClick={handleCloseFolder}
-                                                        className="p-2 hover:bg-white/50 rounded-xl transition-all"
-                                                        title="Close"
-                                                    >
-                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                        </svg>
-                                                    </button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Notes List */}
-                                <div className="flex-grow overflow-y-auto p-6 space-y-4 custom-scroll">
-                                    {folderNotes.length === 0 ? (
-                                        <div className="text-center py-20">
-                                            <p className="text-gray-400 text-sm italic">No items in this folder yet</p>
-                                            <p className="text-gray-400 text-xs mt-2">Double-click notes or tasks and assign them to this folder</p>
-                                        </div>
-                                    ) : (
-                                        folderNotes.map(item => {
-                                            const isScheduled = Object.values(reminders).some(dayEvents => 
-                                                dayEvents.some(event => event.linkedNoteId === item.id)
-                                            );
-                                            const scheduledDates = Object.entries(reminders)
-                                                .filter(([date, events]) => events.some(e => e.linkedNoteId === item.id))
-                                                .map(([date]) => date);
-                                            
-                                            return (
-                                                <div
-                                                    key={item.id}
-                                                    className="bg-gray-50 p-6 rounded-3xl hover:bg-white border border-transparent hover:border-gray-200 group transition-all no-select relative"
-                                                >
-                                                    <div className="flex items-start gap-3">
-                                                        {/* Checkbox for tasks */}
-                                                        {item.type === 'win' && (
-                                                            <input 
-                                                                type="checkbox" 
-                                                                checked={item.completed || false}
-                                                                onChange={(e) => {
-                                                                    e.stopPropagation();
-                                                                    handleWinToggle(item.id);
-                                                                }}
-                                                                className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0 mt-1"
-                                                            />
-                                                        )}
-                                                        
-                                                        <div className="flex-grow min-w-0">
-                                                            <div 
-                                                                onDoubleClick={() => {
-                                                                    handleCloseFolder();
-                                                                    if (item.type === 'note') {
-                                                                        handleNoteStartEdit(item.id, item.text, item.details || "");
-                                                                    } else {
-                                                                        handleWinStartEdit(item.id, item.text, item.details || "");
-                                                                    }
-                                                                }}
-                                                                className="cursor-pointer"
-                                                            >
-                                                                <div className="flex items-center gap-2 mb-2">
-                                                                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
-                                                                        item.type === 'win' ? 'bg-blue-100' : 'bg-pink-100'
-                                                                    }`}>
-                                                                        {item.type === 'win' ? (
-                                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
-                                                                                <polyline points="9 11 12 14 22 4"></polyline>
-                                                                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
-                                                                            </svg>
-                                                                        ) : (
-                                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-pink-600">
-                                                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                                            </svg>
-                                                                        )}
-                                                                    </div>
-                                                                    <span className={`font-bold text-gray-900 text-lg ${item.completed ? 'line-through opacity-60' : ''}`}>{item.text}</span>
-                                                                    {isScheduled && (
-                                                                        <div className="flex items-center gap-1 bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider">
-                                                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                                                                <line x1="16" y1="2" x2="16" y2="6"></line>
-                                                                                <line x1="8" y1="2" x2="8" y2="6"></line>
-                                                                                <line x1="3" y1="10" x2="21" y2="10"></line>
-                                                                            </svg>
-                                                                            <span>{scheduledDates.length}</span>
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-                                                                {item.details && (
-                                                                    <div 
-                                                                        className="text-sm text-gray-600 line-clamp-2 ml-8" 
-                                                                        dangerouslySetInnerHTML={{ __html: item.details }}
-                                                                    />
-                                                                )}
-                                                                <p className="text-xs text-gray-400 mt-3 opacity-0 group-hover:opacity-100 transition-opacity ml-8">
-                                                                    Double-click to edit
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="max-w-[1600px] mx-auto grid lg:grid-cols-12 gap-6">
-                        {/* QuickTasks - Standalone Panel */}
-                        <div className="order-2 lg:order-1 lg:col-span-3 bg-white border-2 border-gray-100 rounded-[40px] shadow-sm p-8 flex flex-col min-h-[800px]">
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[.3em]">QuickTasks</h3>
-                                <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-                                    <button
-                                        onClick={() => setWinFilter('all')}
-                                        className={`px-2 py-1 text-[8px] font-black uppercase rounded transition-all ${
-                                            winFilter === 'all' ? 'bg-blue-500 text-white' : 'text-gray-500 hover:text-gray-700'
-                                        }`}
-                                        title="All"
-                                    >
-                                        All
-                                    </button>
-                                    <button
-                                        onClick={() => setWinFilter('priority')}
-                                        className={`px-2 py-1 text-[8px] font-black uppercase rounded transition-all ${
-                                            winFilter === 'priority' ? 'bg-blue-500 text-white' : 'text-gray-500 hover:text-gray-700'
-                                        }`}
-                                        title="Sort by Priority"
-                                    >
-                                        Priority
-                                    </button>
-                                    <button
-                                        onClick={() => setWinFilter('date')}
-                                        className={`px-2 py-1 text-[8px] font-black uppercase rounded transition-all ${
-                                            winFilter === 'date' ? 'bg-blue-500 text-white' : 'text-gray-500 hover:text-gray-700'
-                                        }`}
-                                        title="Sort by Date"
-                                    >
-                                        Date
-                                    </button>
-                                    <button
-                                        onClick={() => setWinFilter('folder')}
-                                        className={`px-2 py-1 text-[8px] font-black uppercase rounded transition-all ${
-                                            winFilter === 'folder' ? 'bg-blue-500 text-white' : 'text-gray-500 hover:text-gray-700'
-                                        }`}
-                                        title="Sort by Folder"
-                                    >
-                                        Folder
-                                    </button>
-                                </div>
-                            </div>
+                    <div className="max-w-[2000px] mx-auto grid lg:grid-cols-3 gap-6">
+                        {/* Quick Wins */}
+                        <div className="bg-white border-2 border-gray-100 rounded-[40px] shadow-sm p-8 flex flex-col min-h-[800px]">
+                            <h3 className="text-[10px] font-black text-blue-500 uppercase tracking-[.3em] mb-4">Quick Wins</h3>
                             <input 
                                 type="text" 
                                 placeholder="+ Add Win" 
@@ -1912,101 +910,58 @@
                             />
                             
                             <div className="flex-grow overflow-y-auto pr-2 custom-scroll space-y-3">
-                                {winFilter === 'folder' && groupedByFolder ? (
-                                    // Grouped by folder view
-                                    groupedByFolder.map(group => (
-                                        <div key={group.folder.id} className="space-y-3">
-                                            <h4 className="text-[9px] font-black uppercase tracking-wider text-gray-400 px-2 pt-2">
-                                                {group.folder.name}
-                                            </h4>
-                                            {group.wins.map(item => (
-                                                <WinItem 
-                                                    key={item.id} 
-                                                    item={item}
-                                                    editingNoteId={editingNoteId}
-                                                    schedulingNoteId={schedulingNoteId}
-                                                    tempNoteText={tempNoteText}
-                                                    tempNoteDetails={tempNoteDetails}
-                                                    onStartEdit={handleWinStartEdit}
-                                                    onStartSchedule={handleWinStartSchedule}
-                                                    onSaveEdit={handleWinSaveEdit}
-                                                    onCancelEdit={handleWinCancelEdit}
-                                                    onToggleComplete={handleWinToggle}
-                                                    onDelete={handleWinDelete}
-                                                    onScheduleConfirm={handleWinScheduleConfirm}
-                                                    formData={formData}
-                                                    setFormData={setFormData}
-                                                    execCommand={execCommand}
-                                                    editorRef={editorRef}
-                                                    folders={folders}
-                                                    reminders={reminders}
-                                                />
-                                            ))}
-                                        </div>
-                                    ))
-                                ) : (
-                                    // Normal list view
-                                    activeWins.map(item => (
-                                        <WinItem 
-                                            key={item.id} 
-                                            item={item}
-                                            editingNoteId={editingNoteId}
-                                            schedulingNoteId={schedulingNoteId}
-                                            tempNoteText={tempNoteText}
-                                            tempNoteDetails={tempNoteDetails}
-                                            onStartEdit={handleWinStartEdit}
-                                            onStartSchedule={handleWinStartSchedule}
-                                            onSaveEdit={handleWinSaveEdit}
-                                            onCancelEdit={handleWinCancelEdit}
-                                            onToggleComplete={handleWinToggle}
-                                            onDelete={handleWinDelete}
-                                            onScheduleConfirm={handleWinScheduleConfirm}
-                                            formData={formData}
-                                            setFormData={setFormData}
-                                            execCommand={execCommand}
-                                            editorRef={editorRef}
-                                            folders={folders}
-                                            reminders={reminders}
-                                        />
-                                    ))
-                                )}
+                                {activeWins.map(item => (
+                                    <TaskItem 
+                                        key={item.id} 
+                                        item={item}
+                                        editingId={editingNoteId}
+                                        tempText={tempNoteText}
+                                        tempDetails={tempNoteDetails}
+                                        tempFolderId={tempFolderId}
+                                        folders={folders}
+                                        onStartEdit={handleWinStartEdit}
+                                        onSaveEdit={handleWinSaveEdit}
+                                        onCancelEdit={handleWinCancelEdit}
+                                        onToggleComplete={handleWinToggle}
+                                        onDelete={handleWinDelete}
+                                        onFolderChange={setTempFolderId}
+                                        execCommand={execCommand}
+                                        editorRef={editorRef}
+                                    />
+                                ))}
 
                                 {completedWins.length > 0 && (
                                     <div className="pt-6">
                                         <button 
                                             onClick={() => setShowCompleted(!showCompleted)} 
-                                            className="flex items-center gap-2 mb-4 w-full group"
+                                            className="flex items-center gap-2 mb-4 w-full"
                                         >
-                                            <div className="h-[1px] flex-grow bg-gray-200"></div>
-                                            <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter group-hover:text-blue-400 transition-colors">
+                                            <div className="h-[1px] flex-1 bg-gray-200"></div>
+                                            <span className="text-[8px] font-black uppercase text-gray-400 tracking-tighter hover:text-blue-400 transition-colors px-2">
                                                 Completed ({completedWins.length})
                                             </span>
-                                            <div className="h-[1px] flex-grow bg-gray-200"></div>
+                                            <div className="h-[1px] flex-1 bg-gray-200"></div>
                                         </button>
                                         
                                         {showCompleted && (
                                             <div className="space-y-3 animate-pop">
                                                 {completedWins.map(item => (
-                                                    <WinItem 
+                                                    <TaskItem 
                                                         key={item.id} 
                                                         item={item}
-                                                        editingNoteId={editingNoteId}
-                                                        schedulingNoteId={schedulingNoteId}
-                                                        tempNoteText={tempNoteText}
-                                                        tempNoteDetails={tempNoteDetails}
+                                                        editingId={editingNoteId}
+                                                        tempText={tempNoteText}
+                                                        tempDetails={tempNoteDetails}
+                                                        tempFolderId={tempFolderId}
+                                                        folders={folders}
                                                         onStartEdit={handleWinStartEdit}
-                                                        onStartSchedule={handleWinStartSchedule}
                                                         onSaveEdit={handleWinSaveEdit}
                                                         onCancelEdit={handleWinCancelEdit}
                                                         onToggleComplete={handleWinToggle}
                                                         onDelete={handleWinDelete}
-                                                        onScheduleConfirm={handleWinScheduleConfirm}
-                                                        formData={formData}
-                                                        setFormData={setFormData}
+                                                        onFolderChange={setTempFolderId}
                                                         execCommand={execCommand}
                                                         editorRef={editorRef}
-                                                        folders={folders}
-                                                        reminders={reminders}
                                                     />
                                                 ))}
                                             </div>
@@ -2016,8 +971,8 @@
                             </div>
                         </div>
 
-                        {/* QuickNotes - Now Full Width */}
-                        <div className="order-1 lg:order-2 lg:col-span-5 bg-white border-2 border-gray-100 rounded-[40px] shadow-sm overflow-hidden min-h-[800px]">
+                        {/* QuickNotes */}
+                        <div className="bg-white border-2 border-gray-100 rounded-[40px] shadow-sm overflow-hidden min-h-[800px]">
                             <div className="p-10">
                                 <h3 className="text-[10px] font-black text-pink-500 uppercase tracking-[.4em] mb-2">Workspace</h3>
                                 <h2 className="text-4xl font-black italic uppercase tracking-tighter text-gray-900 mb-8">QuickNotes</h2>
@@ -2034,13 +989,8 @@
                                 />
                                 <div className="space-y-4">
                                     {scratchNotes.map(note => {
-                                        const isScheduled = Object.values(reminders).some(dayEvents => 
-                                            dayEvents.some(event => event.linkedNoteId === note.id)
-                                        );
-                                        const scheduledDates = Object.entries(reminders)
-                                            .filter(([date, events]) => events.some(e => e.linkedNoteId === note.id))
-                                            .map(([date]) => date);
-                                        
+                                        const noteFolder = folders.find(f => f.id === note.folderId);
+
                                         return (
                                             <div key={note.id}>
                                                 {editingNoteId === note.id ? (
@@ -2050,26 +1000,6 @@
                                                             value={tempNoteText} 
                                                             onChange={e => setTempNoteText(e.target.value)} 
                                                         />
-                                                        
-                                                        {/* Folder Dropdown */}
-                                                        <div>
-                                                            <label className="block text-xs font-black uppercase tracking-wider text-gray-600 mb-2">
-                                                                Add to Folder
-                                                            </label>
-                                                            <select
-                                                                value={formData.folderId || ''}
-                                                                onChange={e => setFormData({...formData, folderId: e.target.value})}
-                                                                className="w-full px-4 py-3 rounded-xl border-2 border-gray-100 focus:border-blue-500 outline-none transition-all font-medium text-sm"
-                                                            >
-                                                                <option value="">No folder</option>
-                                                                {folders.map(folder => (
-                                                                    <option key={folder.id} value={folder.id}>
-                                                                        {folder.name}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
-                                                        
                                                         <div className="flex flex-wrap items-center gap-1 p-2 bg-gray-50 rounded-xl border border-gray-100">
                                                             <button onClick={() => execCommand('bold')} className="p-1.5 hover:bg-gray-200 rounded font-bold w-8 text-xs">B</button>
                                                             <button onClick={() => execCommand('underline')} className="p-1.5 hover:bg-gray-200 rounded underline w-8 text-xs">U</button>
@@ -2081,9 +1011,24 @@
                                                             className="rich-editor w-full bg-gray-50 p-4 rounded-xl text-sm font-medium outline-none overflow-y-auto" 
                                                             dangerouslySetInnerHTML={{ __html: tempNoteDetails }} 
                                                         />
+                                                        <div>
+                                                            <label className="block text-[8px] font-black uppercase tracking-wider text-gray-600 mb-1">
+                                                                Folder
+                                                            </label>
+                                                            <select
+                                                                value={tempFolderId}
+                                                                onChange={(e) => setTempFolderId(e.target.value)}
+                                                                className="w-full text-sm p-2 bg-gray-50 rounded-lg border border-gray-100 outline-none"
+                                                            >
+                                                                <option value="">No Folder</option>
+                                                                {folders.map(folder => (
+                                                                    <option key={folder.id} value={folder.id}>{folder.name}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
                                                         <div className="flex gap-2">
                                                             <button 
-                                                                onClick={() => handleNoteSaveEdit(note.id, tempNoteText, editorRef.current.innerHTML)} 
+                                                                onClick={() => handleNoteSaveEdit(note.id, tempNoteText, editorRef.current.innerHTML, tempFolderId)} 
                                                                 className="bg-gray-900 text-white px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest"
                                                             >
                                                                 Save
@@ -2096,41 +1041,18 @@
                                                             </button>
                                                         </div>
                                                     </div>
-                                                ) : schedulingNoteId === note.id ? (
-                                                    <div className="bg-white p-8 rounded-[32px] shadow-2xl border-pink-500 border-2 animate-pop">
-                                                        <h3 className="text-xl font-bold mb-4">{note.text}</h3>
-                                                        <div className="flex items-center gap-4">
-                                                            <InlineDatePicker 
-                                                                value={formData.startDate} 
-                                                                onChange={v => setFormData({...formData, startDate: v})} 
-                                                            />
-                                                            <button 
-                                                                onClick={() => handleNoteScheduleConfirm(note, formData.startDate)} 
-                                                                className="bg-gray-900 text-white px-6 py-3 rounded-xl text-[10px] font-black uppercase ml-auto"
-                                                            >
-                                                                Confirm
-                                                            </button>
-                                                        </div>
-                                                    </div>
                                                 ) : (
                                                     <div 
-                                                        onDoubleClick={() => handleNoteStartEdit(note.id, note.text, note.details || "")} 
-                                                        className="bg-gray-50/50 p-6 rounded-3xl hover:bg-white border border-transparent hover:border-gray-100 flex justify-between items-center cursor-pointer group transition-all no-select"
+                                                        onDoubleClick={() => handleNoteStartEdit(note.id, note.text, note.details || "", note.folderId || "")} 
+                                                        className="bg-gray-50/50 p-6 rounded-3xl hover:bg-white border border-transparent hover:border-gray-100 flex justify-between items-center cursor-pointer group transition-all"
                                                     >
                                                         <div className="min-w-0 flex-grow">
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="font-bold text-gray-700 block truncate">{note.text}</span>
-                                                                {isScheduled && (
-                                                                    <div className="flex items-center gap-1 bg-pink-100 text-pink-600 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider shrink-0">
-                                                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                                                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                                                                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                                                                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
-                                                            </div>
+                                                            <span className="font-bold text-gray-700 block">{note.text}</span>
+                                                            {noteFolder && (
+                                                                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-[7px] font-black uppercase text-white ${colorClasses[noteFolder.color] || 'bg-gray-400'}`}>
+                                                                    {noteFolder.name}
+                                                                </span>
+                                                            )}
                                                             {note.details && (
                                                                 <div 
                                                                     className="text-[10px] text-gray-400 mt-1 italic line-clamp-1 opacity-60" 
@@ -2138,28 +1060,17 @@
                                                                 />
                                                             )}
                                                         </div>
-                                                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                                                            <button 
-                                                                onClick={e => { 
-                                                                    e.stopPropagation(); 
-                                                                    handleNoteDelete(note.id);
-                                                                }} 
-                                                                className="p-2 text-gray-300 hover:text-red-500 transition-colors"
-                                                            >
-                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                                </svg>
-                                                            </button>
-                                                            <button 
-                                                                onClick={e => { 
-                                                                    e.stopPropagation(); 
-                                                                    handleNoteStartSchedule(note.id, note.text, note.details || "");
-                                                                }} 
-                                                                className="bg-pink-50 text-pink-600 px-4 py-2 rounded-xl text-[9px] font-black uppercase"
-                                                            >
-                                                                Schedule
-                                                            </button>
-                                                        </div>
+                                                        <button 
+                                                            onClick={e => { 
+                                                                e.stopPropagation(); 
+                                                                handleNoteDelete(note.id);
+                                                            }} 
+                                                            className="opacity-0 group-hover:opacity-100 p-2 text-gray-300 hover:text-red-500 transition-colors"
+                                                        >
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                            </svg>
+                                                        </button>
                                                     </div>
                                                 )}
                                             </div>
@@ -2169,120 +1080,228 @@
                             </div>
                         </div>
 
-                        <div className="order-3 lg:col-span-4 flex flex-col gap-4">
-                            <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-4">
-                                <div className="flex justify-between items-center mb-3">
-                                    <h4 className="text-[9px] font-black uppercase text-gray-400">
-                                        {navDate.toLocaleString('default', { month: 'short', year: 'numeric' })}
-                                    </h4>
-                                    <div className="flex gap-1">
-                                        <button 
-                                            onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() - 1, 1))} 
-                                            className="p-1 text-gray-300"
-                                        >
-                                            â†
-                                        </button>
-                                        <button 
-                                            onClick={() => setNavDate(new Date(navDate.getFullYear(), navDate.getMonth() + 1, 1))} 
-                                            className="p-1 text-gray-300"
-                                        >
-                                            â†’
-                                        </button>
-                                    </div>
-                                </div>
-                                <div className="day-grid gap-1">
-                                    {["S","M","T","W","T","F","S"].map(d => 
-                                        <div key={d} className="text-center text-[7px] font-black text-gray-200 mb-1">{d}</div>
-                                    )}
-                                    {calendarDays}
-                                </div>
-                            </div>
+                        {/* Calendar Panel */}
+                        <div className="bg-white border-2 border-gray-100 rounded-[40px] shadow-sm p-8 flex flex-col min-h-[800px]">
+                            <h3 className="text-[10px] font-black text-purple-500 uppercase tracking-[.3em] mb-4">Calendar</h3>
                             
-                            <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm flex-grow flex flex-col overflow-hidden min-h-[400px]">
-                                <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex justify-between items-center">
-                                    <h3 className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Daily Agenda</h3>
-                                    <span className="text-[8px] font-black text-gray-400">{currentKey}</span>
-                                </div>
-                                <div className="p-4 space-y-2 flex-grow overflow-y-auto custom-scroll">
-                                    {dailyAgenda.length === 0 && (
-                                        <p className="text-[9px] text-gray-300 text-center italic py-10 uppercase tracking-widest">Free Day</p>
-                                    )}
-                                    {dailyAgenda.map(r => (
-                                        <div key={r.id}>
-                                            {editingNoteId === r.id ? (
-                                                <div className={`p-4 rounded-2xl border-2 shadow-xl animate-pop space-y-3 bg-white ${r.type === 'win' ? 'border-blue-500' : 'border-pink-500'}`}>
-                                                    <input 
-                                                        autoFocus 
-                                                        className="text-[11px] font-black uppercase text-gray-900 outline-none w-full bg-gray-50 p-2 rounded-lg" 
-                                                        value={tempNoteText} 
-                                                        onChange={e => setTempNoteText(e.target.value)} 
-                                                    />
-                                                    <div className="flex gap-1 p-1 bg-gray-50 rounded-lg border border-gray-100">
-                                                        <button onClick={() => execCommand('bold')} className="p-1 hover:bg-gray-200 rounded font-bold w-6 text-[10px]">B</button>
-                                                        <button onClick={() => execCommand('underline')} className="p-1 hover:bg-gray-200 rounded underline w-6 text-[10px]">U</button>
-                                                    </div>
-                                                    <div 
-                                                        ref={editorRef} 
-                                                        contentEditable 
-                                                        className="rich-editor w-full bg-gray-50 p-3 rounded-lg text-[10px] font-medium min-h-[80px] outline-none overflow-y-auto" 
-                                                        dangerouslySetInnerHTML={{ __html: tempNoteDetails }} 
-                                                    />
-                                                    <div className="flex gap-2">
-                                                        <button 
-                                                            onClick={() => handleAgendaSaveEdit(r.id, tempNoteText, editorRef.current.innerHTML)} 
-                                                            className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
-                                                        >
-                                                            Save
-                                                        </button>
-                                                        <button 
-                                                            onClick={handleWinCancelEdit} 
-                                                            className="bg-gray-100 text-gray-400 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
-                                                        >
-                                                            Cancel
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <div 
-                                                    onDoubleClick={() => handleAgendaStartEdit(r.id, r.text, r.notes || "")} 
-                                                    className={`p-3 rounded-xl border-l-4 cursor-pointer transition-all hover:brightness-95 no-select ${
-                                                        r.type === 'win' ? 'bg-blue-50/50 border-blue-500' : 'bg-pink-50/50 border-pink-500'
+                            {/* Month Navigation */}
+                            <div className="flex items-center justify-between mb-6">
+                                <button
+                                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+                                    className="p-2 hover:bg-gray-50 rounded-lg transition-all"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <h2 className="text-xl font-black text-gray-900">
+                                    {currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                </h2>
+                                <button
+                                    onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+                                    className="p-2 hover:bg-gray-50 rounded-lg transition-all"
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Day Headers */}
+                            <div className="grid grid-cols-7 gap-1 mb-2">
+                                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+                                    <div key={day} className="text-center text-[8px] font-black uppercase text-gray-400 tracking-wider py-2">
+                                        {day}
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Calendar Grid */}
+                            <div className="grid grid-cols-7 gap-1 flex-grow mb-6">
+                                {renderCalendar()}
+                            </div>
+
+                            {/* Selected Date Events */}
+                            {selectedDate && (
+                                <div className="border-t pt-4">
+                                    <h4 className="text-xs font-black uppercase text-gray-600 mb-3">
+                                        {selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </h4>
+                                    
+                                    <input
+                                        type="text"
+                                        placeholder="+ Add event"
+                                        value={newEventText}
+                                        onChange={(e) => setNewEventText(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && newEventText.trim()) {
+                                                handleAddEvent();
+                                            }
+                                        }}
+                                        className="w-full bg-gray-50 border border-gray-100 rounded-xl p-3 text-[10px] font-bold outline-none mb-2 shadow-sm focus:border-purple-200 transition-all"
+                                    />
+
+                                    {/* Collapsible Folder Section */}
+                                    <button
+                                        onClick={() => setShowNewEventFolders(!showNewEventFolders)}
+                                        className="w-full text-left text-[9px] font-black uppercase text-gray-400 hover:text-purple-500 transition-colors mb-2 flex items-center gap-1"
+                                    >
+                                        <svg 
+                                            width="10" 
+                                            height="10" 
+                                            viewBox="0 0 24 24" 
+                                            fill="none" 
+                                            stroke="currentColor" 
+                                            strokeWidth="2"
+                                            className={`transition-transform ${showNewEventFolders ? 'rotate-90' : ''}`}
+                                        >
+                                            <polyline points="9 18 15 12 9 6"></polyline>
+                                        </svg>
+                                        {newEventFolderId ? folders.find(f => f.id === newEventFolderId)?.name || 'Add to folder' : 'Add to folder'}
+                                    </button>
+
+                                    {showNewEventFolders && (
+                                        <div className="mb-4 animate-pop">
+                                            <div className="grid grid-cols-2 gap-2">
+                                                <button
+                                                    onClick={() => {
+                                                        setNewEventFolderId('');
+                                                        setShowNewEventFolders(false);
+                                                    }}
+                                                    className={`p-2 rounded-lg text-[9px] font-bold transition-all ${
+                                                        !newEventFolderId 
+                                                            ? 'bg-gray-900 text-white' 
+                                                            : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
                                                     }`}
                                                 >
-                                                    <div className="flex justify-between items-start text-black">
-                                                        <div className="flex items-center gap-1 flex-grow min-w-0">
-                                                            <p className={`text-[10px] font-black uppercase mb-1 truncate ${r.type === 'win' ? 'text-blue-800' : 'text-gray-800'}`}>
-                                                                {r.text}
-                                                            </p>
-                                                            {r.linkedNoteId && (
-                                                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-pink-400">
-                                                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                                                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                                                                </svg>
-                                                            )}
-                                                        </div>
-                                                        <button 
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleAgendaDelete(r.id);
-                                                            }}
-                                                            className="text-gray-300 hover:text-red-500 transition-colors"
-                                                        >
-                                                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                                <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                    <div 
-                                                        className="text-[9px] text-gray-400 italic line-clamp-2" 
-                                                        dangerouslySetInnerHTML={{ __html: r.notes }}
-                                                    />
-                                                </div>
-                                            )}
+                                                    No Folder
+                                                </button>
+                                                {folders.map(folder => (
+                                                    <button
+                                                        key={folder.id}
+                                                        onClick={() => {
+                                                            setNewEventFolderId(folder.id);
+                                                            setShowNewEventFolders(false);
+                                                        }}
+                                                        className={`p-2 rounded-lg text-[9px] font-bold flex items-center gap-2 transition-all ${
+                                                            newEventFolderId === folder.id
+                                                                ? 'bg-gray-900 text-white'
+                                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                        }`}
+                                                    >
+                                                        <div className={`w-3 h-3 rounded ${colorClasses[folder.color]}`}></div>
+                                                        {folder.name}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
-                                    ))}
+                                    )}
+
+                                    <div className="space-y-2 max-h-64 overflow-y-auto custom-scroll">
+                                        {getEventsForDate(selectedDate).map(event => {
+                                            const eventFolder = folders.find(f => f.id === event.folderId);
+                                            
+                                            if (editingEventId === event.id) {
+                                                return (
+                                                    <div key={event.id} className="bg-white p-3 rounded-xl border-2 border-purple-500 shadow-xl animate-pop space-y-2">
+                                                        <input 
+                                                            autoFocus 
+                                                            className="text-[10px] font-black uppercase text-gray-900 outline-none w-full bg-gray-50 p-2 rounded-lg" 
+                                                            value={tempEventText} 
+                                                            onChange={e => setTempEventText(e.target.value)} 
+                                                        />
+                                                        <div className="flex gap-1 p-1 bg-gray-50 rounded-lg border border-gray-100">
+                                                            <button onClick={() => {
+                                                                document.execCommand('bold', false, null);
+                                                                if (eventEditorRef.current) eventEditorRef.current.focus();
+                                                            }} className="p-1 hover:bg-gray-200 rounded font-bold w-6 text-[10px]">B</button>
+                                                            <button onClick={() => {
+                                                                document.execCommand('underline', false, null);
+                                                                if (eventEditorRef.current) eventEditorRef.current.focus();
+                                                            }} className="p-1 hover:bg-gray-200 rounded underline w-6 text-[10px]">U</button>
+                                                            <button onClick={() => {
+                                                                document.execCommand('insertUnorderedList', false, null);
+                                                                if (eventEditorRef.current) eventEditorRef.current.focus();
+                                                            }} className="p-1 hover:bg-gray-200 rounded text-[9px] px-2 font-bold">List</button>
+                                                        </div>
+                                                        <div 
+                                                            ref={eventEditorRef} 
+                                                            contentEditable 
+                                                            className="rich-editor w-full bg-gray-50 p-2 rounded-lg text-[10px] font-medium min-h-[60px] outline-none overflow-y-auto" 
+                                                            dangerouslySetInnerHTML={{ __html: tempEventDetails }} 
+                                                        />
+                                                        <div>
+                                                            <label className="block text-[8px] font-black uppercase tracking-wider text-gray-600 mb-1">
+                                                                Folder
+                                                            </label>
+                                                            <select
+                                                                value={tempEventFolderId}
+                                                                onChange={(e) => setTempEventFolderId(e.target.value)}
+                                                                className="w-full text-[10px] p-2 bg-gray-50 rounded-lg border border-gray-100 outline-none"
+                                                            >
+                                                                <option value="">No Folder</option>
+                                                                {folders.map(folder => (
+                                                                    <option key={folder.id} value={folder.id}>{folder.name}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <button 
+                                                                onClick={() => handleEventSaveEdit(event.id, tempEventText, eventEditorRef.current.innerHTML, tempEventFolderId)} 
+                                                                className="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
+                                                            >
+                                                                Save
+                                                            </button>
+                                                            <button 
+                                                                onClick={handleEventCancelEdit} 
+                                                                className="bg-gray-100 text-gray-400 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            
+                                            return (
+                                                <div
+                                                    key={event.id}
+                                                    onDoubleClick={() => handleEventStartEdit(event.id, event.text, event.details || "", event.folderId || "")}
+                                                    className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl hover:bg-white border border-transparent hover:border-gray-100 transition-all group cursor-pointer"
+                                                >
+                                                    <div className="flex-grow min-w-0">
+                                                        <p className="text-[10px] font-bold text-gray-700">
+                                                            {event.text}
+                                                        </p>
+                                                        {eventFolder && (
+                                                            <span className={`inline-block mt-1 px-1.5 py-0.5 rounded-full text-[7px] font-black uppercase text-white ${colorClasses[eventFolder.color] || 'bg-gray-400'}`}>
+                                                                {eventFolder.name}
+                                                            </span>
+                                                        )}
+                                                        {event.details && (
+                                                            <div 
+                                                                className="text-[8px] text-gray-400 italic mt-1 opacity-60 line-clamp-2" 
+                                                                dangerouslySetInnerHTML={{ __html: event.details }}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleDeleteEvent(event.id);
+                                                        }}
+                                                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-300 hover:text-red-500 transition-colors"
+                                                    >
+                                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                            <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
                     </div>
                 </>
@@ -2326,7 +1345,7 @@
                 return <AuthScreen />;
             }
 
-            return <CalendarApp user={user} onSignOut={handleSignOut} />;
+            return <MainApp user={user} onSignOut={handleSignOut} />;
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
