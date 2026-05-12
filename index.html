@@ -399,6 +399,9 @@
             const [showFolderInput, setShowFolderInput] = useState(false);
             const [newFolderName, setNewFolderName] = useState('');
             const [newFolderColor, setNewFolderColor] = useState('blue');
+            const [editingFolderId, setEditingFolderId] = useState(null);
+            const [editFolderName, setEditFolderName] = useState('');
+            const [editFolderColor, setEditFolderColor] = useState('blue');
             const [activePanel, setActivePanel] = useState('wins'); // 'wins', 'notes', 'calendar'
             
             // New feature states
@@ -409,6 +412,7 @@
             const [activeFolderModal, setActiveFolderModal] = useState(null);
             const [newFolderEventText, setNewFolderEventText] = useState("");
             const [newFolderEventDate, setNewFolderEventDate] = useState("");
+            const [isEditingFolderInModal, setIsEditingFolderInModal] = useState(false);
             
             const [editingNoteId, setEditingNoteId] = useState(null); 
             const [tempNoteText, setTempNoteText] = useState("");
@@ -450,9 +454,33 @@
             }, []);
 
             const requestNotificationPermission = async () => {
-                if ('Notification' in window) {
+                if (!('Notification' in window)) {
+                    alert('Notifications are not supported in this browser. Try Chrome, Firefox, or Safari.');
+                    return;
+                }
+                
+                // Check if we're on a secure context
+                if (window.location.protocol === 'file:' || (window.location.protocol === 'http:' && window.location.hostname !== 'localhost')) {
+                    alert('Notifications require HTTPS or localhost. Please access this app via HTTPS or run it locally.');
+                    return;
+                }
+                
+                try {
                     const permission = await Notification.requestPermission();
                     setNotificationsEnabled(permission === 'granted');
+                    
+                    if (permission === 'denied') {
+                        alert('Notification permission was denied. Please enable notifications in your browser settings.');
+                    } else if (permission === 'granted') {
+                        // Show a test notification
+                        new Notification('Notifications Enabled!', {
+                            body: 'You will now receive reminders for upcoming events.',
+                            icon: '/favicon.ico'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Notification permission error:', error);
+                    alert('Could not enable notifications. This feature requires HTTPS or localhost.');
                 }
             };
 
@@ -754,7 +782,13 @@
 
             // Folder modal handlers
             const handleOpenFolderModal = (folderId) => {
-                setActiveFolderModal(folderId);
+                const folder = folders.find(f => f.id === folderId);
+                if (folder) {
+                    setActiveFolderModal(folderId);
+                    setEditFolderName(folder.name);
+                    setEditFolderColor(folder.color);
+                    setIsEditingFolderInModal(false);
+                }
                 setShowFolderModal(true);
                 setMenuOpen(false);
             };
@@ -762,6 +796,7 @@
             const handleCloseFolderModal = () => {
                 setShowFolderModal(false);
                 setActiveFolderModal(null);
+                setIsEditingFolderInModal(false);
             };
 
             // Folder handlers
@@ -785,6 +820,33 @@
                 setFolders(prev => prev.filter(f => f.id !== id));
                 deleteFromFirestore('folders', id);
             }, [deleteFromFirestore]);
+
+            const handleStartEditFolder = (folder) => {
+                setEditingFolderId(folder.id);
+                setEditFolderName(folder.name);
+                setEditFolderColor(folder.color);
+            };
+
+            const handleSaveEditFolder = () => {
+                if (!editFolderName.trim()) return;
+                
+                setFolders(prev => prev.map(f => 
+                    f.id === activeFolderModal 
+                        ? { ...f, name: editFolderName, color: editFolderColor }
+                        : f
+                ));
+                
+                saveToFirestore('folders', activeFolderModal, {
+                    name: editFolderName,
+                    color: editFolderColor
+                });
+                
+                setIsEditingFolderInModal(false);
+            };
+
+            const handleCancelEditFolder = () => {
+                setEditingFolderId(null);
+            };
 
             const handleWinToggle = useCallback((id) => {
                 setQuickWins(prev => {
@@ -1003,18 +1065,20 @@
                                 </button>
 
                                 {/* Notifications Toggle */}
-                                {!notificationsEnabled && (
-                                    <button
-                                        onClick={requestNotificationPermission}
-                                        className="w-full p-2 mb-3 border-2 border-gray-200 rounded-lg text-xs font-black uppercase text-gray-600 hover:border-green-300 hover:text-green-600 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-                                        </svg>
-                                        Enable Notifications
-                                    </button>
-                                )}
+                                <button
+                                    onClick={requestNotificationPermission}
+                                    className={`w-full p-2 mb-3 border-2 rounded-lg text-xs font-black uppercase transition-all flex items-center justify-center gap-2 ${
+                                        notificationsEnabled 
+                                            ? 'border-green-300 text-green-600 bg-green-50' 
+                                            : 'border-gray-200 text-gray-600 hover:border-green-300 hover:text-green-600'
+                                    }`}
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                        <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                    </svg>
+                                    {notificationsEnabled ? 'Notifications Enabled ✓' : 'Enable Notifications'}
+                                </button>
 
                                 {/* Status Display */}
                                 <div className="flex items-center gap-2 mb-4 p-2 bg-gray-50 rounded-lg">
@@ -1637,24 +1701,88 @@
                                         <>
                                             {/* Modal Header */}
                                             <div className="p-8 border-b border-gray-100">
-                                                <div className="flex items-center justify-between mb-2">
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-12 h-12 rounded-2xl ${colorClasses[folder.color]}`}></div>
-                                                        <h2 className="text-3xl font-black uppercase tracking-tighter text-gray-900">{folder.name}</h2>
+                                                {isEditingFolderInModal ? (
+                                                    // Edit Mode
+                                                    <div className="space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <h3 className="text-sm font-black uppercase text-gray-600">Edit Folder</h3>
+                                                            <button
+                                                                onClick={() => setIsEditingFolderInModal(false)}
+                                                                className="p-2 hover:bg-gray-100 rounded-xl transition-all"
+                                                            >
+                                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                        
+                                                        <input
+                                                            autoFocus
+                                                            value={editFolderName}
+                                                            onChange={(e) => setEditFolderName(e.target.value)}
+                                                            className="w-full px-4 py-3 text-2xl font-black uppercase tracking-tighter border-2 border-gray-200 rounded-xl outline-none focus:border-blue-500"
+                                                        />
+                                                        
+                                                        <div>
+                                                            <label className="block text-xs font-black uppercase text-gray-600 mb-2">
+                                                                Folder Color
+                                                            </label>
+                                                            <div className="flex gap-3">
+                                                                {['blue', 'purple', 'pink', 'red', 'orange', 'green'].map(color => (
+                                                                    <button
+                                                                        key={color}
+                                                                        onClick={() => setEditFolderColor(color)}
+                                                                        className={`w-12 h-12 rounded-2xl ${colorClasses[color]} ${
+                                                                            editFolderColor === color ? 'ring-4 ring-offset-2 ring-gray-900' : ''
+                                                                        } transition-all hover:scale-110`}
+                                                                    />
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        <button
+                                                            onClick={handleSaveEditFolder}
+                                                            className="w-full bg-gray-900 text-white py-4 rounded-xl font-black uppercase text-sm tracking-wider hover:bg-gray-800 transition-all"
+                                                        >
+                                                            Save Changes
+                                                        </button>
                                                     </div>
-                                                    <button
-                                                        onClick={handleCloseFolderModal}
-                                                        className="p-2 hover:bg-gray-100 rounded-xl transition-all"
-                                                    >
-                                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                            <line x1="18" y1="6" x2="6" y2="18"></line>
-                                                            <line x1="6" y1="6" x2="18" y2="18"></line>
-                                                        </svg>
-                                                    </button>
-                                                </div>
-                                                <p className="text-sm text-gray-500">
-                                                    {folderWins.length} tasks · {folderNotes.length} notes · {folderEvents.length} events
-                                                </p>
+                                                ) : (
+                                                    // View Mode
+                                                    <>
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-12 h-12 rounded-2xl ${colorClasses[folder.color]}`}></div>
+                                                                <h2 className="text-3xl font-black uppercase tracking-tighter text-gray-900">{folder.name}</h2>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => setIsEditingFolderInModal(true)}
+                                                                    className="p-2 hover:bg-gray-100 rounded-xl transition-all"
+                                                                    title="Edit folder"
+                                                                >
+                                                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                                                    </svg>
+                                                                </button>
+                                                                <button
+                                                                    onClick={handleCloseFolderModal}
+                                                                    className="p-2 hover:bg-gray-100 rounded-xl transition-all"
+                                                                >
+                                                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <p className="text-sm text-gray-500">
+                                                            {folderWins.length} tasks · {folderNotes.length} notes · {folderEvents.length} events
+                                                        </p>
+                                                    </>
+                                                )}
                                             </div>
 
                                             {/* Modal Content */}
