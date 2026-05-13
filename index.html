@@ -1506,6 +1506,39 @@
                 border-top: 1px solid var(--sidebar-bg);
             }
 
+            /* Mobile navigation tabs - horizontal layout */
+            .tab {
+                flex: 1;
+                border-left: none !important;
+                border-bottom: 3px solid transparent;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .tab span {
+                writing-mode: horizontal-tb !important;
+                transform: none !important;
+                font-size: 10px;
+                letter-spacing: 0.5px;
+            }
+
+            .tab.active {
+                border-bottom: 3px solid;
+            }
+
+            .tab.month.active {
+                border-bottom-color: #94a3b8 !important;
+            }
+
+            .tab.tasks.active {
+                border-bottom-color: #8b5cf6 !important;
+            }
+
+            .tab.notes.active {
+                border-bottom-color: #ec4899 !important;
+            }
+
             .sidebar-item {
                 writing-mode: horizontal-tb;
                 padding: 12px 8px;
@@ -1550,11 +1583,15 @@
             }
 
             .header {
-                padding: 16px;
+                padding: 20px 16px;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                background: var(--header-bg);
             }
 
             .header h1 {
-                font-size: 20px;
+                font-size: 22px;
             }
 
             .content {
