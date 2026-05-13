@@ -441,7 +441,7 @@
         .close-btn {
             background: transparent;
             border: none;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-secondary);
             font-size: 28px;
             cursor: pointer;
             line-height: 1;
@@ -451,10 +451,11 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: color 0.3s ease;
         }
 
         .close-btn:hover {
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
         }
 
         .form-group {
@@ -1898,6 +1899,50 @@
 
             .content {
                 padding: 8px;
+            }
+        }
+
+        /* Mobile landscape orientation fixes */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-content {
+                padding-top: 40px !important; /* Less top padding in landscape */
+            }
+
+            .header h1 {
+                font-size: 24px !important; /* Smaller title in landscape */
+            }
+
+            .sidebar {
+                min-height: 50px !important; /* Shorter bottom nav */
+                padding-bottom: 15px !important;
+            }
+
+            .tab {
+                padding: 12px 8px !important;
+            }
+
+            .add-btn {
+                bottom: 70px !important;
+            }
+
+            .calendar-header h2 {
+                font-size: 18px;
+            }
+
+            .calendar-header {
+                margin-bottom: 4px;
+            }
+
+            .calendar-grid {
+                gap: 1px !important;
+            }
+
+            .calendar-day {
+                padding: 2px;
+            }
+
+            .day-number {
+                font-size: 10px;
             }
         }
 
