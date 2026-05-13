@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Personal Organizer</title>
     <style>
         :root {
@@ -1504,6 +1504,7 @@
                 order: 2; /* Move to bottom */
                 border-right: none;
                 border-top: 1px solid var(--sidebar-bg);
+                padding-bottom: env(safe-area-inset-bottom); /* iOS safe area */
             }
 
             /* Mobile navigation tabs - horizontal layout */
@@ -1573,25 +1574,27 @@
                 font-size: 28px;
                 z-index: 100;
                 box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+                bottom: calc(70px + env(safe-area-inset-bottom));
             }
 
             .main-content {
                 order: 1;
                 flex: 1;
                 padding: 12px;
+                padding-top: 60px; /* Push content below status bar */
                 overflow-y: auto;
             }
 
             .header {
-                padding: 20px 16px;
-                position: sticky;
-                top: 0;
+                padding: 16px;
+                position: relative; /* Changed from sticky */
                 z-index: 10;
                 background: var(--header-bg);
             }
 
             .header h1 {
-                font-size: 22px;
+                font-size: 28px; /* Larger for better visibility */
+                font-weight: 400;
             }
 
             .content {
