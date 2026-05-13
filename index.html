@@ -1698,7 +1698,7 @@
                 
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'folder-item-compact-delete';
-                deleteBtn.textContent = '×';
+                deleteBtn.textContent = 'Ã—';
                 deleteBtn.onclick = (e) => {
                     e.stopPropagation();
                     deleteFolderCompact(folder);
@@ -2144,7 +2144,7 @@
             if (dayEvents.length === 0 && dayTasks.length === 0) {
                 content.innerHTML = `
                     <div class="agenda-empty">
-                        <div class="agenda-empty-icon">📅</div>
+                        <div class="agenda-empty-icon">ðŸ“…</div>
                         <div>No events or tasks scheduled for this day</div>
                     </div>
                 `;
@@ -2155,7 +2155,7 @@
                 if (dayEvents.length > 0) {
                     const eventsHeader = document.createElement('div');
                     eventsHeader.style.cssText = 'font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: rgba(139, 92, 246, 0.8); margin-bottom: 12px; font-weight: 600;';
-                    eventsHeader.textContent = '📅 Events';
+                    eventsHeader.textContent = 'ðŸ“… Events';
                     content.appendChild(eventsHeader);
                     
                     dayEvents.forEach(([eventId, event]) => {
@@ -2170,7 +2170,7 @@
                         timeDisplay.className = 'agenda-event-time';
                         const startTime = formatTime(event.startTime || '09:00');
                         const endTime = formatTime(event.endTime || '10:00');
-                        timeDisplay.innerHTML = `🕐 ${startTime} - ${endTime}`;
+                        timeDisplay.innerHTML = `ðŸ• ${startTime} - ${endTime}`;
                         
                         const titleDisplay = document.createElement('div');
                         titleDisplay.className = 'agenda-event-title';
@@ -2194,7 +2194,7 @@
                 if (dayTasks.length > 0) {
                     const tasksHeader = document.createElement('div');
                     tasksHeader.style.cssText = 'font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: rgba(236, 72, 153, 0.8); margin: 20px 0 12px 0; font-weight: 600;';
-                    tasksHeader.textContent = '✓ Tasks';
+                    tasksHeader.textContent = 'âœ“ Tasks';
                     content.appendChild(tasksHeader);
                     
                     dayTasks.forEach(([taskId, task]) => {
