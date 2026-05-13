@@ -1498,14 +1498,15 @@
             .sidebar {
                 width: 100%;
                 height: auto;
-                min-height: 60px;
+                min-height: 70px;
                 flex-direction: row;
                 padding: 0;
-                padding-bottom: 20px; /* Add bottom padding to fill blank space */
+                padding-bottom: 30px; /* More bottom padding */
                 justify-content: space-around;
                 order: 2; /* Move to bottom */
                 border-right: none;
                 border-top: 1px solid var(--sidebar-bg);
+                flex-shrink: 0;
             }
 
             /* Mobile navigation tabs - horizontal layout */
@@ -1516,7 +1517,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 16px 8px; /* Increase padding for larger touch area */
+                padding: 20px 8px; /* More padding for larger touch area */
             }
 
             .tab span {
@@ -1569,7 +1570,7 @@
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
-                bottom: 90px; /* Adjusted for new bottom padding */
+                bottom: 110px; /* Adjusted for taller bottom navigation */
                 right: 16px;
                 width: 56px;
                 height: 56px;
@@ -1581,21 +1582,39 @@
             .main-content {
                 order: 1;
                 flex: 1;
-                padding: 12px;
-                padding-top: 80px; /* Increased padding below status bar */
+                padding: 8px;
+                padding-top: 50px; /* Reduced from 80px */
+                padding-bottom: 8px;
                 overflow-y: auto;
+                display: flex;
+                flex-direction: column;
             }
 
             .header {
-                padding: 16px;
-                position: relative; /* Changed from sticky */
+                padding: 12px 16px;
+                flex-shrink: 0;
+                position: relative;
                 z-index: 10;
                 background: var(--header-bg);
             }
 
             .header h1 {
-                font-size: 32px; /* Even larger for better visibility */
+                font-size: 28px;
                 font-weight: 300;
+            }
+
+            .content-area {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+
+            .view-section {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
             }
 
             .content {
@@ -1605,18 +1624,22 @@
             /* Calendar optimizations */
             .calendar-header {
                 flex-direction: column;
-                gap: 8px;
-                margin-bottom: 12px;
+                gap: 6px;
+                margin-bottom: 6px;
+                flex-shrink: 0;
             }
 
             .calendar-header h2 {
                 font-size: 18px;
+                margin: 0;
+                text-align: center;
             }
 
             .calendar-nav {
                 width: 100%;
                 justify-content: center;
                 gap: 8px;
+                display: flex;
             }
 
             .nav-btn {
@@ -1624,23 +1647,43 @@
                 font-size: 13px;
             }
 
-            /* Make calendar grid visible and properly sized */
+            .calendar-weekdays {
+                flex-shrink: 0;
+                margin-bottom: 3px;
+            }
+
+            .weekday {
+                font-size: 10px;
+            }
+
+            /* Make calendar grid fill available space */
+            #calendar-view {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                min-height: 0;
+            }
+
             .calendar-grid {
-                gap: 3px;
-                height: auto !important;
-                min-height: 300px;
+                gap: 2px !important;
+                flex: 1 !important;
                 display: grid !important;
+                grid-template-columns: repeat(7, 1fr) !important;
+                grid-template-rows: repeat(6, 1fr) !important;
+                min-height: 0 !important;
+                height: 100% !important;
             }
 
             .calendar-day {
-                padding: 3px;
-                min-height: 55px;
+                padding: 2px;
+                min-height: 0;
+                height: 100%;
                 border-radius: 4px;
             }
 
             .day-number {
-                font-size: 11px;
-                margin-bottom: 2px;
+                font-size: 10px;
+                margin-bottom: 1px;
             }
 
             .event-badge {
