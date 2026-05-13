@@ -1601,7 +1601,7 @@
                         <div class="setting-description">Sign out of your account</div>
                     </div>
                     <button class="btn-icon">
-                        <span>â†’</span>
+                        <span>&rarr;</span>
                     </button>
                 </div>
             </div>
@@ -2209,12 +2209,19 @@
         async function logoutUser() {
             if (confirm('Are you sure you want to log out?')) {
                 try {
+                    // Clean up real-time listener
+                    if (unsubscribeListener) {
+                        unsubscribeListener();
+                        unsubscribeListener = null;
+                    }
+                    
                     await auth.signOut();
                     events = {};
                     tasks = {};
                     notes = {};
                     folders = ['Personal', 'Work'];
                     folderColors = {};
+                    document.documentElement.removeAttribute('data-initialized');
                     showLoginModal();
                     toggleMenu(); // Close settings menu
                 } catch (error) {
@@ -2700,11 +2707,19 @@
         }
 
         // Load user data from Firebase Firestore
-        async function loadUserData() {
+        // Real-time listener for user data
+        let unsubscribeListener = null;
+
+        function loadUserData() {
             if (!currentUser) return;
             
-            try {
-                const doc = await db.collection('users').doc(currentUser.uid).get();
+            // Clean up any existing listener
+            if (unsubscribeListener) {
+                unsubscribeListener();
+            }
+            
+            // Set up real-time listener
+            unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
                     events = data.events || {};
@@ -2712,19 +2727,24 @@
                     notes = data.notes || {};
                     folders = data.folders || ['Personal', 'Work'];
                     folderColors = data.folderColors || {};
+                    
+                    // Re-render all views with new data
+                    renderCalendar();
+                    renderTasks();
+                    renderNotes();
+                    updateFoldersDescription();
                 }
                 
-                // Initialize UI
-                initTheme();
-                renderCalendar();
-                renderTasks();
-                renderNotes();
-                updateFoldersDescription();
-                hideLoginModal();
-            } catch (error) {
+                // Initialize UI on first load
+                if (!document.documentElement.hasAttribute('data-initialized')) {
+                    initTheme();
+                    hideLoginModal();
+                    document.documentElement.setAttribute('data-initialized', 'true');
+                }
+            }, (error) => {
                 console.error('Error loading data:', error);
                 alert('Failed to load data. Please refresh the page.');
-            }
+            });
         }
 
         // Folder management
@@ -2929,7 +2949,7 @@
             if (dayEvents.length === 0 && dayTasks.length === 0) {
                 content.innerHTML = `
                     <div class="agenda-empty">
-                        <div class="agenda-empty-icon">ðŸ“…</div>
+                        <div class="agenda-empty-icon">â€”</div>
                         <div>No events or tasks scheduled for this day</div>
                     </div>
                 `;
@@ -2940,7 +2960,7 @@
                 if (dayEvents.length > 0) {
                     const eventsHeader = document.createElement('div');
                     eventsHeader.style.cssText = 'font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: rgba(139, 92, 246, 0.8); margin-bottom: 12px; font-weight: 600;';
-                    eventsHeader.textContent = 'ðŸ“… Events';
+                    eventsHeader.textContent = 'Events';
                     content.appendChild(eventsHeader);
                     
                     dayEvents.forEach(([eventId, event]) => {
@@ -2955,7 +2975,7 @@
                         timeDisplay.className = 'agenda-event-time';
                         const startTime = formatTime(event.startTime || '09:00');
                         const endTime = formatTime(event.endTime || '10:00');
-                        timeDisplay.innerHTML = `ðŸ• ${startTime} - ${endTime}`;
+                        timeDisplay.innerHTML = `${startTime} - ${endTime}`;
                         
                         const titleDisplay = document.createElement('div');
                         titleDisplay.className = 'agenda-event-title';
@@ -2979,7 +2999,7 @@
                 if (dayTasks.length > 0) {
                     const tasksHeader = document.createElement('div');
                     tasksHeader.style.cssText = 'font-size: 12px; text-transform: uppercase; letter-spacing: 1px; color: rgba(236, 72, 153, 0.8); margin: 20px 0 12px 0; font-weight: 600;';
-                    tasksHeader.textContent = 'âœ“ Tasks';
+                    tasksHeader.textContent = 'Tasks';
                     content.appendChild(tasksHeader);
                     
                     dayTasks.forEach(([taskId, task]) => {
