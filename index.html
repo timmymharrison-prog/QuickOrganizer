@@ -3063,13 +3063,13 @@
                     notes = data.notes || {};
                     folders = data.folders || ['Personal', 'Work'];
                     folderColors = data.folderColors || {};
-                    
-                    // Re-render all views with new data
-                    renderCalendar();
-                    renderTasks();
-                    renderNotes();
-                    updateFoldersDescription();
                 }
+                
+                // Always re-render all views (even for new users)
+                renderCalendar();
+                renderTasks();
+                renderNotes();
+                updateFoldersDescription();
                 
                 // Initialize UI on first load
                 if (!document.documentElement.hasAttribute('data-initialized')) {
