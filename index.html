@@ -1462,6 +1462,279 @@
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
         }
+
+        /* ============================================
+           MOBILE RESPONSIVE STYLES
+           ============================================ */
+
+        @media (max-width: 768px) {
+            /* Layout adjustments */
+            .container {
+                flex-direction: column;
+                height: 100vh;
+                height: 100dvh; /* Dynamic viewport height for mobile browsers */
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                padding: 12px;
+                justify-content: space-around;
+                order: 2; /* Move to bottom */
+            }
+
+            .sidebar-item {
+                writing-mode: horizontal-tb;
+                padding: 8px 16px;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+
+            .sidebar-item.active::before {
+                width: 100%;
+                height: 2px;
+                bottom: 0;
+                left: 0;
+            }
+
+            /* Hide hamburger menu button on mobile navigation */
+            .hamburger-btn {
+                display: none;
+            }
+
+            /* Move add button to fixed position */
+            .add-btn {
+                position: fixed;
+                bottom: 80px;
+                right: 20px;
+                width: 56px;
+                height: 56px;
+                font-size: 28px;
+                z-index: 100;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            .main-content {
+                order: 1;
+                flex: 1;
+                padding: 16px;
+                overflow-y: auto;
+            }
+
+            /* Calendar optimizations */
+            .calendar-header {
+                flex-direction: column;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+
+            .calendar-header h2 {
+                font-size: 20px;
+            }
+
+            .calendar-nav {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            /* Make calendar grid more compact */
+            .calendar-grid {
+                gap: 4px;
+                height: auto !important;
+                min-height: 400px;
+            }
+
+            .calendar-day {
+                padding: 4px;
+                min-height: 60px;
+                border-radius: 6px;
+            }
+
+            .day-number {
+                font-size: 12px;
+                margin-bottom: 2px;
+            }
+
+            .event-badge {
+                font-size: 7px;
+                padding: 2px 3px;
+                margin-top: 1px;
+            }
+
+            /* Tasks and Notes - larger touch targets */
+            .task-item, .note-item {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+
+            .task-title, .note-title {
+                font-size: 16px;
+            }
+
+            .task-checkbox {
+                width: 24px;
+                height: 24px;
+            }
+
+            /* Notes grid - single column on mobile */
+            .notes-container {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+            }
+
+            /* Modal optimizations */
+            .modal-content {
+                width: 95%;
+                max-width: 95%;
+                margin: 20px;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+
+            .modal-header h3 {
+                font-size: 18px;
+            }
+
+            /* Form inputs - larger for mobile */
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 14px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+
+            .form-group label {
+                font-size: 12px;
+            }
+
+            /* Buttons - larger touch targets */
+            .btn {
+                padding: 14px 24px;
+                font-size: 15px;
+                min-height: 48px; /* Recommended touch target */
+            }
+
+            .btn-small {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .close-btn {
+                width: 36px;
+                height: 36px;
+                font-size: 28px;
+            }
+
+            /* Settings menu - full screen on mobile */
+            .settings-menu {
+                width: 100%;
+                max-width: 100%;
+            }
+
+            .settings-menu.active {
+                transform: translateX(0);
+            }
+
+            /* Folder card */
+            .folder-item-compact {
+                padding: 14px;
+            }
+
+            .add-folder-btn {
+                padding: 14px;
+                font-size: 15px;
+            }
+
+            /* Day agenda modal */
+            #agenda-content {
+                max-height: 60vh;
+            }
+
+            .agenda-event-item {
+                padding: 14px;
+            }
+
+            /* Time picker - easier to use on mobile */
+            .time-picker-scroll {
+                height: 180px;
+                font-size: 18px;
+            }
+
+            .time-value {
+                padding: 12px;
+            }
+
+            /* Folder details modal */
+            .folder-item-preview {
+                padding: 14px;
+            }
+
+            /* Hide desktop-only elements */
+            .calendar-day:hover {
+                transform: none; /* No hover effect on mobile */
+            }
+
+            /* Ensure header content doesn't overlap */
+            .content-header {
+                padding: 16px 0;
+            }
+
+            .content-header h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Small mobile devices (< 375px) */
+        @media (max-width: 374px) {
+            .calendar-day {
+                min-height: 50px;
+                padding: 2px;
+            }
+
+            .day-number {
+                font-size: 11px;
+            }
+
+            .event-badge {
+                font-size: 6px;
+                padding: 1px 2px;
+            }
+
+            .sidebar-item {
+                padding: 8px 12px;
+                font-size: 10px;
+            }
+
+            .main-content {
+                padding: 12px;
+            }
+        }
+
+        /* Tablet landscape and desktop */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                gap: 0;
+            }
+
+            .sidebar {
+                width: 80px;
+            }
+
+            .main-content {
+                padding: 24px;
+            }
+
+            .notes-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
