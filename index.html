@@ -1468,35 +1468,61 @@
            ============================================ */
 
         @media (max-width: 768px) {
+            /* Force full-screen mobile layout */
+            html, body {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+            }
+
+            body {
+                display: flex;
+                align-items: stretch;
+                justify-content: stretch;
+            }
+
             /* Layout adjustments */
-            .container {
+            .organizer-container {
                 flex-direction: column;
                 height: 100vh;
                 height: 100dvh; /* Dynamic viewport height for mobile browsers */
+                max-height: none;
+                border-radius: 0;
+                max-width: 100%;
+                width: 100%;
+                border: none;
             }
 
             .sidebar {
                 width: 100%;
-                height: auto;
+                height: 60px;
                 flex-direction: row;
-                padding: 12px;
+                padding: 0;
                 justify-content: space-around;
                 order: 2; /* Move to bottom */
+                border-right: none;
+                border-top: 1px solid var(--sidebar-bg);
             }
 
             .sidebar-item {
                 writing-mode: horizontal-tb;
-                padding: 8px 16px;
-                font-size: 11px;
+                padding: 12px 8px;
+                font-size: 10px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
+                flex: 1;
+                text-align: center;
             }
 
             .sidebar-item.active::before {
                 width: 100%;
-                height: 2px;
+                height: 3px;
                 bottom: 0;
                 left: 0;
+                top: auto;
+                right: auto;
             }
 
             /* Hide hamburger menu button on mobile navigation */
@@ -1507,95 +1533,119 @@
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
-                bottom: 80px;
-                right: 20px;
+                bottom: 70px;
+                right: 16px;
                 width: 56px;
                 height: 56px;
                 font-size: 28px;
                 z-index: 100;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
             }
 
             .main-content {
                 order: 1;
                 flex: 1;
-                padding: 16px;
+                padding: 12px;
                 overflow-y: auto;
+            }
+
+            .header {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 12px;
             }
 
             /* Calendar optimizations */
             .calendar-header {
                 flex-direction: column;
-                gap: 12px;
-                margin-bottom: 16px;
+                gap: 8px;
+                margin-bottom: 12px;
             }
 
             .calendar-header h2 {
-                font-size: 20px;
+                font-size: 18px;
             }
 
             .calendar-nav {
                 width: 100%;
                 justify-content: center;
+                gap: 8px;
             }
 
             .nav-btn {
-                padding: 10px 20px;
-                font-size: 14px;
+                padding: 8px 16px;
+                font-size: 13px;
             }
 
-            /* Make calendar grid more compact */
+            /* Make calendar grid visible and properly sized */
             .calendar-grid {
-                gap: 4px;
+                gap: 3px;
                 height: auto !important;
-                min-height: 400px;
+                min-height: 300px;
+                display: grid !important;
             }
 
             .calendar-day {
-                padding: 4px;
-                min-height: 60px;
-                border-radius: 6px;
+                padding: 3px;
+                min-height: 55px;
+                border-radius: 4px;
             }
 
             .day-number {
-                font-size: 12px;
+                font-size: 11px;
                 margin-bottom: 2px;
             }
 
             .event-badge {
-                font-size: 7px;
-                padding: 2px 3px;
+                font-size: 6px;
+                padding: 1px 2px;
                 margin-top: 1px;
+                border-radius: 2px;
             }
 
             /* Tasks and Notes - larger touch targets */
+            .tasks-container, .notes-container {
+                padding: 0;
+            }
+
             .task-item, .note-item {
-                padding: 16px;
-                margin-bottom: 12px;
+                padding: 14px;
+                margin-bottom: 10px;
             }
 
             .task-title, .note-title {
-                font-size: 16px;
+                font-size: 15px;
             }
 
             .task-checkbox {
-                width: 24px;
-                height: 24px;
+                width: 22px;
+                height: 22px;
             }
 
             /* Notes grid - single column on mobile */
             .notes-container {
                 grid-template-columns: 1fr !important;
-                gap: 12px;
+                gap: 10px;
             }
 
             /* Modal optimizations */
             .modal-content {
                 width: 95%;
                 max-width: 95%;
-                margin: 20px;
-                max-height: 90vh;
+                margin: 10px;
+                max-height: 85vh;
                 overflow-y: auto;
+                border-radius: 16px;
+            }
+
+            .modal-header {
+                padding: 16px;
             }
 
             .modal-header h3 {
@@ -1606,36 +1656,37 @@
             .form-group input,
             .form-group textarea,
             .form-group select {
-                padding: 14px;
+                padding: 12px;
                 font-size: 16px; /* Prevents zoom on iOS */
             }
 
             .form-group label {
-                font-size: 12px;
+                font-size: 11px;
             }
 
             /* Buttons - larger touch targets */
             .btn {
-                padding: 14px 24px;
+                padding: 12px 20px;
                 font-size: 15px;
-                min-height: 48px; /* Recommended touch target */
+                min-height: 44px; /* Recommended touch target */
             }
 
             .btn-small {
-                padding: 10px 16px;
-                font-size: 14px;
+                padding: 8px 14px;
+                font-size: 13px;
             }
 
             .close-btn {
-                width: 36px;
-                height: 36px;
-                font-size: 28px;
+                width: 32px;
+                height: 32px;
+                font-size: 24px;
             }
 
             /* Settings menu - full screen on mobile */
             .settings-menu {
                 width: 100%;
                 max-width: 100%;
+                border-radius: 0;
             }
 
             .settings-menu.active {
@@ -1644,91 +1695,103 @@
 
             /* Folder card */
             .folder-item-compact {
-                padding: 14px;
+                padding: 12px;
             }
 
             .add-folder-btn {
-                padding: 14px;
-                font-size: 15px;
+                padding: 12px;
+                font-size: 14px;
             }
 
             /* Day agenda modal */
             #agenda-content {
-                max-height: 60vh;
+                max-height: 50vh;
             }
 
             .agenda-event-item {
-                padding: 14px;
+                padding: 12px;
             }
 
             /* Time picker - easier to use on mobile */
             .time-picker-scroll {
-                height: 180px;
-                font-size: 18px;
+                height: 160px;
+                font-size: 16px;
             }
 
             .time-value {
-                padding: 12px;
+                padding: 10px;
             }
 
             /* Folder details modal */
             .folder-item-preview {
-                padding: 14px;
+                padding: 12px;
             }
 
-            /* Hide desktop-only elements */
-            .calendar-day:hover {
-                transform: none; /* No hover effect on mobile */
+            /* Remove hover effects on mobile */
+            .calendar-day:hover,
+            .task-item:hover,
+            .note-item:hover {
+                transform: none;
             }
 
-            /* Ensure header content doesn't overlap */
-            .content-header {
-                padding: 16px 0;
+            /* View sections */
+            .view-section {
+                height: 100%;
             }
 
-            .content-header h1 {
-                font-size: 24px;
+            .view-section.active {
+                display: flex;
+                flex-direction: column;
             }
         }
 
         /* Small mobile devices (< 375px) */
         @media (max-width: 374px) {
+            .calendar-grid {
+                gap: 2px;
+                min-height: 280px;
+            }
+
             .calendar-day {
-                min-height: 50px;
+                min-height: 48px;
                 padding: 2px;
             }
 
             .day-number {
-                font-size: 11px;
-            }
-
-            .event-badge {
-                font-size: 6px;
-                padding: 1px 2px;
-            }
-
-            .sidebar-item {
-                padding: 8px 12px;
                 font-size: 10px;
             }
 
+            .event-badge {
+                font-size: 5px;
+                padding: 1px;
+            }
+
+            .sidebar-item {
+                padding: 10px 6px;
+                font-size: 9px;
+            }
+
             .main-content {
-                padding: 12px;
+                padding: 8px;
+            }
+
+            .content {
+                padding: 8px;
             }
         }
 
         /* Tablet landscape and desktop */
         @media (min-width: 769px) and (max-width: 1024px) {
-            .container {
-                gap: 0;
+            .organizer-container {
+                max-width: 95%;
             }
 
             .sidebar {
-                width: 80px;
+                width: 70px;
             }
 
             .main-content {
-                padding: 24px;
+                padding: 20px;
             }
 
             .notes-container {
