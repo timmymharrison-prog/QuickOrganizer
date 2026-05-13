@@ -1425,6 +1425,19 @@
                     </div>
                 </div>
             </div>
+
+            <div class="settings-section">
+                <h4 class="section-title">Account</h4>
+                <div class="setting-item" onclick="logoutUser()" style="cursor: pointer;">
+                    <div class="setting-info">
+                        <div class="setting-title">Log Out</div>
+                        <div class="setting-description">Sign out of your account</div>
+                    </div>
+                    <button class="btn-icon">
+                        <span>â†’</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1606,18 +1619,83 @@
         </div>
     </div>
 
+    <!-- Login/Signup Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h3>Welcome</h3>
+            </div>
+            <div style="padding: 8px 0 24px 0;">
+                <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 24px;">Sign in to access your personal organizer</p>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="auth-email" placeholder="your@email.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="auth-password" placeholder="Password" autocomplete="current-password">
+                </div>
+                <div id="auth-error" style="display: none; color: #ef4444; font-size: 13px; margin-bottom: 16px; padding: 12px; background: rgba(239, 68, 68, 0.1); border-radius: 8px;"></div>
+                
+                <!-- Primary Login Button -->
+                <button type="button" class="btn btn-primary" onclick="loginUser()" style="width: 100%; margin-bottom: 12px;">Log In</button>
+                
+                <!-- Secondary Actions -->
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" class="btn btn-secondary" onclick="signupUser()" style="flex: 1;">Sign Up</button>
+                    <button type="button" class="btn btn-secondary" onclick="forgotPassword()" style="flex: 1;">Forgot Password?</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <script>
+        // ============================================
+        // FIREBASE CONFIGURATION - REPLACE THIS!
+        // ============================================
+        // Get your config from: Firebase Console > Project Settings > Your apps
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        // ============================================
+
         // Data storage
-        let events = JSON.parse(localStorage.getItem('events')) || {};
-        let tasks = JSON.parse(localStorage.getItem('tasks')) || {};
-        let notes = JSON.parse(localStorage.getItem('notes')) || {};
-        let folders = JSON.parse(localStorage.getItem('folders')) || ['Personal', 'Work'];
+        let events = {};
+        let tasks = {};
+        let notes = {};
+        let folders = ['Personal', 'Work'];
         let currentView = 'calendar';
         let currentEditingId = null;
-        let currentFolder = null; // Filter by folder
+        let currentFolder = null;
+        let currentUser = null;
 
         // Theme management
         let currentTheme = localStorage.getItem('theme') || 'dark';
+
+        // Firebase Authentication State
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                currentUser = user;
+                loadUserData();
+            } else {
+                showLoginModal();
+            }
+        });
 
         function initTheme() {
             document.documentElement.setAttribute('data-theme', currentTheme);
@@ -1729,6 +1807,128 @@
         function openFolderManager() {
             toggleMenu();
             toggleFoldersCard();
+        }
+
+        // Authentication Functions
+        function showLoginModal() {
+            document.getElementById('login-modal').classList.add('active');
+        }
+
+        function hideLoginModal() {
+            document.getElementById('login-modal').classList.remove('active');
+        }
+
+        function showAuthError(message) {
+            const errorEl = document.getElementById('auth-error');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+
+        function hideAuthError() {
+            const errorEl = document.getElementById('auth-error');
+            errorEl.style.display = 'none';
+        }
+
+        async function signupUser() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            
+            hideAuthError();
+            
+            if (!email || !password) {
+                showAuthError('Please enter email and password');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showAuthError('Password must be at least 6 characters');
+                return;
+            }
+            
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                // onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error('Signup error:', error);
+                if (error.code === 'auth/email-already-in-use') {
+                    showAuthError('Email already in use. Try logging in instead.');
+                } else if (error.code === 'auth/invalid-email') {
+                    showAuthError('Invalid email address');
+                } else if (error.code === 'auth/weak-password') {
+                    showAuthError('Password is too weak');
+                } else {
+                    showAuthError('Signup failed: ' + error.message);
+                }
+            }
+        }
+
+        async function loginUser() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+            
+            hideAuthError();
+            
+            if (!email || !password) {
+                showAuthError('Please enter email and password');
+                return;
+            }
+            
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                // onAuthStateChanged will handle the rest
+            } catch (error) {
+                console.error('Login error:', error);
+                if (error.code === 'auth/user-not-found') {
+                    showAuthError('No account found with this email');
+                } else if (error.code === 'auth/wrong-password') {
+                    showAuthError('Incorrect password');
+                } else if (error.code === 'auth/invalid-email') {
+                    showAuthError('Invalid email address');
+                } else {
+                    showAuthError('Login failed: ' + error.message);
+                }
+            }
+        }
+
+        async function logoutUser() {
+            if (confirm('Are you sure you want to log out?')) {
+                try {
+                    await auth.signOut();
+                    events = {};
+                    tasks = {};
+                    notes = {};
+                    folders = ['Personal', 'Work'];
+                    showLoginModal();
+                    toggleMenu(); // Close settings menu
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    alert('Logout failed: ' + error.message);
+                }
+            }
+        }
+
+        async function forgotPassword() {
+            const email = document.getElementById('auth-email').value.trim();
+            
+            if (!email) {
+                showAuthError('Please enter your email address');
+                return;
+            }
+            
+            try {
+                await auth.sendPasswordResetEmail(email);
+                hideAuthError();
+                alert('Password reset email sent! Check your inbox.');
+            } catch (error) {
+                console.error('Password reset error:', error);
+                if (error.code === 'auth/user-not-found') {
+                    showAuthError('No account found with this email');
+                } else if (error.code === 'auth/invalid-email') {
+                    showAuthError('Invalid email address');
+                } else {
+                    showAuthError('Failed to send reset email: ' + error.message);
+                }
+            }
         }
 
         // Calendar state
@@ -1941,11 +2141,49 @@
         }
 
         // Save data to localStorage
-        function saveData() {
-            localStorage.setItem('events', JSON.stringify(events));
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-            localStorage.setItem('notes', JSON.stringify(notes));
-            localStorage.setItem('folders', JSON.stringify(folders));
+        // Save data to Firebase Firestore
+        async function saveData() {
+            if (!currentUser) return;
+            
+            try {
+                await db.collection('users').doc(currentUser.uid).set({
+                    events: events,
+                    tasks: tasks,
+                    notes: notes,
+                    folders: folders,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch (error) {
+                console.error('Error saving data:', error);
+                alert('Failed to save data. Please try again.');
+            }
+        }
+
+        // Load user data from Firebase Firestore
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            try {
+                const doc = await db.collection('users').doc(currentUser.uid).get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    events = data.events || {};
+                    tasks = data.tasks || {};
+                    notes = data.notes || {};
+                    folders = data.folders || ['Personal', 'Work'];
+                }
+                
+                // Initialize UI
+                initTheme();
+                renderCalendar();
+                renderTasks();
+                renderNotes();
+                updateFoldersDescription();
+                hideLoginModal();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Failed to load data. Please refresh the page.');
+            }
         }
 
         // Folder management
@@ -2502,10 +2740,10 @@
 
         // Initialize app
         window.addEventListener('load', function() {
+            // Initialize theme immediately (stored locally)
             initTheme();
-            renderCalendar();
-            renderTasks();
-            renderNotes();
+            // Data will be loaded after Firebase authentication
+            // See auth.onAuthStateChanged at the top
             
             // Form submissions
             document.getElementById('event-form').addEventListener('submit', function(e) {
