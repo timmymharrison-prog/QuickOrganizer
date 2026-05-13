@@ -1562,11 +1562,6 @@
                 right: auto;
             }
 
-            /* Hide hamburger menu button on mobile navigation */
-            .hamburger-btn {
-                display: none;
-            }
-
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
@@ -1596,11 +1591,29 @@
                 position: relative;
                 z-index: 10;
                 background: var(--header-bg);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
 
             .header h1 {
                 font-size: 32px;
                 font-weight: 300;
+            }
+
+            /* Show hamburger menu on mobile */
+            .hamburger-btn {
+                display: flex !important;
+                width: 40px;
+                height: 40px;
+                background: rgba(255, 255, 255, 0.1);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 8px;
+                font-size: 24px;
+                cursor: pointer;
+                align-items: center;
+                justify-content: center;
+                color: var(--text-primary);
             }
 
             .content-area {
@@ -1901,6 +1914,9 @@
         <div class="main-content">
             <div class="header">
                 <h1 id="header-title">Calendar</h1>
+                <button class="hamburger-btn" onclick="toggleMenu()" title="Menu">
+                    <span>&equiv;</span>
+                </button>
             </div>
             
             <div class="content-area">
@@ -1955,12 +1971,6 @@
             </div>
             <div class="tab notes" onclick="switchView('notes')">
                 <span>Notes</span>
-            </div>
-            
-            <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px; align-items: center; padding-bottom: 8px;">
-                <button class="hamburger-btn" onclick="toggleMenu()" title="Menu">
-                    <span>&equiv;</span>
-                </button>
             </div>
         </div>
 
