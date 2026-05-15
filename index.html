@@ -5160,6 +5160,19 @@
                 });
             }
         });
+
+        // Close hamburger menu when clicking outside
+        document.addEventListener('click', function(e) {
+            const settingsMenu = document.getElementById('settings-menu');
+            const hamburgerBtn = document.querySelector('.hamburger-btn');
+            
+            // Check if menu is open and click is outside both menu and hamburger button
+            if (settingsMenu && settingsMenu.classList.contains('active')) {
+                if (!settingsMenu.contains(e.target) && !hamburgerBtn.contains(e.target)) {
+                    settingsMenu.classList.remove('active');
+                }
+            }
+        });
     </script>
 </body>
 </html>
