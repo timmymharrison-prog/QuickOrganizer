@@ -890,6 +890,27 @@
             color: #ef4444;
         }
 
+        .folder-item-compact-action {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: transparent;
+            border: 1px solid transparent;
+            color: var(--text-tertiary);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .folder-item-compact-action:hover {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
         .folder-edit-btn {
             width: 28px;
             height: 28px;
@@ -1230,6 +1251,85 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 16px;
+        }
+
+        /* Messages/Inbox Styles */
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .message-item {
+            background: var(--element-bg);
+            border: 1px solid var(--element-border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .message-item:hover {
+            background: var(--element-hover);
+            transform: translateX(4px);
+        }
+
+        .message-item.unread {
+            background: rgba(59, 130, 246, 0.05);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .message-item.unread .message-subject {
+            font-weight: 600;
+        }
+
+        .message-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        .message-from {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .message-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        .message-subject {
+            font-size: 15px;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .message-preview {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .note-item {
@@ -2028,6 +2128,16 @@
                 </button>
             </div>
             
+            <!-- Folder Invitations Banner -->
+            <div id="invitations-banner" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px 16px; margin: 0 20px 16px 20px; display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 20px;">📬</span>
+                <div style="flex: 1;">
+                    <div style="font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Folder Invitations</div>
+                    <div id="invitations-text" style="font-size: 13px; color: var(--text-secondary);">You have pending folder invitations</div>
+                </div>
+                <button onclick="openInvitationsModal()" style="padding: 6px 16px; background: rgba(59, 130, 246, 1); color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap;">View</button>
+            </div>
+            
             <div class="content-area">
                 <!-- Calendar View -->
                 <div id="calendar-view" class="view-section active">
@@ -2079,6 +2189,15 @@
                     </div>
                     <div class="folder-filter-container" id="notes-folder-filter"></div>
                     <div class="notes-container" id="notes-container"></div>
+                </div>
+
+                <!-- Inbox View -->
+                <div id="inbox-view" class="view-section">
+                    <div class="calendar-header">
+                        <h2>Inbox</h2>
+                        <button class="btn-primary" onclick="openComposeMessageModal()" style="padding: 8px 16px; font-size: 14px; border-radius: 8px;">New Message</button>
+                    </div>
+                    <div class="messages-container" id="messages-container"></div>
                 </div>
             </div>
         </div>
@@ -2152,6 +2271,22 @@
                                 <button class="btn btn-primary btn-small" onclick="addFolderInline()">Add</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h4 class="section-title">Messages</h4>
+                <div class="setting-item" onclick="openInbox()" style="cursor: pointer; position: relative;">
+                    <div class="setting-info">
+                        <div class="setting-title">Inbox</div>
+                        <div class="setting-description">View and send messages</div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span id="unread-badge-menu" style="display: none; background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600;"></span>
+                        <button class="btn-icon">
+                            <span>→</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -2437,6 +2572,124 @@
         </div>
     </div>
 
+    <!-- Share Folder Modal -->
+    <div id="share-folder-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="share-folder-title">Share Folder</h3>
+                <button class="close-btn" onclick="closeModal('share-folder-modal')">&times;</button>
+            </div>
+            <form onsubmit="shareFolderSubmit(event)">
+                <div class="form-group">
+                    <label>Folder: <span id="sharing-folder-name" style="font-weight: 600; color: var(--text-primary);"></span></label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="collaborator-email">Add Collaborator</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="email" id="collaborator-email" placeholder="email@example.com" style="flex: 1;" />
+                        <button type="button" class="btn btn-primary" onclick="addCollaborator()" style="white-space: nowrap;">Add</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Collaborators</label>
+                    <div id="collaborators-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;">
+                        <div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No collaborators yet</div>
+                    </div>
+                </div>
+
+                <div class="form-group" style="padding-top: 12px; border-top: 1px solid var(--element-border);">
+                    <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px;">
+                        ℹ️ Collaborators can view and edit all items in this folder
+                    </label>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('share-folder-modal')">Close</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Folder Invitations Modal -->
+    <div id="invitations-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Folder Invitations</h3>
+                <button class="close-btn" onclick="closeModal('invitations-modal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <div id="invitations-list" style="display: flex; flex-direction: column; gap: 12px; max-height: 400px; overflow-y: auto;">
+                    <div style="color: var(--text-muted); font-size: 14px; text-align: center; padding: 40px;">No pending invitations</div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('invitations-modal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Message Modal -->
+    <div id="compose-message-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>New Message</h3>
+                <button class="close-btn" onclick="closeModal('compose-message-modal')">&times;</button>
+            </div>
+            <form onsubmit="sendMessage(event)">
+                <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: var(--text-secondary);">
+                    <strong style="color: var(--text-primary);">💡 How to send a message:</strong><br>
+                    Enter the recipient's email address (the one they used to sign up). They'll receive your message in their Inbox.
+                </div>
+                
+                <div class="form-group">
+                    <label for="message-to">To</label>
+                    <input type="email" id="message-to" placeholder="recipient@example.com" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="message-subject">Subject</label>
+                    <input type="text" id="message-subject" placeholder="Message subject" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="message-body">Message</label>
+                    <textarea id="message-body" rows="8" placeholder="Type your message here..." required></textarea>
+                </div>
+
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('compose-message-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View Message Modal -->
+    <div id="view-message-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="view-message-subject">Message Subject</h3>
+                <button class="close-btn" onclick="closeModal('view-message-modal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label style="font-size: 13px; color: var(--text-muted);">From</label>
+                <div id="view-message-from" style="font-size: 15px; color: var(--text-primary); margin-bottom: 16px;"></div>
+                
+                <label style="font-size: 13px; color: var(--text-muted);">Sent</label>
+                <div id="view-message-time" style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;"></div>
+                
+                <div id="view-message-body" style="font-size: 15px; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; background: var(--element-bg); padding: 16px; border-radius: 8px; border: 1px solid var(--element-border);"></div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('view-message-modal')">Close</button>
+                <button type="button" class="btn btn-primary" onclick="replyToMessage()">Reply</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -2471,12 +2724,42 @@
         let currentUser = null;
         let selectedTasksFolder = '';
         let selectedNotesFolder = '';
+        
+        // Shared folder structure:
+        // sharedFolders = {
+        //   'FolderName': {
+        //     owner: 'user@email.com',
+        //     collaborators: ['user2@email.com', 'user3@email.com'],
+        //     permissions: 'edit' // 'view' or 'edit'
+        //   }
+        // }
+        let sharedFolders = {};
+        
+        // Pending invitations for current user
+        // pendingInvitations = [
+        //   { folderName: 'Project', owner: 'boss@email.com', invitedAt: timestamp }
+        // ]
+        let pendingInvitations = [];
+        
+        // Messages structure:
+        // messages = {
+        //   'messageId': {
+        //     from: 'sender@email.com',
+        //     to: 'recipient@email.com',
+        //     subject: 'Message subject',
+        //     body: 'Message content',
+        //     timestamp: '2024-01-15T10:30:00',
+        //     read: false,
+        //     type: 'invitation' or 'message'
+        //   }
+        // }
+        let messages = {};
 
         // Theme management
         let currentTheme = localStorage.getItem('theme') || 'dark';
 
         // Firebase Authentication State
-        auth.onAuthStateChanged((user) => {
+        auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
                 // Update the displayed email in settings
@@ -2484,6 +2767,16 @@
                 if (emailDisplay) {
                     emailDisplay.textContent = user.email || 'User';
                 }
+                
+                // Ensure email is stored in Firestore (for existing users who signed up before this feature)
+                try {
+                    await db.collection('users').doc(user.uid).set({
+                        email: user.email
+                    }, { merge: true });
+                } catch (error) {
+                    console.error('Error storing email:', error);
+                }
+                
                 loadUserData();
             } else {
                 showLoginModal();
@@ -2562,7 +2855,6 @@
             folders.forEach(folder => {
                 const folderItem = document.createElement('div');
                 folderItem.className = 'folder-item-compact';
-                folderItem.onclick = () => openFolderDetailsModal(folder);
                 folderItem.style.cursor = 'pointer';
                 
                 // Add color indicator
@@ -2574,11 +2866,39 @@
                 folderName.className = 'folder-item-compact-name';
                 folderName.textContent = folder;
                 
+                // Add shared indicator if folder is shared
+                if (sharedFolders[folder]) {
+                    const sharedIcon = document.createElement('span');
+                    sharedIcon.style.cssText = 'font-size: 12px; color: rgba(59, 130, 246, 0.8); margin-left: 6px;';
+                    sharedIcon.textContent = '👥';
+                    sharedIcon.title = sharedFolders[folder].owner === currentUser?.email 
+                        ? `Shared with ${sharedFolders[folder].collaborators?.length || 0} people`
+                        : `Shared by ${sharedFolders[folder].owner}`;
+                    folderName.appendChild(sharedIcon);
+                }
+                
                 const nameContainer = document.createElement('div');
                 nameContainer.style.cssText = 'display: flex; align-items: center; gap: 10px; flex: 1;';
+                nameContainer.onclick = () => openFolderDetailsModal(folder);
                 nameContainer.appendChild(colorDot);
                 nameContainer.appendChild(folderName);
                 
+                // Action buttons container
+                const actionsContainer = document.createElement('div');
+                actionsContainer.style.cssText = 'display: flex; gap: 4px; align-items: center;';
+                
+                // Share button
+                const shareBtn = document.createElement('button');
+                shareBtn.className = 'folder-item-compact-action';
+                shareBtn.innerHTML = '🔗';
+                shareBtn.title = 'Share folder';
+                shareBtn.style.cssText = 'font-size: 16px; padding: 4px 8px;';
+                shareBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    openShareFolderModal(folder);
+                };
+                
+                // Delete button
                 const deleteBtn = document.createElement('button');
                 deleteBtn.className = 'folder-item-compact-delete';
                 deleteBtn.innerHTML = '&times;';
@@ -2587,8 +2907,11 @@
                     deleteFolderCompact(folder);
                 };
                 
+                actionsContainer.appendChild(shareBtn);
+                actionsContainer.appendChild(deleteBtn);
+                
                 folderItem.appendChild(nameContainer);
-                folderItem.appendChild(deleteBtn);
+                folderItem.appendChild(actionsContainer);
                 container.appendChild(folderItem);
             });
             
@@ -2689,12 +3012,517 @@
             if (confirm(`Delete folder "${folderName}"? Items in this folder will not be deleted.`)) {
                 folders = folders.filter(f => f !== folderName);
                 
+                // Also remove from shared folders if it was shared
+                if (sharedFolders[folderName]) {
+                    delete sharedFolders[folderName];
+                }
+                
                 // Wait for the save to complete before continuing
                 await saveData();
                 
                 renderFoldersCompact();
                 updateFoldersDescription();
             }
+        }
+
+        function openShareFolderModal(folderName) {
+            document.getElementById('sharing-folder-name').textContent = folderName;
+            currentFolder = folderName;
+            
+            // Initialize shared folder structure if it doesn't exist
+            if (!sharedFolders[folderName]) {
+                sharedFolders[folderName] = {
+                    owner: currentUser?.email || '',
+                    collaborators: [],
+                    permissions: 'edit'
+                };
+            }
+            
+            renderCollaboratorsList();
+            openModal('share-folder-modal');
+        }
+
+        function renderCollaboratorsList() {
+            const container = document.getElementById('collaborators-list');
+            const folder = sharedFolders[currentFolder];
+            
+            if (!folder || !folder.collaborators || folder.collaborators.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No collaborators yet</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            folder.collaborators.forEach((email, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--element-bg); border-radius: 8px; border: 1px solid var(--element-border);';
+                
+                const emailSpan = document.createElement('span');
+                emailSpan.style.cssText = 'color: var(--text-primary); font-size: 14px;';
+                emailSpan.textContent = email;
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'btn-icon';
+                removeBtn.style.cssText = 'width: 24px; height: 24px; font-size: 16px; color: var(--text-muted);';
+                removeBtn.innerHTML = '×';
+                removeBtn.onclick = () => removeCollaborator(index);
+                
+                item.appendChild(emailSpan);
+                item.appendChild(removeBtn);
+                container.appendChild(item);
+            });
+        }
+
+        function addCollaborator() {
+            const emailInput = document.getElementById('collaborator-email');
+            const email = emailInput.value.trim().toLowerCase();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Don't allow sharing with yourself
+            if (email === currentUser?.email) {
+                alert('You cannot share with yourself');
+                return;
+            }
+            
+            // Check if already added
+            const folder = sharedFolders[currentFolder];
+            if (folder.collaborators.includes(email)) {
+                alert('This user is already a collaborator');
+                return;
+            }
+            
+            // Add collaborator
+            folder.collaborators.push(email);
+            emailInput.value = '';
+            renderCollaboratorsList();
+        }
+
+        function removeCollaborator(index) {
+            const folder = sharedFolders[currentFolder];
+            folder.collaborators.splice(index, 1);
+            renderCollaboratorsList();
+        }
+
+        async function shareFolderSubmit(event) {
+            event.preventDefault();
+            
+            try {
+                const folder = sharedFolders[currentFolder];
+                
+                // Send invitations to all collaborators
+                for (const email of folder.collaborators) {
+                    await sendFolderInvitation(currentFolder, email);
+                }
+                
+                await saveData();
+                alert('Folder invitations sent successfully!');
+                closeModal('share-folder-modal');
+                renderFoldersCompact();
+            } catch (error) {
+                console.error('Error saving folder sharing:', error);
+                alert('Failed to send invitations: ' + error.message);
+            }
+        }
+
+        // Send folder invitation to a specific user
+        async function sendFolderInvitation(folderName, recipientEmail) {
+            try {
+                // Find the recipient's user document by querying for their email
+                const usersSnapshot = await db.collection('users')
+                    .where('email', '==', recipientEmail)
+                    .get();
+                
+                if (usersSnapshot.empty) {
+                    // User doesn't have an account yet - invitation will be stored when they sign up
+                    console.log(`User ${recipientEmail} not found - invitation will be pending`);
+                    return;
+                }
+                
+                // Add invitation to recipient's pending invitations
+                const recipientDoc = usersSnapshot.docs[0];
+                const recipientData = recipientDoc.data();
+                const recipientInvitations = recipientData.pendingInvitations || [];
+                
+                // Check if invitation already exists
+                const existingInvitation = recipientInvitations.find(
+                    inv => inv.folderName === folderName && inv.owner === currentUser.email
+                );
+                
+                if (!existingInvitation) {
+                    recipientInvitations.push({
+                        folderName: folderName,
+                        owner: currentUser.email,
+                        invitedAt: new Date().toISOString()
+                    });
+                    
+                    await db.collection('users').doc(recipientDoc.id).update({
+                        pendingInvitations: recipientInvitations
+                    });
+                }
+            } catch (error) {
+                console.error(`Error sending invitation to ${recipientEmail}:`, error);
+            }
+        }
+
+        function updateInvitationsBanner() {
+            const banner = document.getElementById('invitations-banner');
+            const text = document.getElementById('invitations-text');
+            
+            if (pendingInvitations && pendingInvitations.length > 0) {
+                banner.style.display = 'flex';
+                const count = pendingInvitations.length;
+                text.textContent = `You have ${count} pending folder invitation${count > 1 ? 's' : ''}`;
+            } else {
+                banner.style.display = 'none';
+            }
+        }
+
+        function openInvitationsModal() {
+            renderInvitationsList();
+            openModal('invitations-modal');
+        }
+
+        function renderInvitationsList() {
+            const container = document.getElementById('invitations-list');
+            
+            if (!pendingInvitations || pendingInvitations.length === 0) {
+                container.innerHTML = '<div style="color: var(--text-muted); font-size: 14px; text-align: center; padding: 40px;">No pending invitations</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            pendingInvitations.forEach((invitation, index) => {
+                const item = document.createElement('div');
+                item.style.cssText = 'padding: 16px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 12px;';
+                
+                const header = document.createElement('div');
+                header.style.cssText = 'display: flex; align-items: center; gap: 12px; margin-bottom: 12px;';
+                
+                const icon = document.createElement('span');
+                icon.style.cssText = 'font-size: 24px;';
+                icon.textContent = '📁';
+                
+                const info = document.createElement('div');
+                info.style.cssText = 'flex: 1;';
+                
+                const folderName = document.createElement('div');
+                folderName.style.cssText = 'font-size: 16px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;';
+                folderName.textContent = invitation.folderName;
+                
+                const ownerText = document.createElement('div');
+                ownerText.style.cssText = 'font-size: 13px; color: var(--text-secondary);';
+                ownerText.textContent = `From: ${invitation.owner}`;
+                
+                info.appendChild(folderName);
+                info.appendChild(ownerText);
+                header.appendChild(icon);
+                header.appendChild(info);
+                
+                const actions = document.createElement('div');
+                actions.style.cssText = 'display: flex; gap: 8px; justify-content: flex-end;';
+                
+                const declineBtn = document.createElement('button');
+                declineBtn.className = 'btn btn-secondary btn-small';
+                declineBtn.textContent = 'Decline';
+                declineBtn.onclick = () => declineInvitation(index);
+                
+                const acceptBtn = document.createElement('button');
+                acceptBtn.className = 'btn btn-primary btn-small';
+                acceptBtn.textContent = 'Accept';
+                acceptBtn.onclick = () => acceptInvitation(index);
+                
+                actions.appendChild(declineBtn);
+                actions.appendChild(acceptBtn);
+                
+                item.appendChild(header);
+                item.appendChild(actions);
+                container.appendChild(item);
+            });
+        }
+
+        async function acceptInvitation(index) {
+            const invitation = pendingInvitations[index];
+            
+            try {
+                // Add the folder to user's folder list if not already there
+                if (!folders.includes(invitation.folderName)) {
+                    folders.push(invitation.folderName);
+                }
+                
+                // Mark this folder as shared with this user
+                if (!sharedFolders[invitation.folderName]) {
+                    sharedFolders[invitation.folderName] = {
+                        owner: invitation.owner,
+                        collaborators: [],
+                        permissions: 'edit'
+                    };
+                }
+                
+                // Remove from pending invitations
+                pendingInvitations.splice(index, 1);
+                
+                // Save to Firebase
+                await db.collection('users').doc(currentUser.uid).update({
+                    pendingInvitations: pendingInvitations,
+                    folders: folders,
+                    sharedFolders: sharedFolders
+                });
+                
+                // Reload shared data
+                await loadSharedData();
+                
+                renderInvitationsList();
+                updateInvitationsBanner();
+                renderFoldersCompact();
+                renderCalendar();
+                renderTasks();
+                renderNotes();
+                
+                alert(`You now have access to the "${invitation.folderName}" folder!`);
+                
+                // Close modal if no more invitations
+                if (pendingInvitations.length === 0) {
+                    closeModal('invitations-modal');
+                }
+            } catch (error) {
+                console.error('Error accepting invitation:', error);
+                alert('Failed to accept invitation: ' + error.message);
+            }
+        }
+
+        async function declineInvitation(index) {
+            if (!confirm('Are you sure you want to decline this invitation?')) {
+                return;
+            }
+            
+            try {
+                // Remove from pending invitations
+                pendingInvitations.splice(index, 1);
+                
+                // Save to Firebase
+                await db.collection('users').doc(currentUser.uid).update({
+                    pendingInvitations: pendingInvitations
+                });
+                
+                renderInvitationsList();
+                updateInvitationsBanner();
+                
+                // Close modal if no more invitations
+                if (pendingInvitations.length === 0) {
+                    closeModal('invitations-modal');
+                }
+            } catch (error) {
+                console.error('Error declining invitation:', error);
+                alert('Failed to decline invitation: ' + error.message);
+            }
+        }
+
+        // Messaging Functions
+        let currentViewingMessageId = null;
+
+        function renderMessages() {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            
+            const messageEntries = Object.entries(messages)
+                .filter(([id, msg]) => msg.to === currentUser?.email)
+                .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
+            
+            if (messageEntries.length === 0) {
+                container.innerHTML = `
+                    <div style="color: var(--text-muted); font-size: 14px; text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+                        <div style="font-size: 16px; color: var(--text-secondary); margin-bottom: 8px;">No messages yet</div>
+                        <div style="font-size: 13px; line-height: 1.6;">
+                            Click <strong>"New Message"</strong> above to send a message to another user.<br>
+                            You'll need their email address (the one they used to sign up).
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            messageEntries.forEach(([msgId, msg]) => {
+                const messageItem = document.createElement('div');
+                messageItem.className = 'message-item' + (msg.read ? '' : ' unread');
+                messageItem.onclick = () => openViewMessageModal(msgId);
+                
+                const icon = document.createElement('div');
+                icon.className = 'message-icon';
+                icon.textContent = msg.type === 'invitation' ? '📬' : '✉️';
+                
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                
+                const header = document.createElement('div');
+                header.className = 'message-header';
+                
+                const from = document.createElement('div');
+                from.className = 'message-from';
+                from.textContent = msg.from;
+                
+                const time = document.createElement('div');
+                time.className = 'message-time';
+                const date = new Date(msg.timestamp);
+                time.textContent = formatMessageTime(date);
+                
+                header.appendChild(from);
+                header.appendChild(time);
+                
+                const subject = document.createElement('div');
+                subject.className = 'message-subject';
+                subject.textContent = msg.subject;
+                
+                const preview = document.createElement('div');
+                preview.className = 'message-preview';
+                preview.textContent = msg.body.substring(0, 100) + (msg.body.length > 100 ? '...' : '');
+                
+                content.appendChild(header);
+                content.appendChild(subject);
+                content.appendChild(preview);
+                
+                messageItem.appendChild(icon);
+                messageItem.appendChild(content);
+                container.appendChild(messageItem);
+            });
+            
+            updateUnreadBadge();
+        }
+
+        function formatMessageTime(date) {
+            const now = new Date();
+            const diff = now - date;
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            
+            if (days === 0) {
+                return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            } else if (days === 1) {
+                return 'Yesterday';
+            } else if (days < 7) {
+                return date.toLocaleDateString('en-US', { weekday: 'short' });
+            } else {
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            }
+        }
+
+        function updateUnreadBadge() {
+            const badgeMenu = document.getElementById('unread-badge-menu');
+            const unreadCount = Object.values(messages).filter(msg => 
+                msg.to === currentUser?.email && !msg.read
+            ).length;
+            
+            if (unreadCount > 0) {
+                const displayCount = unreadCount > 99 ? '99+' : unreadCount;
+                if (badgeMenu) {
+                    badgeMenu.textContent = displayCount;
+                    badgeMenu.style.display = 'block';
+                }
+            } else {
+                if (badgeMenu) {
+                    badgeMenu.style.display = 'none';
+                }
+            }
+        }
+
+        function openInbox() {
+            toggleMenu(); // Close settings menu
+            switchView('inbox');
+        }
+
+        function openComposeMessageModal() {
+            document.getElementById('message-to').value = '';
+            document.getElementById('message-subject').value = '';
+            document.getElementById('message-body').value = '';
+            openModal('compose-message-modal');
+        }
+
+        async function sendMessage(event) {
+            event.preventDefault();
+            
+            const to = document.getElementById('message-to').value.trim();
+            const subject = document.getElementById('message-subject').value.trim();
+            const body = document.getElementById('message-body').value.trim();
+            
+            try {
+                // Find recipient
+                const recipientSnapshot = await db.collection('users')
+                    .where('email', '==', to)
+                    .get();
+                
+                if (recipientSnapshot.empty) {
+                    alert('User not found. Make sure they have an account.');
+                    return;
+                }
+                
+                const recipientDoc = recipientSnapshot.docs[0];
+                const messageId = Date.now().toString();
+                
+                const newMessage = {
+                    from: currentUser.email,
+                    to: to,
+                    subject: subject,
+                    body: body,
+                    timestamp: new Date().toISOString(),
+                    read: false,
+                    type: 'message'
+                };
+                
+                // Add to recipient's messages
+                const recipientData = recipientDoc.data();
+                const recipientMessages = recipientData.messages || {};
+                recipientMessages[messageId] = newMessage;
+                
+                await db.collection('users').doc(recipientDoc.id).update({
+                    messages: recipientMessages
+                });
+                
+                alert('Message sent successfully!');
+                closeModal('compose-message-modal');
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message: ' + error.message);
+            }
+        }
+
+        async function openViewMessageModal(messageId) {
+            currentViewingMessageId = messageId;
+            const msg = messages[messageId];
+            
+            document.getElementById('view-message-subject').textContent = msg.subject;
+            document.getElementById('view-message-from').textContent = msg.from;
+            document.getElementById('view-message-time').textContent = new Date(msg.timestamp).toLocaleString();
+            document.getElementById('view-message-body').textContent = msg.body;
+            
+            // Mark as read
+            if (!msg.read) {
+                msg.read = true;
+                await db.collection('users').doc(currentUser.uid).update({
+                    messages: messages
+                });
+                renderMessages();
+            }
+            
+            openModal('view-message-modal');
+        }
+
+        function replyToMessage() {
+            const msg = messages[currentViewingMessageId];
+            closeModal('view-message-modal');
+            
+            document.getElementById('message-to').value = msg.from;
+            document.getElementById('message-subject').value = 'Re: ' + msg.subject;
+            document.getElementById('message-body').value = '';
+            openModal('compose-message-modal');
         }
 
         function updateFoldersDescription() {
@@ -2744,7 +3572,12 @@
             }
             
             try {
-                await auth.createUserWithEmailAndPassword(email, password);
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                // Store email in Firestore so we can look up users by email for sharing
+                await db.collection('users').doc(userCredential.user.uid).set({
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
                 // onAuthStateChanged will handle the rest
             } catch (error) {
                 console.error('Signup error:', error);
@@ -3311,6 +4144,8 @@
                     notes: notes,
                     folders: folders,
                     folderColors: folderColors,
+                    sharedFolders: sharedFolders,
+                    messages: messages,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
             } catch (error) {
@@ -3331,8 +4166,8 @@
                 unsubscribeListener();
             }
             
-            // Set up real-time listener
-            unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot((doc) => {
+            // Set up real-time listener for user's own data
+            unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc) => {
                 if (doc.exists) {
                     const data = doc.data();
                     events = data.events || {};
@@ -3340,7 +4175,17 @@
                     notes = data.notes || {};
                     folders = data.folders || ['Personal', 'Work'];
                     folderColors = data.folderColors || {};
+                    sharedFolders = data.sharedFolders || {};
+                    pendingInvitations = data.pendingInvitations || [];
+                    messages = data.messages || {};
                 }
+                
+                // Load data from folders shared WITH this user
+                await loadSharedData();
+                
+                // Update invitations banner and unread message badge
+                updateInvitationsBanner();
+                updateUnreadBadge();
                 
                 // Always re-render all views (even for new users)
                 renderCalendar();
@@ -3358,6 +4203,73 @@
                 console.error('Error loading data:', error);
                 alert('Failed to load data. Please refresh the page.');
             });
+        }
+
+        // Load data from folders that have been shared with this user
+        async function loadSharedData() {
+            if (!currentUser) return;
+            
+            try {
+                // Query all users to find folders shared with current user
+                const usersSnapshot = await db.collection('users').get();
+                
+                usersSnapshot.forEach((userDoc) => {
+                    if (userDoc.id === currentUser.uid) return; // Skip own data
+                    
+                    const userData = userDoc.data();
+                    const theirSharedFolders = userData.sharedFolders || {};
+                    
+                    // Check each of their folders
+                    Object.entries(theirSharedFolders).forEach(([folderName, folderData]) => {
+                        // If this folder is shared with current user's email
+                        if (folderData.collaborators && folderData.collaborators.includes(currentUser.email)) {
+                            // Add this folder to our folders list if not already there
+                            if (!folders.includes(folderName)) {
+                                folders.push(folderName);
+                            }
+                            
+                            // Store the shared folder info (but mark it as shared FROM someone else)
+                            if (!sharedFolders[folderName]) {
+                                sharedFolders[folderName] = {
+                                    owner: folderData.owner,
+                                    collaborators: [],
+                                    permissions: folderData.permissions || 'edit'
+                                };
+                            }
+                            
+                            // Merge their items from this folder into our data
+                            // Events
+                            if (userData.events) {
+                                Object.entries(userData.events).forEach(([id, event]) => {
+                                    if (event.folder === folderName) {
+                                        events[id] = event;
+                                    }
+                                });
+                            }
+                            
+                            // Tasks
+                            if (userData.tasks) {
+                                Object.entries(userData.tasks).forEach(([id, task]) => {
+                                    if (task.folder === folderName) {
+                                        tasks[id] = task;
+                                    }
+                                });
+                            }
+                            
+                            // Notes
+                            if (userData.notes) {
+                                Object.entries(userData.notes).forEach(([id, note]) => {
+                                    if (note.folder === folderName) {
+                                        notes[id] = note;
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading shared data:', error);
+            }
         }
 
         // Folder management
@@ -3409,6 +4321,11 @@
                 document.getElementById('notes-view').classList.add('active');
                 document.getElementById('header-title').textContent = 'Notes';
                 renderNotes();
+            } else if (view === 'inbox') {
+                // Inbox doesn't have a tab (it's in the menu), so just activate the view
+                document.getElementById('inbox-view').classList.add('active');
+                document.getElementById('header-title').textContent = 'Inbox';
+                renderMessages();
             }
         }
 
