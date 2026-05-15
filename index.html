@@ -2123,8 +2123,9 @@
         <div class="main-content">
             <div class="header">
                 <h1 id="header-title">Calendar</h1>
-                <button class="hamburger-btn" onclick="toggleMenu()" title="Menu">
+                <button class="hamburger-btn" onclick="toggleMenu()" title="Menu" style="position: relative;">
                     <span>&equiv;</span>
+                    <span id="hamburger-badge" style="display: none; position: absolute; top: 6px; right: 6px; background: #ef4444; color: white; border-radius: 10px; min-width: 18px; height: 18px; font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center; padding: 0 4px;"></span>
                 </button>
             </div>
             
@@ -3417,19 +3418,31 @@
 
         function updateUnreadBadge() {
             const badgeMenu = document.getElementById('unread-badge-menu');
+            const badgeHamburger = document.getElementById('hamburger-badge');
             const unreadCount = Object.values(messages).filter(msg => 
                 msg.to === currentUser?.email && !msg.read
             ).length;
             
             if (unreadCount > 0) {
                 const displayCount = unreadCount > 99 ? '99+' : unreadCount;
+                
+                // Update menu badge
                 if (badgeMenu) {
                     badgeMenu.textContent = displayCount;
                     badgeMenu.style.display = 'block';
                 }
+                
+                // Update hamburger menu badge
+                if (badgeHamburger) {
+                    badgeHamburger.textContent = displayCount;
+                    badgeHamburger.style.display = 'flex';
+                }
             } else {
                 if (badgeMenu) {
                     badgeMenu.style.display = 'none';
+                }
+                if (badgeHamburger) {
+                    badgeHamburger.style.display = 'none';
                 }
             }
         }
