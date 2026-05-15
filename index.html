@@ -2028,8 +2028,8 @@
                     
                     <!-- Completed Tasks Section -->
                     <div id="completed-tasks-section" style="margin-top: 24px; display: none;">
-                        <div onclick="toggleCompletedTasks()" style="cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 12px; background: var(--element-bg); border-radius: 8px; margin-bottom: 12px;">
-                            <span id="completed-toggle-icon" style="font-size: 14px; transition: transform 0.3s; transform: rotate(-90deg);">â–¶</span>
+                        <div onclick="toggleCompletedTasks()" style="cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--element-bg); border-radius: 8px; margin-bottom: 12px;">
+                            <span id="completed-toggle-icon" style="font-size: 16px; line-height: 1; transition: transform 0.2s; display: inline-block; transform: rotate(-90deg);">▼</span>
                             <h3 style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin: 0;">Completed Tasks</h3>
                             <span id="completed-count" style="font-size: 13px; color: var(--text-muted); margin-left: auto;">0</span>
                         </div>
@@ -2131,7 +2131,7 @@
                         <div class="setting-description">Delete all events, tasks, notes, and folders</div>
                     </div>
                     <button class="btn-icon" style="color: #ef4444;">
-                        <span>ðŸ—‘ï¸</span>
+                        <span>🗑️</span>
                     </button>
                 </div>
                 <div class="setting-item" onclick="logoutUser()" style="cursor: pointer;">
@@ -2157,7 +2157,7 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <button class="folder-modal-edit-btn" id="folder-details-edit-btn" title="Edit folder">
-                        <span>âœŽ</span>
+                        <span>✎</span>
                     </button>
                     <button class="close-btn" onclick="closeModal('folder-details-modal')">&times;</button>
                 </div>
@@ -2779,7 +2779,7 @@
         }
 
         async function clearAllData() {
-            if (confirm('âš ï¸ WARNING: This will delete ALL your events, tasks, notes, and folders. This cannot be undone!\n\nAre you absolutely sure?')) {
+            if (confirm('⚠️ WARNING: This will delete ALL your events, tasks, notes, and folders. This cannot be undone!\n\nAre you absolutely sure?')) {
                 if (confirm('Last chance! This will permanently delete everything. Continue?')) {
                     try {
                         // Clear all local data
@@ -2800,7 +2800,7 @@
                         updateFoldersDescription();
                         
                         toggleMenu(); // Close settings menu
-                        alert('âœ… All data has been cleared successfully.');
+                        alert('✅ All data has been cleared successfully.');
                     } catch (error) {
                         console.error('Error clearing data:', error);
                         alert('Failed to clear data: ' + error.message);
@@ -3934,11 +3934,9 @@
             if (container.style.display === 'none') {
                 container.style.display = 'block';
                 icon.style.transform = 'rotate(0deg)';
-                icon.textContent = 'â–¼';
             } else {
                 container.style.display = 'none';
                 icon.style.transform = 'rotate(-90deg)';
-                icon.textContent = 'â–¶';
             }
         }
 
