@@ -3878,6 +3878,12 @@
                 content.innerHTML = '<div style="color: var(--text-tertiary); text-align: center; padding: 40px;">No items in this folder yet.</div>';
             }
             
+            // Close hamburger menu before opening modal
+            const settingsMenu = document.getElementById('settings-menu');
+            if (settingsMenu && settingsMenu.classList.contains('active')) {
+                toggleMenu();
+            }
+            
             modal.classList.add('active');
         }
 
@@ -4151,6 +4157,7 @@
             if (!currentUser) return;
             
             try {
+                // Save to current user's document
                 await db.collection('users').doc(currentUser.uid).set({
                     events: events,
                     tasks: tasks,
@@ -4161,23 +4168,89 @@
                     messages: messages,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 }, { merge: true });
+                
+                // Also sync shared folder items to the owner's account
+                await syncSharedFolderItems();
+                
             } catch (error) {
                 console.error('Error saving data:', error);
                 alert('Failed to save data. Please try again.');
             }
         }
 
+        // Sync items in shared folders to the folder owner's account
+        async function syncSharedFolderItems() {
+            if (!currentUser) return;
+            
+            try {
+                // Find all shared folders where current user is NOT the owner (i.e., they're a collaborator)
+                const sharedFoldersAsCollaborator = Object.entries(sharedFolders).filter(
+                    ([folderName, folderData]) => folderData.owner !== currentUser.email
+                );
+                
+                // For each shared folder, sync items to the owner's account
+                for (const [folderName, folderData] of sharedFoldersAsCollaborator) {
+                    const ownerEmail = folderData.owner;
+                    
+                    // Find the owner's user document
+                    const ownerSnapshot = await db.collection('users')
+                        .where('email', '==', ownerEmail)
+                        .get();
+                    
+                    if (ownerSnapshot.empty) continue;
+                    
+                    const ownerDoc = ownerSnapshot.docs[0];
+                    const ownerData = ownerDoc.data();
+                    const ownerEvents = ownerData.events || {};
+                    const ownerTasks = ownerData.tasks || {};
+                    const ownerNotes = ownerData.notes || {};
+                    
+                    // Add/update items from current user that belong to this shared folder
+                    Object.entries(events).forEach(([id, event]) => {
+                        if (event.folder === folderName) {
+                            ownerEvents[id] = event;
+                        }
+                    });
+                    
+                    Object.entries(tasks).forEach(([id, task]) => {
+                        if (task.folder === folderName) {
+                            ownerTasks[id] = task;
+                        }
+                    });
+                    
+                    Object.entries(notes).forEach(([id, note]) => {
+                        if (note.folder === folderName) {
+                            ownerNotes[id] = note;
+                        }
+                    });
+                    
+                    // Update the owner's document
+                    await db.collection('users').doc(ownerDoc.id).update({
+                        events: ownerEvents,
+                        tasks: ownerTasks,
+                        notes: ownerNotes,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            } catch (error) {
+                console.error('Error syncing shared folder items:', error);
+            }
+        }
+
         // Load user data from Firebase Firestore
         // Real-time listener for user data
         let unsubscribeListener = null;
+        let sharedFolderListeners = []; // Track listeners for shared folder owners
 
         function loadUserData() {
             if (!currentUser) return;
             
-            // Clean up any existing listener
+            // Clean up any existing listeners
             if (unsubscribeListener) {
                 unsubscribeListener();
             }
+            sharedFolderListeners.forEach(unsubscribe => unsubscribe());
+            sharedFolderListeners = [];
             
             // Set up real-time listener for user's own data
             unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc) => {
@@ -4193,8 +4266,8 @@
                     messages = data.messages || {};
                 }
                 
-                // Load data from folders shared WITH this user
-                await loadSharedData();
+                // Load data from folders shared WITH this user and set up real-time listeners
+                await loadSharedDataWithRealTimeSync();
                 
                 // Update invitations banner and unread message badge
                 updateInvitationsBanner();
@@ -4216,6 +4289,89 @@
                 console.error('Error loading data:', error);
                 alert('Failed to load data. Please refresh the page.');
             });
+        }
+
+        // Load shared data AND set up real-time listeners for folder owners
+        async function loadSharedDataWithRealTimeSync() {
+            if (!currentUser) return;
+            
+            try {
+                // Clean up old shared folder listeners
+                sharedFolderListeners.forEach(unsubscribe => unsubscribe());
+                sharedFolderListeners = [];
+                
+                // Query all users to find folders shared with current user
+                const usersSnapshot = await db.collection('users').get();
+                
+                usersSnapshot.forEach((userDoc) => {
+                    if (userDoc.id === currentUser.uid) return; // Skip own data
+                    
+                    const userData = userDoc.data();
+                    const theirSharedFolders = userData.sharedFolders || {};
+                    
+                    // Check each of their folders
+                    Object.entries(theirSharedFolders).forEach(([folderName, folderData]) => {
+                        // If this folder is shared with current user's email
+                        if (folderData.collaborators && folderData.collaborators.includes(currentUser.email)) {
+                            // Add this folder to our folders list if not already there
+                            if (!folders.includes(folderName)) {
+                                folders.push(folderName);
+                            }
+                            
+                            // Store the shared folder info
+                            if (!sharedFolders[folderName]) {
+                                sharedFolders[folderName] = {
+                                    owner: folderData.owner,
+                                    collaborators: [],
+                                    permissions: folderData.permissions || 'edit'
+                                };
+                            }
+                            
+                            // Set up REAL-TIME listener for this owner's document
+                            const ownerUnsubscribe = db.collection('users').doc(userDoc.id).onSnapshot((ownerDoc) => {
+                                if (!ownerDoc.exists) return;
+                                
+                                const ownerData = ownerDoc.data();
+                                
+                                // Merge their items from this shared folder into our data
+                                if (ownerData.events) {
+                                    Object.entries(ownerData.events).forEach(([id, event]) => {
+                                        if (event.folder === folderName) {
+                                            events[id] = event;
+                                        }
+                                    });
+                                }
+                                
+                                if (ownerData.tasks) {
+                                    Object.entries(ownerData.tasks).forEach(([id, task]) => {
+                                        if (task.folder === folderName) {
+                                            tasks[id] = task;
+                                        }
+                                    });
+                                }
+                                
+                                if (ownerData.notes) {
+                                    Object.entries(ownerData.notes).forEach(([id, note]) => {
+                                        if (note.folder === folderName) {
+                                            notes[id] = note;
+                                        }
+                                    });
+                                }
+                                
+                                // Re-render views with new data
+                                renderCalendar();
+                                renderTasks();
+                                renderNotes();
+                            });
+                            
+                            // Track this listener so we can clean it up later
+                            sharedFolderListeners.push(ownerUnsubscribe);
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('Error loading shared data:', error);
+            }
         }
 
         // Load data from folders that have been shared with this user
