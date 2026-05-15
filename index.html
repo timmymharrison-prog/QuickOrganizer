@@ -1132,6 +1132,43 @@
             transform: translateX(2px);
         }
 
+        /* Folder Filter Pills */
+        .folder-filter-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .folder-filter-pill {
+            padding: 8px 16px;
+            background: transparent;
+            border: 1px solid var(--element-border);
+            border-radius: 20px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s;
+            outline: none;
+            white-space: nowrap;
+        }
+
+        .folder-filter-pill:hover {
+            background: var(--element-hover);
+            color: var(--text-primary);
+        }
+
+        .folder-filter-pill.active {
+            background: rgba(59, 130, 246, 1);
+            color: white;
+            border-color: rgba(59, 130, 246, 1);
+        }
+
+        .folder-filter-pill.active:hover {
+            background: rgba(37, 99, 235, 1);
+            border-color: rgba(37, 99, 235, 1);
+        }
+
         /* Tasks View */
         .tasks-container {
             display: flex;
@@ -2020,10 +2057,8 @@
                 <div id="tasks-view" class="view-section">
                     <div class="calendar-header">
                         <h2>Tasks</h2>
-                        <select id="tasks-folder-filter" onchange="renderTasks()" style="padding: 8px 12px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer;">
-                            <option value="">All Folders</option>
-                        </select>
                     </div>
+                    <div class="folder-filter-container" id="tasks-folder-filter"></div>
                     <div class="tasks-container" id="tasks-container"></div>
                     
                     <!-- Completed Tasks Section -->
@@ -2041,10 +2076,8 @@
                 <div id="notes-view" class="view-section">
                     <div class="calendar-header">
                         <h2>Notes</h2>
-                        <select id="notes-folder-filter" onchange="renderNotes()" style="padding: 8px 12px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer;">
-                            <option value="">All Folders</option>
-                        </select>
                     </div>
+                    <div class="folder-filter-container" id="notes-folder-filter"></div>
                     <div class="notes-container" id="notes-container"></div>
                 </div>
             </div>
@@ -2436,6 +2469,8 @@
         let currentEditingId = null;
         let currentFolder = null;
         let currentUser = null;
+        let selectedTasksFolder = '';
+        let selectedNotesFolder = '';
 
         // Theme management
         let currentTheme = localStorage.getItem('theme') || 'dark';
@@ -3817,24 +3852,35 @@
             const completedContainer = document.getElementById('completed-tasks-container');
             const completedSection = document.getElementById('completed-tasks-section');
             const completedCount = document.getElementById('completed-count');
+            const filterContainer = document.getElementById('tasks-folder-filter');
             
             container.innerHTML = '';
             completedContainer.innerHTML = '';
             
-            // Get selected folder filter
-            const filterSelect = document.getElementById('tasks-folder-filter');
-            const selectedFolder = filterSelect ? filterSelect.value : '';
-            
-            // Populate folder filter dropdown
-            if (filterSelect) {
-                const currentSelection = filterSelect.value;
-                filterSelect.innerHTML = '<option value="">All Folders</option>';
+            // Populate folder filter pills
+            if (filterContainer) {
+                filterContainer.innerHTML = '';
+                
+                // Add "All" pill
+                const allPill = document.createElement('button');
+                allPill.className = 'folder-filter-pill' + (selectedTasksFolder === '' ? ' active' : '');
+                allPill.textContent = 'All';
+                allPill.onclick = () => {
+                    selectedTasksFolder = '';
+                    renderTasks();
+                };
+                filterContainer.appendChild(allPill);
+                
+                // Add folder pills
                 folders.forEach(folder => {
-                    const option = document.createElement('option');
-                    option.value = folder;
-                    option.textContent = folder;
-                    if (folder === currentSelection) option.selected = true;
-                    filterSelect.appendChild(option);
+                    const pill = document.createElement('button');
+                    pill.className = 'folder-filter-pill' + (selectedTasksFolder === folder ? ' active' : '');
+                    pill.textContent = folder;
+                    pill.onclick = () => {
+                        selectedTasksFolder = folder;
+                        renderTasks();
+                    };
+                    filterContainer.appendChild(pill);
                 });
             }
             
@@ -3848,8 +3894,8 @@
             
             // Filter by folder if selected
             const filteredTasks = taskEntries.filter(([taskId, task]) => {
-                if (selectedFolder === '') return true;
-                return task.folder === selectedFolder;
+                if (selectedTasksFolder === '') return true;
+                return task.folder === selectedTasksFolder;
             });
             
             // Separate into incomplete and completed
@@ -3942,22 +3988,33 @@
 
         function renderNotes() {
             const container = document.getElementById('notes-container');
+            const filterContainer = document.getElementById('notes-folder-filter');
             container.innerHTML = '';
             
-            // Get selected folder filter
-            const filterSelect = document.getElementById('notes-folder-filter');
-            const selectedFolder = filterSelect ? filterSelect.value : '';
-            
-            // Populate folder filter dropdown
-            if (filterSelect) {
-                const currentSelection = filterSelect.value;
-                filterSelect.innerHTML = '<option value="">All Folders</option>';
+            // Populate folder filter pills
+            if (filterContainer) {
+                filterContainer.innerHTML = '';
+                
+                // Add "All" pill
+                const allPill = document.createElement('button');
+                allPill.className = 'folder-filter-pill' + (selectedNotesFolder === '' ? ' active' : '');
+                allPill.textContent = 'All';
+                allPill.onclick = () => {
+                    selectedNotesFolder = '';
+                    renderNotes();
+                };
+                filterContainer.appendChild(allPill);
+                
+                // Add folder pills
                 folders.forEach(folder => {
-                    const option = document.createElement('option');
-                    option.value = folder;
-                    option.textContent = folder;
-                    if (folder === currentSelection) option.selected = true;
-                    filterSelect.appendChild(option);
+                    const pill = document.createElement('button');
+                    pill.className = 'folder-filter-pill' + (selectedNotesFolder === folder ? ' active' : '');
+                    pill.textContent = folder;
+                    pill.onclick = () => {
+                        selectedNotesFolder = folder;
+                        renderNotes();
+                    };
+                    filterContainer.appendChild(pill);
                 });
             }
             
@@ -3970,8 +4027,8 @@
             
             // Filter by folder if selected
             const filteredNotes = noteEntries.filter(([noteId, note]) => {
-                if (selectedFolder === '') return true;
-                return note.folder === selectedFolder;
+                if (selectedNotesFolder === '') return true;
+                return note.folder === selectedNotesFolder;
             });
             
             if (filteredNotes.length === 0) {
