@@ -1332,6 +1332,26 @@
             text-overflow: ellipsis;
         }
 
+        /* Notification badges - hidden by default */
+        #hamburger-badge,
+        #unread-badge-menu {
+            display: none !important;
+        }
+
+        #hamburger-badge.show,
+        #unread-badge-menu.show {
+            display: flex !important;
+        }
+
+        /* Folder invitations banner - hidden by default */
+        #invitations-banner {
+            display: none !important;
+        }
+
+        #invitations-banner.show {
+            display: flex !important;
+        }
+
         .note-item {
             background: var(--element-bg);
             border: 1px solid var(--element-border);
@@ -2125,12 +2145,12 @@
                 <h1 id="header-title">Calendar</h1>
                 <button class="hamburger-btn" onclick="toggleMenu()" title="Menu" style="position: relative;">
                     <span>&equiv;</span>
-                    <span id="hamburger-badge" style="display: none; position: absolute; top: 6px; right: 6px; background: #ef4444; color: white; border-radius: 10px; min-width: 18px; height: 18px; font-size: 11px; font-weight: 600; align-items: center; justify-content: center; padding: 0 4px;"></span>
+                    <span id="hamburger-badge" style="position: absolute; top: 6px; right: 6px; background: #ef4444; color: white; border-radius: 10px; min-width: 18px; height: 18px; font-size: 11px; font-weight: 600; align-items: center; justify-content: center; padding: 0 4px;"></span>
                 </button>
             </div>
             
             <!-- Folder Invitations Banner -->
-            <div id="invitations-banner" style="display: none; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px 16px; margin: 0 20px 16px 20px; display: flex; align-items: center; gap: 12px;">
+            <div id="invitations-banner" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px 16px; margin: 0 20px 16px 20px; align-items: center; gap: 12px;">
                 <span style="font-size: 20px;">📬</span>
                 <div style="flex: 1;">
                     <div style="font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Folder Invitations</div>
@@ -2284,7 +2304,7 @@
                         <div class="setting-description">View and send messages</div>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span id="unread-badge-menu" style="display: none; background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600;"></span>
+                        <span id="unread-badge-menu" style="background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600;"></span>
                         <button class="btn-icon">
                             <span>→</span>
                         </button>
@@ -3176,15 +3196,18 @@
         }
 
         function updateInvitationsBanner() {
+            // Don't update banner until user is logged in and data is loaded
+            if (!currentUser) return;
+            
             const banner = document.getElementById('invitations-banner');
             const text = document.getElementById('invitations-text');
             
             if (pendingInvitations && pendingInvitations.length > 0) {
-                banner.style.display = 'flex';
+                banner.classList.add('show');
                 const count = pendingInvitations.length;
                 text.textContent = `You have ${count} pending folder invitation${count > 1 ? 's' : ''}`;
             } else {
-                banner.style.display = 'none';
+                banner.classList.remove('show');
             }
         }
 
@@ -3432,20 +3455,20 @@
                 // Update menu badge
                 if (badgeMenu) {
                     badgeMenu.textContent = displayCount;
-                    badgeMenu.style.display = 'block';
+                    badgeMenu.classList.add('show');
                 }
                 
                 // Update hamburger menu badge
                 if (badgeHamburger) {
                     badgeHamburger.textContent = displayCount;
-                    badgeHamburger.style.display = 'flex';
+                    badgeHamburger.classList.add('show');
                 }
             } else {
                 if (badgeMenu) {
-                    badgeMenu.style.display = 'none';
+                    badgeMenu.classList.remove('show');
                 }
                 if (badgeHamburger) {
-                    badgeHamburger.style.display = 'none';
+                    badgeHamburger.classList.remove('show');
                 }
             }
         }
