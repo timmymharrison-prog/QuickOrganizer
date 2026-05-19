@@ -1352,6 +1352,142 @@
             display: flex !important;
         }
 
+        /* In-App Notification Banner */
+        .notification-banner {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            max-width: 400px;
+            background: var(--bg-primary);
+            border: 1px solid var(--element-border);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10000;
+            animation: slideInRight 0.3s ease-out;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .notification-banner.show {
+            display: flex !important;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(420px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0;
+            width: 24px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .notification-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* Rich Text Formatting Toolbar */
+        .formatting-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+            background: var(--element-bg);
+            border: 1px solid var(--element-border);
+            border-radius: 8px 8px 0 0;
+            border-bottom: none;
+            flex-wrap: wrap;
+        }
+
+        .formatting-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--element-border);
+            background: var(--bg-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        .formatting-btn:hover {
+            background: var(--element-hover);
+            transform: translateY(-1px);
+        }
+
+        .formatting-btn.active {
+            background: #c2925d;
+            color: white;
+            border-color: #c2925d;
+        }
+
+        .formatting-btn.separator {
+            width: 1px;
+            height: 32px;
+            background: var(--element-border);
+            border: none;
+            margin: 4px 4px;
+            cursor: default;
+        }
+
+        .formatting-btn.separator:hover {
+            transform: none;
+            background: var(--element-border);
+        }
+
+        .formatting-toolbar + textarea {
+            border-radius: 0 0 8px 8px;
+            border-top: none;
+        }
+
+        .color-picker-input {
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
         .note-item {
             background: var(--element-bg);
             border: 1px solid var(--element-border);
@@ -2151,12 +2287,22 @@
             
             <!-- Folder Invitations Banner -->
             <div id="invitations-banner" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px 16px; margin: 0 20px 16px 20px; align-items: center; gap: 12px;">
-                <span style="font-size: 20px;">📬</span>
+                <span style="font-size: 20px;">ðŸ“¬</span>
                 <div style="flex: 1;">
                     <div style="font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Folder Invitations</div>
                     <div id="invitations-text" style="font-size: 13px; color: var(--text-secondary);">You have pending folder invitations</div>
                 </div>
                 <button onclick="openInvitationsModal()" style="padding: 6px 16px; background: rgba(59, 130, 246, 1); color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer; white-space: nowrap;">View</button>
+            </div>
+
+            <!-- In-App Notification Banner -->
+            <div id="notification-banner" class="notification-banner">
+                <div class="notification-icon" id="notification-icon">ðŸ””</div>
+                <div class="notification-content">
+                    <div class="notification-title" id="notification-title"></div>
+                    <div class="notification-message" id="notification-message"></div>
+                </div>
+                <button class="notification-close" onclick="closeNotificationBanner()">&times;</button>
             </div>
             
             <div class="content-area">
@@ -2195,7 +2341,7 @@
                     <!-- Completed Tasks Section -->
                     <div id="completed-tasks-section" style="margin-top: 24px; display: none;">
                         <div onclick="toggleCompletedTasks()" style="cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--element-bg); border-radius: 8px; margin-bottom: 12px;">
-                            <span id="completed-toggle-icon" style="font-size: 16px; line-height: 1; transition: transform 0.2s; display: inline-block; transform: rotate(-90deg);">›</span>
+                            <span id="completed-toggle-icon" style="font-size: 16px; line-height: 1; transition: transform 0.2s; display: inline-block; transform: rotate(-90deg);">â€º</span>
                             <h3 style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin: 0;">Completed Tasks</h3>
                             <span id="completed-count" style="font-size: 13px; color: var(--text-muted); margin-left: auto;">0</span>
                         </div>
@@ -2306,7 +2452,7 @@
                     <div style="display: flex; align-items: center; gap: 8px;">
                         <span id="unread-badge-menu" style="background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600;"></span>
                         <button class="btn-icon">
-                            <span>→</span>
+                            <span>â†’</span>
                         </button>
                     </div>
                 </div>
@@ -2314,13 +2460,22 @@
 
             <div class="settings-section">
                 <h4 class="section-title">Account</h4>
+                <div class="setting-item" onclick="testNotifications()" style="cursor: pointer;">
+                    <div class="setting-info">
+                        <div class="setting-title">Test Notifications</div>
+                        <div class="setting-description">Send test browser and in-app notifications</div>
+                    </div>
+                    <button class="btn-icon">
+                        <span>ðŸ””</span>
+                    </button>
+                </div>
                 <div class="setting-item" onclick="clearAllData()" style="cursor: pointer;">
                     <div class="setting-info">
                         <div class="setting-title" style="color: #ef4444;">Clear All Data</div>
                         <div class="setting-description">Delete all events, tasks, notes, and folders</div>
                     </div>
                     <button class="btn-icon" style="color: #ef4444;">
-                        <span style="font-size: 20px;">×</span>
+                        <span style="font-size: 20px;">Ã—</span>
                     </button>
                 </div>
                 <div class="setting-item" onclick="logoutUser()" style="cursor: pointer;">
@@ -2346,7 +2501,7 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <button class="folder-modal-edit-btn" id="folder-details-edit-btn" title="Edit folder">
-                        <span>✎</span>
+                        <span>âœŽ</span>
                     </button>
                     <button class="close-btn" onclick="closeModal('folder-details-modal')">&times;</button>
                 </div>
@@ -2427,6 +2582,7 @@
             </div>
             <div class="modal-actions">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('agenda-modal')">Close</button>
+                <button type="button" class="btn btn-primary" onclick="addTaskFromAgenda()" style="background: rgba(236, 72, 153, 1); margin-right: 8px;">+ Add Task</button>
                 <button type="button" class="btn btn-primary" onclick="addEventFromAgenda()">+ Add Event</button>
             </div>
         </div>
@@ -2518,6 +2674,21 @@
                     <label>Description (Optional)</label>
                     <textarea id="event-description" placeholder="Add details about the event"></textarea>
                 </div>
+                <div class="form-group">
+                    <label>Reminder (Optional)</label>
+                    <select id="event-reminder">
+                        <option value="">No reminder</option>
+                        <option value="0">At time of event</option>
+                        <option value="5">5 minutes before</option>
+                        <option value="15">15 minutes before</option>
+                        <option value="30">30 minutes before</option>
+                        <option value="60">1 hour before</option>
+                        <option value="120">2 hours before</option>
+                        <option value="1440">1 day before</option>
+                        <option value="2880">2 days before</option>
+                        <option value="10080">1 week before</option>
+                    </select>
+                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('event-modal')">Cancel</button>
                     <button type="button" class="btn btn-delete" id="delete-event-btn" onclick="deleteEvent()" style="display: none;">Delete</button>
@@ -2551,7 +2722,27 @@
                 </div>
                 <div class="form-group">
                     <label>Description (Optional)</label>
-                    <textarea id="task-description" placeholder="Add task details"></textarea>
+                    <div class="formatting-toolbar">
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'bold')" title="Bold"><strong>B</strong></button>
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'italic')" title="Italic"><em>I</em></button>
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'underline')" title="Underline"><u>U</u></button>
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'strike')" title="Strikethrough"><s>S</s></button>
+                        <div class="formatting-btn separator"></div>
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'bulletList')" title="Bullet List">â€¢â€”</button>
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'numberList')" title="Numbered List">1â€”</button>
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'checkList')" title="Checklist">â˜â€”</button>
+                    </div>
+                    <textarea id="task-description" placeholder="Add task details" onkeydown="handleTextareaEnter(event)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Reminder (Optional)</label>
+                    <select id="task-reminder">
+                        <option value="">No reminder</option>
+                        <option value="0">On due date</option>
+                        <option value="1440">1 day before</option>
+                        <option value="2880">2 days before</option>
+                        <option value="10080">1 week before</option>
+                    </select>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('task-modal')">Cancel</button>
@@ -2582,7 +2773,17 @@
                 </div>
                 <div class="form-group">
                     <label>Content</label>
-                    <textarea id="note-content" placeholder="Write your note here..." style="min-height: 200px;" required></textarea>
+                    <div class="formatting-toolbar">
+                        <button type="button" class="formatting-btn" onclick="formatText('note-content', 'bold')" title="Bold"><strong>B</strong></button>
+                        <button type="button" class="formatting-btn" onclick="formatText('note-content', 'italic')" title="Italic"><em>I</em></button>
+                        <button type="button" class="formatting-btn" onclick="formatText('note-content', 'underline')" title="Underline"><u>U</u></button>
+                        <button type="button" class="formatting-btn" onclick="formatText('note-content', 'strike')" title="Strikethrough"><s>S</s></button>
+                        <div class="formatting-btn separator"></div>
+                        <button type="button" class="formatting-btn" onclick="formatText('note-content', 'bulletList')" title="Bullet List">â€¢â€”</button>
+                        <button type="button" class="formatting-btn" onclick="formatText('note-content', 'numberList')" title="Numbered List">1â€”</button>
+                        <button type="button" class="formatting-btn" onclick="formatText('note-content', 'checkList')" title="Checklist">â˜â€”</button>
+                    </div>
+                    <textarea id="note-content" placeholder="Write your note here..." style="min-height: 200px;" required onkeydown="handleTextareaEnter(event)"></textarea>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('note-modal')">Cancel</button>
@@ -2622,7 +2823,7 @@
 
                 <div class="form-group" style="padding-top: 12px; border-top: 1px solid var(--element-border);">
                     <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 8px;">
-                        ℹ️ Collaborators can view and edit all items in this folder
+                        â„¹ï¸ Collaborators can view and edit all items in this folder
                     </label>
                 </div>
 
@@ -2661,7 +2862,7 @@
             </div>
             <form onsubmit="sendMessage(event)">
                 <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px; margin-bottom: 16px; font-size: 13px; color: var(--text-secondary);">
-                    <strong style="color: var(--text-primary);">💡 How to send a message:</strong><br>
+                    <strong style="color: var(--text-primary);">ðŸ’¡ How to send a message:</strong><br>
                     Enter the recipient's email address (the one they used to sign up). They'll receive your message in their Inbox.
                 </div>
                 
@@ -2775,6 +2976,18 @@
         //   }
         // }
         let messages = {};
+        
+        // Notification preferences
+        let notificationPreferences = {
+            browserEnabled: true,
+            inAppEnabled: true,
+            emailEnabled: false, // Requires backend setup
+            soundEnabled: true
+        };
+        
+        // Track active notifications to avoid duplicates
+        let activeNotifications = new Set();
+        let notificationCheckInterval = null;
 
         // Theme management
         let currentTheme = localStorage.getItem('theme') || 'dark';
@@ -2798,8 +3011,19 @@
                     console.error('Error storing email:', error);
                 }
                 
+                // Request notification permission and start checker
+                await requestNotificationPermission();
+                
                 loadUserData();
+                startNotificationChecker();
             } else {
+                // Stop notification checker on logout
+                if (notificationCheckInterval) {
+                    clearInterval(notificationCheckInterval);
+                    notificationCheckInterval = null;
+                }
+                activeNotifications.clear();
+                
                 showLoginModal();
             }
         });
@@ -2891,7 +3115,7 @@
                 if (sharedFolders[folder]) {
                     const sharedIcon = document.createElement('span');
                     sharedIcon.style.cssText = 'font-size: 12px; color: rgba(59, 130, 246, 0.8); margin-left: 6px;';
-                    sharedIcon.textContent = '👥';
+                    sharedIcon.textContent = 'ðŸ‘¥';
                     sharedIcon.title = sharedFolders[folder].owner === currentUser?.email 
                         ? `Shared with ${sharedFolders[folder].collaborators?.length || 0} people`
                         : `Shared by ${sharedFolders[folder].owner}`;
@@ -2911,7 +3135,7 @@
                 // Share button
                 const shareBtn = document.createElement('button');
                 shareBtn.className = 'folder-item-compact-action';
-                shareBtn.innerHTML = '🔗';
+                shareBtn.innerHTML = 'ðŸ”—';
                 shareBtn.title = 'Share folder';
                 shareBtn.style.cssText = 'font-size: 16px; padding: 4px 8px;';
                 shareBtn.onclick = (e) => {
@@ -3084,7 +3308,7 @@
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'btn-icon';
                 removeBtn.style.cssText = 'width: 24px; height: 24px; font-size: 16px; color: var(--text-muted);';
-                removeBtn.innerHTML = '×';
+                removeBtn.innerHTML = 'Ã—';
                 removeBtn.onclick = () => removeCollaborator(index);
                 
                 item.appendChild(emailSpan);
@@ -3234,7 +3458,7 @@
                 
                 const icon = document.createElement('span');
                 icon.style.cssText = 'font-size: 24px;';
-                icon.textContent = '📁';
+                icon.textContent = 'ðŸ“';
                 
                 const info = document.createElement('div');
                 info.style.cssText = 'flex: 1;';
@@ -3365,7 +3589,7 @@
             if (messageEntries.length === 0) {
                 container.innerHTML = `
                     <div style="color: var(--text-muted); font-size: 14px; text-align: center; padding: 60px 20px;">
-                        <div style="font-size: 48px; margin-bottom: 16px;">📭</div>
+                        <div style="font-size: 48px; margin-bottom: 16px;">ðŸ“­</div>
                         <div style="font-size: 16px; color: var(--text-secondary); margin-bottom: 8px;">No messages yet</div>
                         <div style="font-size: 13px; line-height: 1.6;">
                             Click <strong>"New Message"</strong> above to send a message to another user.<br>
@@ -3383,7 +3607,7 @@
                 
                 const icon = document.createElement('div');
                 icon.className = 'message-icon';
-                icon.textContent = msg.type === 'invitation' ? '📬' : '✉️';
+                icon.textContent = msg.type === 'invitation' ? 'ðŸ“¬' : 'âœ‰ï¸';
                 
                 const content = document.createElement('div');
                 content.className = 'message-content';
@@ -3564,6 +3788,266 @@
             openModal('compose-message-modal');
         }
 
+        // ===== NOTIFICATION SYSTEM =====
+        
+        // Request browser notification permission
+        async function requestNotificationPermission() {
+            if (!("Notification" in window)) {
+                console.log("This browser does not support notifications");
+                return false;
+            }
+            
+            if (Notification.permission === "granted") {
+                return true;
+            }
+            
+            if (Notification.permission !== "denied") {
+                const permission = await Notification.requestPermission();
+                return permission === "granted";
+            }
+            
+            return false;
+        }
+
+        // Show in-app notification banner
+        function showInAppNotification(title, message, icon = 'ðŸ””', duration = 5000) {
+            if (!notificationPreferences.inAppEnabled) return;
+            
+            const banner = document.getElementById('notification-banner');
+            const titleEl = document.getElementById('notification-title');
+            const messageEl = document.getElementById('notification-message');
+            const iconEl = document.getElementById('notification-icon');
+            
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+            iconEl.textContent = icon;
+            
+            banner.classList.add('show');
+            
+            // Auto-hide after duration
+            setTimeout(() => {
+                closeNotificationBanner();
+            }, duration);
+        }
+
+        function closeNotificationBanner() {
+            const banner = document.getElementById('notification-banner');
+            banner.classList.remove('show');
+        }
+
+        // Show browser notification
+        function showBrowserNotification(title, message, data = {}) {
+            if (!notificationPreferences.browserEnabled) return;
+            
+            if (Notification.permission === "granted") {
+                const notification = new Notification(title, {
+                    body: message,
+                    tag: data.id || 'default',
+                    data: data,
+                    requireInteraction: false
+                });
+                
+                notification.onclick = function(event) {
+                    event.preventDefault();
+                    window.focus();
+                    
+                    // Handle click based on notification type
+                    if (data.type === 'event') {
+                        switchView('calendar');
+                    } else if (data.type === 'task') {
+                        switchView('tasks');
+                    } else if (data.type === 'message') {
+                        switchView('inbox');
+                    }
+                    
+                    notification.close();
+                };
+            }
+        }
+
+        // Start notification checker
+        function startNotificationChecker() {
+            // Check every minute for due notifications
+            if (notificationCheckInterval) {
+                clearInterval(notificationCheckInterval);
+            }
+            
+            notificationCheckInterval = setInterval(() => {
+                checkDueNotifications();
+            }, 60000); // Check every 60 seconds
+            
+            // Also check immediately
+            checkDueNotifications();
+        }
+
+        // Check for due notifications
+        function checkDueNotifications() {
+            if (!currentUser) return;
+            
+            const now = new Date();
+            
+            // Check events
+            Object.entries(events).forEach(([id, event]) => {
+                if (!event.reminder || !event.date || !event.startTime) return;
+                
+                const eventDateTime = new Date(`${event.date}T${event.startTime}`);
+                const reminderMinutes = parseInt(event.reminder);
+                const reminderTime = new Date(eventDateTime.getTime() - (reminderMinutes * 60000));
+                
+                const notificationKey = `event-${id}-${event.reminder}`;
+                
+                // If reminder time has passed and we haven't notified yet
+                if (now >= reminderTime && now < eventDateTime && !activeNotifications.has(notificationKey)) {
+                    activeNotifications.add(notificationKey);
+                    
+                    const timeUntil = reminderMinutes === 0 ? 'now' : 
+                                    reminderMinutes < 60 ? `in ${reminderMinutes} minutes` :
+                                    reminderMinutes < 1440 ? `in ${Math.floor(reminderMinutes/60)} hours` :
+                                    `in ${Math.floor(reminderMinutes/1440)} days`;
+                    
+                    showBrowserNotification(
+                        `Event Reminder: ${event.title}`,
+                        `Your event "${event.title}" starts ${timeUntil}`,
+                        { type: 'event', id: id }
+                    );
+                    
+                    showInAppNotification(
+                        `ðŸ“… ${event.title}`,
+                        `Starting ${timeUntil} at ${event.startTime}`,
+                        'ðŸ“…'
+                    );
+                }
+            });
+            
+            // Check tasks
+            Object.entries(tasks).forEach(([id, task]) => {
+                if (!task.reminder || !task.dueDate) return;
+                
+                const dueDate = new Date(task.dueDate + 'T09:00:00'); // Default to 9 AM
+                const reminderMinutes = parseInt(task.reminder);
+                const reminderTime = new Date(dueDate.getTime() - (reminderMinutes * 60000));
+                
+                const notificationKey = `task-${id}-${task.reminder}`;
+                
+                if (now >= reminderTime && now < dueDate && !activeNotifications.has(notificationKey)) {
+                    activeNotifications.add(notificationKey);
+                    
+                    const timeUntil = reminderMinutes === 0 ? 'today' :
+                                    reminderMinutes < 1440 ? 'today' :
+                                    `in ${Math.floor(reminderMinutes/1440)} days`;
+                    
+                    showBrowserNotification(
+                        `Task Due: ${task.title}`,
+                        `Task "${task.title}" is due ${timeUntil}`,
+                        { type: 'task', id: id }
+                    );
+                    
+                    showInAppNotification(
+                        `âœ“ ${task.title}`,
+                        `Due ${timeUntil}`,
+                        'âœ“'
+                    );
+                }
+            });
+            
+            // Check for unread messages (only notify once per message)
+            const unreadMessages = Object.entries(messages).filter(([id, msg]) => 
+                msg.to === currentUser.email && !msg.read
+            );
+            
+            unreadMessages.forEach(([id, msg]) => {
+                const notificationKey = `message-${id}`;
+                
+                if (!activeNotifications.has(notificationKey)) {
+                    activeNotifications.add(notificationKey);
+                    
+                    showBrowserNotification(
+                        `New Message from ${msg.from}`,
+                        msg.subject,
+                        { type: 'message', id: id }
+                    );
+                    
+                    showInAppNotification(
+                        `âœ‰ï¸ New Message`,
+                        `From: ${msg.from} - ${msg.subject}`,
+                        'âœ‰ï¸',
+                        6000
+                    );
+                }
+            });
+        }
+
+        // Test notifications function
+        function testNotifications() {
+            console.log('ðŸ§ª Test Notifications clicked');
+            console.log('Notification permission:', Notification.permission);
+            console.log('In-app notifications enabled:', notificationPreferences.inAppEnabled);
+            console.log('Browser notifications enabled:', notificationPreferences.browserEnabled);
+            
+            // Show immediate confirmation
+            showInAppNotification(
+                'â±ï¸ Notification Test Scheduled',
+                'Test notifications will appear in 5 seconds...',
+                'â±ï¸',
+                4000
+            );
+            
+            // Close settings menu
+            toggleMenu();
+            
+            // Schedule test notifications for 5 seconds later
+            setTimeout(() => {
+                console.log('â° 5 seconds elapsed, triggering test notifications...');
+                
+                // Test in-app notification
+                showInAppNotification(
+                    'ðŸŽ‰ Test Notification',
+                    'This is a test in-app notification. It will auto-dismiss in 5 seconds.',
+                    'ðŸŽ‰',
+                    5000
+                );
+                
+                // Test browser notification
+                if (Notification.permission === "granted") {
+                    console.log('âœ… Sending browser notification (permission granted)');
+                    showBrowserNotification(
+                        'Test Browser Notification',
+                        'This is a test desktop notification. Click it to return to the app.',
+                        { type: 'test', id: 'test-notification' }
+                    );
+                } else if (Notification.permission === "default") {
+                    console.log('â“ Requesting notification permission...');
+                    // Request permission if not granted yet
+                    requestNotificationPermission().then(granted => {
+                        if (granted) {
+                            console.log('âœ… Permission granted, sending notification');
+                            showBrowserNotification(
+                                'Test Browser Notification',
+                                'This is a test desktop notification. Click it to return to the app.',
+                                { type: 'test', id: 'test-notification' }
+                            );
+                        } else {
+                            console.log('âŒ Permission denied');
+                            showInAppNotification(
+                                'âš ï¸ Permission Denied',
+                                'Please allow browser notifications to receive desktop alerts.',
+                                'âš ï¸',
+                                6000
+                            );
+                        }
+                    });
+                } else {
+                    console.log('ðŸš« Notifications blocked by user');
+                    showInAppNotification(
+                        'âš ï¸ Notifications Blocked',
+                        'Browser notifications are blocked. Please enable them in your browser settings.',
+                        'âš ï¸',
+                        6000
+                    );
+                }
+            }, 5000); // 5 second delay
+        }
+
         function updateFoldersDescription() {
             const desc = document.getElementById('folders-description');
             desc.textContent = `${folders.length} folder${folders.length !== 1 ? 's' : ''}`;
@@ -3686,7 +4170,7 @@
         }
 
         async function clearAllData() {
-            if (confirm('⚠️ WARNING: This will delete ALL your events, tasks, notes, and folders. This cannot be undone!\n\nAre you absolutely sure?')) {
+            if (confirm('âš ï¸ WARNING: This will delete ALL your events, tasks, notes, and folders. This cannot be undone!\n\nAre you absolutely sure?')) {
                 if (confirm('Last chance! This will permanently delete everything. Continue?')) {
                     try {
                         // Clear all local data
@@ -3707,7 +4191,7 @@
                         updateFoldersDescription();
                         
                         toggleMenu(); // Close settings menu
-                        alert('✅ All data has been cleared successfully.');
+                        alert('âœ… All data has been cleared successfully.');
                     } catch (error) {
                         console.error('Error clearing data:', error);
                         alert('Failed to clear data: ' + error.message);
@@ -4587,12 +5071,28 @@
             const dayEvents = Object.entries(events).filter(([id, event]) => event.date === dateStr);
             
             // Check for incomplete tasks on this day
-            const dayTasks = Object.entries(tasks).filter(([id, task]) => task.date === dateStr && !task.completed);
+            const dayTasks = Object.entries(tasks).filter(([id, task]) => {
+                const hasDate = task.dueDate === dateStr;
+                const notCompleted = !task.completed;
+                return hasDate && notCompleted;
+            });
             
             // Check for completed tasks on this day
-            const completedTasks = Object.entries(tasks).filter(([id, task]) => task.date === dateStr && task.completed);
+            const completedTasks = Object.entries(tasks).filter(([id, task]) => task.dueDate === dateStr && task.completed);
             
-            if (dayEvents.length > 0 || dayTasks.length > 0) {
+            // Debug logging for first day of month
+            if (day === 1 && !isOtherMonth) {
+                console.log(`ðŸ“… Day ${day} of month ${month + 1}:`, {
+                    dateStr,
+                    eventsCount: dayEvents.length,
+                    tasksCount: dayTasks.length,
+                    completedCount: completedTasks.length,
+                    allTasks: Object.values(tasks).map(t => ({ title: t.title, dueDate: t.dueDate, completed: t.completed }))
+                });
+            }
+            
+            // Only highlight days with events (not tasks)
+            if (dayEvents.length > 0) {
                 dayEl.classList.add('has-event');
             }
             
@@ -4653,6 +5153,196 @@
         // Modal functions
         let selectedAgendaDate = null;
 
+        // Rich text formatting function
+        function formatText(textareaId, format) {
+            const textarea = document.getElementById(textareaId);
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const fullText = textarea.value;
+            
+            // For list formatting, work with entire lines
+            if (format === 'bulletList' || format === 'numberList' || format === 'checkList') {
+                // Find the start of the first line
+                let lineStart = start;
+                while (lineStart > 0 && fullText[lineStart - 1] !== '\n') {
+                    lineStart--;
+                }
+                
+                // Find the end of the last line
+                let lineEnd = end;
+                while (lineEnd < fullText.length && fullText[lineEnd] !== '\n') {
+                    lineEnd++;
+                }
+                
+                const beforeLines = fullText.substring(0, lineStart);
+                const selectedLines = fullText.substring(lineStart, lineEnd);
+                const afterLines = fullText.substring(lineEnd);
+                
+                let formattedLines = '';
+                const lines = selectedLines.split('\n');
+                
+                if (format === 'bulletList') {
+                    formattedLines = lines.map(line => {
+                        // Remove existing bullet if present
+                        const cleaned = line.replace(/^[â€¢\-\*]\s*/, '');
+                        return cleaned ? `â€¢ ${cleaned}` : 'â€¢ ';
+                    }).join('\n');
+                } else if (format === 'numberList') {
+                    formattedLines = lines.map((line, i) => {
+                        // Remove existing number if present
+                        const cleaned = line.replace(/^\d+\.\s*/, '');
+                        return cleaned ? `${i + 1}. ${cleaned}` : `${i + 1}. `;
+                    }).join('\n');
+                } else if (format === 'checkList') {
+                    formattedLines = lines.map(line => {
+                        // Remove existing checkbox if present
+                        const cleaned = line.replace(/^[â˜â˜‘âœ“]\s*/, '');
+                        return cleaned ? `â˜ ${cleaned}` : 'â˜ ';
+                    }).join('\n');
+                }
+                
+                textarea.value = beforeLines + formattedLines + afterLines;
+                
+                // Position cursor at end of formatted text (no highlighting)
+                const cursorPos = lineStart + formattedLines.length;
+                textarea.selectionStart = cursorPos;
+                textarea.selectionEnd = cursorPos;
+                textarea.focus();
+                return;
+            }
+            
+            // For inline formatting (bold, italic, etc.), work with selection
+            const selectedText = fullText.substring(start, end);
+            const beforeText = fullText.substring(0, start);
+            const afterText = fullText.substring(end);
+            
+            let formattedText = '';
+            let cursorOffset = 0;
+            
+            switch(format) {
+                case 'bold':
+                    formattedText = `**${selectedText}**`;
+                    cursorOffset = selectedText ? 2 : 2;
+                    break;
+                case 'italic':
+                    formattedText = `*${selectedText}*`;
+                    cursorOffset = selectedText ? 1 : 1;
+                    break;
+                case 'underline':
+                    formattedText = `__${selectedText}__`;
+                    cursorOffset = selectedText ? 2 : 2;
+                    break;
+                case 'strike':
+                    formattedText = `~~${selectedText}~~`;
+                    cursorOffset = selectedText ? 2 : 2;
+                    break;
+            }
+            
+            textarea.value = beforeText + formattedText + afterText;
+            
+            // Set cursor position
+            if (selectedText) {
+                textarea.selectionStart = start;
+                textarea.selectionEnd = start + formattedText.length;
+            } else {
+                const newPos = start + (formattedText.length - cursorOffset);
+                textarea.selectionStart = newPos;
+                textarea.selectionEnd = newPos;
+            }
+            
+            textarea.focus();
+        }
+
+        // Auto-continue lists on Enter key
+        function handleTextareaEnter(e) {
+            console.log('Key pressed:', e.key); // Debug
+            
+            if (e.key === 'Enter') {
+                const textarea = e.target;
+                const cursorPos = textarea.selectionStart;
+                const textBeforeCursor = textarea.value.substring(0, cursorPos);
+                const textAfterCursor = textarea.value.substring(cursorPos);
+                
+                // Get the current line
+                const lines = textBeforeCursor.split('\n');
+                const currentLine = lines[lines.length - 1];
+                
+                console.log('Current line:', currentLine); // Debug
+                
+                // Check for bullet list
+                const bulletMatch = currentLine.match(/^â€¢\s/);
+                if (bulletMatch) {
+                    console.log('Bullet match found!'); // Debug
+                    // If line only has bullet and whitespace, remove it and exit list
+                    if (currentLine.trim() === 'â€¢') {
+                        e.preventDefault();
+                        const newText = textBeforeCursor.slice(0, -1) + '\n' + textAfterCursor;
+                        textarea.value = newText;
+                        textarea.selectionStart = cursorPos;
+                        textarea.selectionEnd = cursorPos;
+                        return;
+                    }
+                    // Continue bullet list
+                    e.preventDefault();
+                    const newText = textBeforeCursor + '\nâ€¢ ' + textAfterCursor;
+                    textarea.value = newText;
+                    textarea.selectionStart = cursorPos + 3;
+                    textarea.selectionEnd = cursorPos + 3;
+                    return;
+                }
+                
+                // Check for numbered list
+                const numberMatch = currentLine.match(/^(\d+)\.\s/);
+                if (numberMatch) {
+                    console.log('Number match found!'); // Debug
+                    const currentNum = parseInt(numberMatch[1]);
+                    // If line only has number and whitespace, remove it and exit list
+                    if (currentLine.trim() === `${currentNum}.`) {
+                        e.preventDefault();
+                        const removeLength = currentNum.toString().length + 2; // number + ". "
+                        const newText = textBeforeCursor.slice(0, -removeLength) + '\n' + textAfterCursor;
+                        textarea.value = newText;
+                        textarea.selectionStart = cursorPos - removeLength + 1;
+                        textarea.selectionEnd = cursorPos - removeLength + 1;
+                        return;
+                    }
+                    // Continue numbered list
+                    e.preventDefault();
+                    const nextNum = currentNum + 1;
+                    const newText = textBeforeCursor + `\n${nextNum}. ` + textAfterCursor;
+                    textarea.value = newText;
+                    const newPos = cursorPos + nextNum.toString().length + 3;
+                    textarea.selectionStart = newPos;
+                    textarea.selectionEnd = newPos;
+                    return;
+                }
+                
+                // Check for checklist
+                const checkMatch = currentLine.match(/^â˜\s/);
+                if (checkMatch) {
+                    console.log('Checkbox match found!'); // Debug
+                    // If line only has checkbox and whitespace, remove it and exit list
+                    if (currentLine.trim() === 'â˜') {
+                        e.preventDefault();
+                        const newText = textBeforeCursor.slice(0, -1) + '\n' + textAfterCursor;
+                        textarea.value = newText;
+                        textarea.selectionStart = cursorPos;
+                        textarea.selectionEnd = cursorPos;
+                        return;
+                    }
+                    // Continue checklist
+                    e.preventDefault();
+                    const newText = textBeforeCursor + '\nâ˜ ' + textAfterCursor;
+                    textarea.value = newText;
+                    textarea.selectionStart = cursorPos + 3;
+                    textarea.selectionEnd = cursorPos + 3;
+                    return;
+                }
+                
+                console.log('No list pattern matched'); // Debug
+            }
+        }
+
         function openAgendaModal(dateStr) {
             selectedAgendaDate = dateStr;
             const modal = document.getElementById('agenda-modal');
@@ -4672,7 +5362,7 @@
             const dayEvents = Object.entries(events).filter(([id, event]) => event.date === dateStr);
             
             // Get tasks for this day
-            const dayTasks = Object.entries(tasks).filter(([id, task]) => task.date === dateStr);
+            const dayTasks = Object.entries(tasks).filter(([id, task]) => task.dueDate === dateStr);
             
             // Sort events by start time
             dayEvents.sort((a, b) => {
@@ -4810,6 +5500,11 @@
             openEventModal(null, selectedAgendaDate);
         }
 
+        function addTaskFromAgenda() {
+            closeModal('agenda-modal');
+            openTaskModal(null, selectedAgendaDate);
+        }
+
         function openEventModal(eventId = null, dateStr = null) {
             currentEditingId = eventId;
             const modal = document.getElementById('event-modal');
@@ -4832,6 +5527,7 @@
                 setTimePicker('event-end', endTime);
                 
                 document.getElementById('event-description').value = events[eventId].description || '';
+                document.getElementById('event-reminder').value = events[eventId].reminder || '';
                 deleteBtn.style.display = 'block';
             } else {
                 // New event
@@ -4851,7 +5547,7 @@
             modal.classList.add('active');
         }
 
-        function openTaskModal(taskId = null) {
+        function openTaskModal(taskId = null, dateStr = null) {
             currentEditingId = taskId;
             const modal = document.getElementById('task-modal');
             const form = document.getElementById('task-form');
@@ -4863,12 +5559,16 @@
                 document.getElementById('task-modal-title').textContent = 'Edit Task';
                 document.getElementById('task-title').value = tasks[taskId].title;
                 populateFolderDropdown('task-folder', tasks[taskId].folder);
-                document.getElementById('task-date').value = tasks[taskId].date || '';
+                document.getElementById('task-date').value = tasks[taskId].dueDate || '';
                 document.getElementById('task-description').value = tasks[taskId].description || '';
+                document.getElementById('task-reminder').value = tasks[taskId].reminder || '';
                 deleteBtn.style.display = 'block';
             } else {
                 document.getElementById('task-modal-title').textContent = 'New Task';
                 populateFolderDropdown('task-folder', null);
+                if (dateStr) {
+                    document.getElementById('task-date').value = dateStr;
+                }
                 deleteBtn.style.display = 'none';
             }
             
@@ -5200,7 +5900,8 @@
                     date: document.getElementById('event-date').value,
                     startTime: document.getElementById('event-start-time').value,
                     endTime: document.getElementById('event-end-time').value,
-                    description: document.getElementById('event-description').value
+                    description: document.getElementById('event-description').value,
+                    reminder: document.getElementById('event-reminder').value
                 };
                 
                 if (currentEditingId) {
@@ -5225,8 +5926,9 @@
                 const taskData = {
                     title: document.getElementById('task-title').value,
                     folder: document.getElementById('task-folder').value,
-                    date: document.getElementById('task-date').value,
+                    dueDate: document.getElementById('task-date').value,
                     description: document.getElementById('task-description').value,
+                    reminder: document.getElementById('task-reminder').value,
                     completed: currentEditingId && tasks[currentEditingId] ? tasks[currentEditingId].completed : false
                 };
                 
