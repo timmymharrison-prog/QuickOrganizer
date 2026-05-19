@@ -4709,6 +4709,7 @@
             
             try {
                 // Save to current user's document
+                // Note: We send complete objects, so we overwrite these fields entirely
                 await db.collection('users').doc(currentUser.uid).set({
                     events: events,
                     tasks: tasks,
@@ -4719,7 +4720,7 @@
                     sharedFolders: sharedFolders,
                     messages: messages,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+                });
                 
                 // Also sync shared folder items to the owner's account
                 await syncSharedFolderItems();
@@ -4806,7 +4807,7 @@
             
             // Set up real-time listener for user's own data
             unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc) => {
-                // Skip snapshot updates during deletion to prevent race condition
+                // Skip snapshot updates during save operations to prevent race condition
                 if (isSavingData) {
                     return;
                 }
@@ -5715,7 +5716,7 @@
             // Clear flag after a delay to ensure Firestore has propagated
             setTimeout(() => {
                 isSavingData = false;
-            }, 1000);
+            }, 3000);
         }
 
         async function deleteNote() {
@@ -5848,10 +5849,19 @@
             checkbox.checked = task.completed;
             checkbox.onclick = async (e) => {
                 e.stopPropagation();
+                
+                // Set flag to prevent onSnapshot reload
+                isSavingData = true;
+                
                 task.completed = e.target.checked;
                 await saveData();
                 renderCalendar(); // Update calendar to show/hide completed indicator
                 renderTasks();
+                
+                // Clear flag after delay
+                setTimeout(() => {
+                    isSavingData = false;
+                }, 3000);
             };
             
             const taskContent = document.createElement('div');
@@ -5909,7 +5919,9 @@
         }
         
         // Task reordering function - simple and instant
-        function moveTask(taskId, direction) {
+        async function moveTask(taskId, direction) {
+            console.log('ðŸ”€ moveTask called for:', taskId);
+            
             // Get the filtered task list that's currently displayed
             const container = document.getElementById('tasks-container');
             const displayedTaskIds = Array.from(container.querySelectorAll('.task-item'))
@@ -5949,9 +5961,24 @@
                 }, 600);
             }
             
+            console.log('ðŸš« Setting isSavingData = true');
+            // Set flag to prevent onSnapshot from reloading during save
+            isSavingData = true;
+            
+            console.log('ðŸ’¾ Calling saveData...');
+            console.log('   Tasks before save:', Object.keys(tasks));
             // Save and immediately re-render
-            saveData();
+            await saveData();
+            console.log('âœ… saveData complete');
+            
             renderTasks();
+            
+            console.log('â° Setting 1-second timer to clear flag');
+            // Clear flag after a delay
+            setTimeout(() => {
+                console.log('âœ… Setting isSavingData = false');
+                isSavingData = false;
+            }, 3000);
         }
         
         function toggleCompletedTasks() {
@@ -6085,7 +6112,7 @@
                 // Clear flag after a delay
                 setTimeout(() => {
                     isSavingData = false;
-                }, 1000);
+                }, 3000);
                 
                 // Reopen agenda modal if we came from there
                 if (selectedAgendaDate === eventData.date) {
@@ -6122,7 +6149,7 @@
                 // Clear flag after a delay to ensure Firestore has propagated
                 setTimeout(() => {
                     isSavingData = false;
-                }, 1000);
+                }, 3000);
             });
 
             document.getElementById('note-form').addEventListener('submit', async function(e) {
@@ -6151,7 +6178,7 @@
                 // Clear flag after a delay
                 setTimeout(() => {
                     isSavingData = false;
-                }, 1000);
+                }, 3000);
             });
 
             // Edit folder form handler
