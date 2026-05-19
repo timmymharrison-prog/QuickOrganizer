@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Personal Organizer</title>
     <style>
+        html, body {
+            overflow-x: hidden !important;
+        }
+        
         :root {
             /* Dark Mode (Default) */
             --bg-gradient-1: #0f0f0f;
@@ -183,6 +187,7 @@
         .content-area {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 32px;
         }
 
@@ -266,6 +271,7 @@
             display: flex;
             flex-direction: column;
             height: 100%;
+            overflow-x: hidden;
         }
 
         /* Calendar Styles */
@@ -446,7 +452,7 @@
         .modal-header h3 {
             font-size: 22px;
             font-weight: 300;
-            color: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
         }
 
         .close-btn {
@@ -1202,6 +1208,7 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            overflow-x: hidden;
         }
 
         .task-item {
@@ -1214,6 +1221,7 @@
             gap: 12px;
             transition: background 0.3s ease;
             position: relative;
+            max-width: 100%;
         }
 
         .task-item.task-moved {
@@ -1296,6 +1304,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
             gap: 16px;
+            overflow-x: hidden;
         }
 
         /* Messages/Inbox Styles */
@@ -1545,6 +1554,7 @@
             min-height: 150px;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .note-item:hover {
@@ -1589,19 +1599,19 @@
 
         /* Agenda Modal Styles */
         .agenda-event-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: var(--element-bg);
+            border: 1px solid var(--element-border);
             border-radius: 12px;
             padding: 16px;
             margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.2s;
-            border-left: 3px solid rgba(139, 92, 246, 0.6);
+            border-left: 3px solid rgba(139, 92, 246, 1);
         }
 
         .agenda-event-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.15);
+            background: var(--element-hover);
+            border-color: var(--element-border);
             transform: translateX(4px);
         }
 
@@ -5485,7 +5495,7 @@
                     dayTasks.forEach(([taskId, task]) => {
                         const taskItem = document.createElement('div');
                         taskItem.className = 'agenda-event-item';
-                        taskItem.style.borderLeftColor = 'rgba(236, 72, 153, 0.6)';
+                        taskItem.style.borderLeftColor = 'rgba(236, 72, 153, 1)';
                         if (task.completed) {
                             taskItem.style.opacity = '0.6';
                         }
