@@ -2383,7 +2383,7 @@
                     <!-- Completed Tasks Section -->
                     <div id="completed-tasks-section" style="margin-top: 24px; display: none;">
                         <div onclick="toggleCompletedTasks()" style="cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--element-bg); border-radius: 8px; margin-bottom: 12px;">
-                            <span id="completed-toggle-icon" style="font-size: 16px; line-height: 1; transition: transform 0.2s; display: inline-block; transform: rotate(-90deg);">â€º</span>
+                            <span id="completed-toggle-icon" style="font-size: 16px; line-height: 1; transition: transform 0.2s; display: inline-block; transform: rotate(-90deg);">&gt;</span>
                             <h3 style="font-size: 16px; font-weight: 400; color: var(--text-secondary); margin: 0;">Completed Tasks</h3>
                             <span id="completed-count" style="font-size: 13px; color: var(--text-muted); margin-left: auto;">0</span>
                         </div>
@@ -5678,7 +5678,11 @@
         }
 
         async function deleteTask() {
+            console.log('deleteTask called, currentEditingId:', currentEditingId);
+            console.log('tasks object:', tasks);
+            
             if (currentEditingId && confirm('Are you sure you want to delete this task?')) {
+                console.log('Deleting task:', currentEditingId);
                 delete tasks[currentEditingId];
                 
                 // Remove from taskOrder array as well
@@ -5687,12 +5691,16 @@
                     taskOrder.splice(index, 1);
                 }
                 
+                console.log('Task deleted, saving...');
                 // Wait for the save to complete before continuing
                 await saveData();
                 
+                console.log('Rendering updates...');
                 renderCalendar(); // Update calendar to remove deleted task
                 renderTasks();
                 closeModal('task-modal');
+            } else {
+                console.log('Delete cancelled or no currentEditingId');
             }
         }
 
@@ -5844,8 +5852,8 @@
             taskMeta.className = 'task-meta';
             if (task.completed) {
                 taskMeta.textContent = 'Completed';
-            } else if (task.date) {
-                const date = new Date(task.date + 'T00:00:00');
+            } else if (task.dueDate) {
+                const date = new Date(task.dueDate + 'T00:00:00');
                 taskMeta.textContent = `Due: ${date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`;
             } else {
                 taskMeta.textContent = 'No due date';
