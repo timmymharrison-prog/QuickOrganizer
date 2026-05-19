@@ -17,7 +17,7 @@
             --content-bg: rgba(0, 0, 0, 0.2);
             --header-bg: rgba(255, 255, 255, 0.02);
             --header-border: rgba(255, 255, 255, 0.08);
-            --text-primary: rgba(255, 255, 255, 0.95);
+            --text-primary: rgba(255, 255, 255, 1);
             --text-secondary: rgba(255, 255, 255, 0.7);
             --text-tertiary: rgba(255, 255, 255, 0.5);
             --text-muted: rgba(255, 255, 255, 0.4);
@@ -49,7 +49,7 @@
             --content-bg: rgba(248, 250, 252, 0.5);
             --header-bg: rgba(255, 255, 255, 0.5);
             --header-border: rgba(0, 0, 0, 0.06);
-            --text-primary: rgba(15, 23, 42, 0.95);
+            --text-primary: rgba(15, 23, 42, 1);
             --text-secondary: rgba(51, 65, 85, 0.9);
             --text-tertiary: rgba(71, 85, 105, 0.8);
             --text-muted: rgba(100, 116, 139, 0.6);
@@ -426,8 +426,8 @@
         }
 
         .modal-content {
-            background: rgba(26, 26, 46, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--modal-bg);
+            border: 1px solid var(--element-border);
             border-radius: 16px;
             width: 90%;
             max-width: 500px;
@@ -477,11 +477,16 @@
             display: block;
             margin-bottom: 8px;
             font-size: 13px;
-            color: var(--text-primary);
+            color: #ffffff !important;
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-weight: 500;
+            font-weight: 600;
+            opacity: 1;
             transition: color 0.3s ease;
+        }
+
+        [data-theme="light"] .form-group label {
+            color: #0f172a !important;
         }
 
         .form-group input,
@@ -1612,21 +1617,21 @@
 
         .agenda-event-title {
             font-size: 16px;
-            color: rgba(255, 255, 255, 0.95);
+            color: var(--text-primary);
             margin-bottom: 6px;
             font-weight: 500;
         }
 
         .agenda-event-description {
             font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
+            color: var(--text-secondary);
             line-height: 1.5;
         }
 
         .agenda-empty {
             text-align: center;
             padding: 40px 20px;
-            color: rgba(255, 255, 255, 0.4);
+            color: var(--text-tertiary);
         }
 
         .agenda-empty-icon {
