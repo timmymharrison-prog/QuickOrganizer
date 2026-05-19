@@ -2982,7 +2982,7 @@
         let currentEditingId = null;
         let currentFolder = null;
         let currentUser = null;
-        let isDeletingTask = false; // Flag to prevent snapshot reload during deletion
+        let isSavingData = false; // Flag to prevent snapshot reload during save operations
         let selectedTasksFolder = '';
         let selectedNotesFolder = '';
         
@@ -4807,7 +4807,7 @@
             // Set up real-time listener for user's own data
             unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc) => {
                 // Skip snapshot updates during deletion to prevent race condition
-                if (isDeletingTask) {
+                if (isSavingData) {
                     return;
                 }
                 
@@ -5696,7 +5696,7 @@
             }
             
             // Set flag to prevent onSnapshot from reloading during deletion
-            isDeletingTask = true;
+            isSavingData = true;
             
             delete tasks[currentEditingId];
             
@@ -5714,7 +5714,7 @@
             
             // Clear flag after a delay to ensure Firestore has propagated
             setTimeout(() => {
-                isDeletingTask = false;
+                isSavingData = false;
             }, 1000);
         }
 
@@ -6056,8 +6056,11 @@
             // See auth.onAuthStateChanged at the top
             
             // Form submissions
-            document.getElementById('event-form').addEventListener('submit', function(e) {
+            document.getElementById('event-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
+                // Set flag to prevent onSnapshot from reloading during save
+                isSavingData = true;
                 
                 const eventData = {
                     title: document.getElementById('event-title').value,
@@ -6075,9 +6078,14 @@
                     events[Date.now()] = eventData;
                 }
                 
-                saveData();
+                await saveData();
                 renderCalendar();
                 closeModal('event-modal');
+                
+                // Clear flag after a delay
+                setTimeout(() => {
+                    isSavingData = false;
+                }, 1000);
                 
                 // Reopen agenda modal if we came from there
                 if (selectedAgendaDate === eventData.date) {
@@ -6085,8 +6093,11 @@
                 }
             });
 
-            document.getElementById('task-form').addEventListener('submit', function(e) {
+            document.getElementById('task-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
+                // Set flag to prevent onSnapshot from reloading during save
+                isSavingData = true;
                 
                 const taskData = {
                     title: document.getElementById('task-title').value,
@@ -6103,14 +6114,22 @@
                     tasks[Date.now()] = taskData;
                 }
                 
-                saveData();
+                await saveData();
                 renderCalendar(); // Update calendar to show new/edited task
                 renderTasks();
                 closeModal('task-modal');
+                
+                // Clear flag after a delay to ensure Firestore has propagated
+                setTimeout(() => {
+                    isSavingData = false;
+                }, 1000);
             });
 
-            document.getElementById('note-form').addEventListener('submit', function(e) {
+            document.getElementById('note-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
+                
+                // Set flag to prevent onSnapshot from reloading during save
+                isSavingData = true;
                 
                 const noteData = {
                     title: document.getElementById('note-title').value,
@@ -6125,9 +6144,14 @@
                     notes[Date.now()] = noteData;
                 }
                 
-                saveData();
+                await saveData();
                 renderNotes();
                 closeModal('note-modal');
+                
+                // Clear flag after a delay
+                setTimeout(() => {
+                    isSavingData = false;
+                }, 1000);
             });
 
             // Edit folder form handler
