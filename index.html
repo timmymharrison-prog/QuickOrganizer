@@ -3050,10 +3050,11 @@
                     console.error('Error storing email:', error);
                 }
                 
-                // Request notification permission and start checker
-                await requestNotificationPermission();
-                
+                // Load data first (don't block on notification permission)
                 loadUserData();
+                
+                // Request notification permission in background (non-blocking)
+                requestNotificationPermission();
                 startNotificationChecker();
             } else {
                 // Stop notification checker on logout
