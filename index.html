@@ -1881,12 +1881,12 @@
             .sidebar {
                 width: 100%;
                 height: auto;
-                min-height: 30px; /* Reduced from 35px */
+                min-height: 12px; /* 50% of 24px */
                 flex-direction: row;
                 padding: 0;
-                padding-bottom: env(safe-area-inset-bottom, 4px); /* Minimal bottom padding */
+                padding-bottom: env(safe-area-inset-bottom, 1px);
                 justify-content: space-around;
-                order: 2; /* Move to bottom */
+                order: 2;
                 border-right: none;
                 border-top: 1px solid var(--sidebar-bg);
                 flex-shrink: 0;
@@ -1896,23 +1896,25 @@
             .tab {
                 flex: 1;
                 border-left: none !important;
-                border-bottom: 2px solid transparent; /* Thinner indicator */
+                border-bottom: 1px solid transparent; /* 1px indicator */
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 4px 2px; /* Reduced from 6px 4px - minimal clickable area */
+                padding: 1px 1px; /* 50% of 2px */
             }
 
             .tab span {
                 writing-mode: horizontal-tb !important;
                 transform: none !important;
-                font-size: 9px; /* Smallest readable size */
-                letter-spacing: 0.3px;
-                font-weight: 500;
+                font-size: 7px; /* Very tiny - may be hard to read */
+                letter-spacing: 0.1px;
+                font-weight: 700; /* Extra bold for tiny size */
+                text-transform: uppercase;
+                line-height: 1;
             }
 
             .tab.active {
-                border-bottom: 2px solid; /* Thinner to match */
+                border-bottom: 1px solid; /* 1px to match tiny tabs */
             }
 
             .tab.month.active {
@@ -1949,7 +1951,7 @@
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
-                bottom: 45px; /* Adjusted for minimal bottom navigation */
+                bottom: 20px; /* Adjusted for ultra-tiny navigation - 50% smaller */
                 right: 16px;
                 width: 56px;
                 height: 56px;
