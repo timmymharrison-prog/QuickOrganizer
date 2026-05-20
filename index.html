@@ -1879,38 +1879,55 @@
             }
 
             .sidebar {
-                width: 100%;
-                height: auto;
-                min-height: 12px; /* 50% of 24px */
-                flex-direction: row;
-                padding: 0;
-                padding-bottom: env(safe-area-inset-bottom, 1px);
-                justify-content: space-around;
-                order: 2;
-                border-right: none;
-                border-top: 1px solid var(--sidebar-bg);
-                flex-shrink: 0;
+                width: 100% !important;
+                height: 61px !important; /* 20% smaller than 76px (76 Ã— 0.8 = 60.8) */
+                min-height: 61px !important;
+                max-height: 61px !important;
+                flex-direction: row !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                justify-content: center !important;
+                gap: 18px !important;
+                order: 2 !important;
+                border-right: none !important;
+                border-top: 1px solid var(--sidebar-bg) !important;
+                flex-shrink: 0 !important;
+                background: transparent !important; /* Back to transparent */
+                overflow: hidden !important;
             }
 
             /* Mobile navigation tabs - horizontal layout */
             .tab {
-                flex: 1;
+                flex: 0 0 auto !important;
+                height: 61px !important; /* Match sidebar */
+                min-height: 61px !important;
+                max-height: 61px !important;
                 border-left: none !important;
-                border-bottom: 1px solid transparent; /* 1px indicator */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 1px 1px; /* 50% of 2px */
+                border-right: 2px solid rgba(0, 0, 0, 0.5) !important; /* Dark thick separator */
+                border-bottom: 2px solid transparent !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 0 16px !important; /* Equal padding on both sides */
+                margin: 0 !important;
+                background: transparent !important;
+                overflow: hidden !important;
+            }
+            
+            .tab:last-child {
+                border-right: none !important; /* Remove separator after last tab */
+                padding-right: 16px !important; /* Keep equal padding */
             }
 
             .tab span {
                 writing-mode: horizontal-tb !important;
                 transform: none !important;
-                font-size: 7px; /* Very tiny - may be hard to read */
-                letter-spacing: 0.1px;
-                font-weight: 700; /* Extra bold for tiny size */
+                font-size: 11px; /* Readable font */
+                letter-spacing: 0.5px;
+                font-weight: 600;
                 text-transform: uppercase;
                 line-height: 1;
+                padding: 0;
             }
 
             .tab.active {
@@ -1931,11 +1948,11 @@
 
             .sidebar-item {
                 writing-mode: horizontal-tb;
-                padding: 12px 8px;
-                font-size: 10px;
+                padding: 1px 3px; /* Match the tab padding - minimal! */
+                font-size: 11px; /* Match tab font size */
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-                flex: 1;
+                flex: 0 0 auto; /* Don't stretch */
                 text-align: center;
             }
 
@@ -1951,7 +1968,7 @@
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
-                bottom: 20px; /* Adjusted for ultra-tiny navigation - 50% smaller */
+                bottom: 65px; /* Above 61px tab area */
                 right: 16px;
                 width: 56px;
                 height: 56px;
@@ -2300,12 +2317,23 @@
             }
 
             .sidebar {
-                min-height: 50px !important; /* Shorter bottom nav */
-                padding-bottom: 15px !important;
+                height: 61px !important; /* 20% smaller than 76px */
+                min-height: 61px !important;
+                max-height: 61px !important;
+                padding: 0 !important;
+                padding-bottom: 0 !important;
+                background: transparent !important; /* Back to transparent */
             }
 
             .tab {
-                padding: 12px 8px !important;
+                height: 61px !important;
+                padding: 0 16px !important; /* Equal padding for centering */
+                border-right: 2px solid rgba(0, 0, 0, 0.5) !important; /* Dark separator */
+            }
+            
+            .tab:last-child {
+                border-right: none !important;
+                padding-right: 16px !important;
             }
 
             .add-btn {
