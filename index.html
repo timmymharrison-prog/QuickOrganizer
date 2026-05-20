@@ -1896,7 +1896,7 @@
 
             .sidebar {
                 width: 100% !important;
-                height: 61px !important; /* 20% smaller than 76px (76 Ã— 0.8 = 60.8) */
+                height: 61px !important; /* 20% smaller than 76px (76 X 0.8 = 60.8) */
                 min-height: 61px !important;
                 max-height: 61px !important;
                 flex-direction: row !important;
@@ -2407,8 +2407,8 @@
     <div class="organizer-container">
         <div class="main-content">
             <div class="header">
-                <button class="menu-btn" onclick="openMenu()" title="Menu" style="background: none; border: none; font-size: 20px; cursor: pointer; padding: 8px; color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-weight: 400; line-height: 1;">
-                    <span>â‰¡</span>
+                <button class="menu-btn" onclick="openMenu()" title="Menu" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 8px 12px; color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-weight: 500; line-height: 1;">
+                    <span>MENU</span>
                 </button>
                 <h1 id="header-title">Calendar</h1>
                 <div style="display: flex; gap: 8px; align-items: center;">
@@ -2441,7 +2441,7 @@
                                 <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Theme</div>
                                 <div style="font-size: 13px; color: var(--text-secondary);">Switch between light and dark mode</div>
                             </div>
-                            <div style="font-size: 18px; color: var(--text-secondary);">â†’</div>
+                            <div style="font-size: 18px; color: var(--text-secondary);">></div>
                         </div>
                     </div>
 
@@ -2455,7 +2455,7 @@
                                     <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Folders</div>
                                     <div style="font-size: 13px; color: var(--text-secondary);">Manage your folders</div>
                                 </div>
-                                <span id="folder-toggle-arrow" style="font-size: 18px; transition: transform 0.3s; color: var(--text-secondary);">â†’</span>
+                                <span id="folder-toggle-arrow" style="font-size: 18px; transition: transform 0.3s; color: var(--text-secondary);">></span>
                             </div>
                             
                             <!-- Expandable Folders List -->
@@ -2481,7 +2481,7 @@
                                     <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">My Groups</div>
                                     <div style="font-size: 13px; color: var(--text-secondary);">Organize contacts into groups</div>
                                 </div>
-                                <span id="groups-toggle-arrow" style="font-size: 18px; transition: transform 0.3s; color: var(--text-secondary);">â†’</span>
+                                <span id="groups-toggle-arrow" style="font-size: 18px; transition: transform 0.3s; color: var(--text-secondary);">></span>
                             </div>
                             
                             <!-- Expandable Groups List -->
@@ -2507,7 +2507,7 @@
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span id="inbox-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600; display: none;"></span>
-                                <div style="font-size: 18px; color: var(--text-secondary);">â†’</div>
+                                <div style="font-size: 18px; color: var(--text-secondary);">></div>
                             </div>
                         </div>
                     </div>
@@ -2528,7 +2528,7 @@
                                 <div style="font-size: 15px; font-weight: 500; color: #ef4444; margin-bottom: 4px;">Clear All Data</div>
                                 <div style="font-size: 13px; color: var(--text-secondary);">Delete all events, tasks, and notes</div>
                             </div>
-                            <div style="font-size: 24px; color: #ef4444; font-weight: bold; line-height: 1;">Ã—</div>
+                            <div style="font-size: 24px; color: #ef4444; font-weight: bold; line-height: 1;">X</div>
                         </div>
                     </div>
 
@@ -2760,7 +2760,7 @@
                                 <span style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Completed Tasks</span>
                                 <span id="folder-completed-tasks-count" style="font-size: 13px; color: var(--text-secondary);"></span>
                             </div>
-                            <span id="folder-completed-toggle" style="font-size: 14px; transition: transform 0.3s; color: var(--text-secondary);">â–¼</span>
+                            <span id="folder-completed-toggle" style="font-size: 14px; transition: transform 0.3s; color: var(--text-secondary);">v</span>
                         </div>
                         <div id="folder-completed-tasks-list" style="display: none; flex-direction: column; gap: 8px;">
                             <!-- Completed tasks will be listed here -->
@@ -2816,7 +2816,7 @@
                             <input type="email" id="compose-recipient" placeholder="recipient@example.com" oninput="checkEmailInGroups(this.value, 'compose-check')" style="width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
                             <div id="compose-check" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; align-items: center; gap: 8px;">
                                 <span style="font-size: 14px; color: var(--text-primary); font-weight: 500;"></span>
-                                <span style="font-size: 18px; color: #3b82f6;">âœ“</span>
+                                <span style="font-size: 18px; color: #3b82f6;">[OK]</span>
                             </div>
                         </div>
                         <button type="button" onclick="openGroupPicker('compose')" style="padding: 12px 16px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; white-space: nowrap;">
@@ -2993,7 +2993,7 @@
                             <input type="email" id="share-folder-email" placeholder="user@example.com" oninput="checkEmailInGroups(this.value, 'share-check')" style="width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
                             <div id="share-check" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; align-items: center; gap: 8px;">
                                 <span style="font-size: 14px; color: var(--text-primary); font-weight: 500;"></span>
-                                <span style="font-size: 18px; color: #3b82f6;">âœ“</span>
+                                <span style="font-size: 18px; color: #3b82f6;">[OK]</span>
                             </div>
                         </div>
                         <button type="button" onclick="openGroupPicker('share')" style="padding: 12px 16px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; white-space: nowrap;">
@@ -3733,7 +3733,7 @@
                 
                 folderDiv.innerHTML = `
                     <div style="font-size: 14px; color: var(--text-primary); flex: 1;">${folder}</div>
-                    <div style="font-size: 12px; color: var(--text-secondary);">â†’</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">></div>
                 `;
                 
                 container.appendChild(folderDiv);
@@ -3812,7 +3812,7 @@
                 completedTasksList.innerHTML = completedTasks.map(([id, task]) => `
                     <div style="padding: 12px; background: var(--element-bg); border-radius: 6px; border-left: 3px solid ${getFolderColor(folderName)}; cursor: pointer; opacity: 0.7;" onclick="openTaskModal('${id}')">
                         <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px; text-decoration: line-through;">${task.title}</div>
-                        <div style="font-size: 13px; color: var(--text-secondary);">âœ“ Completed</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">[OK] Completed</div>
                     </div>
                 `).join('');
             }
@@ -4004,7 +4004,7 @@
                                     <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">${member.name}</div>
                                     <div style="font-size: 13px; color: var(--text-secondary);">${member.email}</div>
                                 </div>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Select â†’</span>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Select ></span>
                             </div>
                         `).join('')
                         : '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 13px;">No members in this group</div>';
@@ -4080,7 +4080,7 @@
                             <div style="font-size: 12px; color: var(--text-secondary);">${group.members?.length || 0} members</div>
                         </div>
                     </div>
-                    <div style="font-size: 12px; color: var(--text-secondary);">â†’</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">></div>
                 `;
                 
                 container.appendChild(groupDiv);
@@ -4147,7 +4147,7 @@
                             <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">${member.name}</div>
                             <div style="font-size: 13px; color: var(--text-secondary);">${member.email}</div>
                         </div>
-                        <button onclick="removeMember(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 18px; padding: 4px 8px;" title="Remove member">Ã—</button>
+                        <button onclick="removeMember(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 18px; padding: 4px 8px;" title="Remove member">X</button>
                     </div>
                 `).join('');
             }
@@ -4707,7 +4707,7 @@
                 const removeBtn = document.createElement('button');
                 removeBtn.className = 'btn-icon';
                 removeBtn.style.cssText = 'width: 24px; height: 24px; font-size: 16px; color: var(--text-muted);';
-                removeBtn.innerHTML = 'Ã—';
+                removeBtn.innerHTML = 'X';
                 removeBtn.onclick = () => removeCollaborator(index);
                 
                 item.appendChild(emailSpan);
@@ -5491,9 +5491,9 @@
                     );
                     
                     showInAppNotification(
-                        `âœ“ ${task.title}`,
+                        `[OK] ${task.title}`,
                         `Due ${timeUntil}`,
-                        'âœ“'
+                        '[OK]'
                     );
                 }
             });
