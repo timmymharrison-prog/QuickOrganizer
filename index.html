@@ -2407,13 +2407,13 @@
     <div class="organizer-container">
         <div class="main-content">
             <div class="header">
-                <button class="menu-btn" onclick="openMenu()" title="Menu" style="background: none; border: none; font-size: 24px; cursor: pointer; padding: 8px; color: var(--text-primary); display: flex; align-items: center; justify-content: center;">
-                    <span>â˜°</span>
+                <button class="menu-btn" onclick="openMenu()" title="Menu" style="background: none; border: none; font-size: 20px; cursor: pointer; padding: 8px; color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-weight: 400; line-height: 1;">
+                    <span>â‰¡</span>
                 </button>
                 <h1 id="header-title">Calendar</h1>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="hamburger-btn" onclick="toggleSearch()" title="Search" style="font-size: 18px;">
-                        <span>ðŸ”</span>
+                    <button class="hamburger-btn" onclick="toggleSearch()" title="Search" style="font-size: 14px; padding: 8px 12px;">
+                        <span>Search</span>
                     </button>
                 </div>
             </div>
@@ -2441,7 +2441,7 @@
                                 <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Theme</div>
                                 <div style="font-size: 13px; color: var(--text-secondary);">Switch between light and dark mode</div>
                             </div>
-                            <div id="theme-indicator" style="font-size: 24px;">ðŸŒ™</div>
+                            <div style="font-size: 18px; color: var(--text-secondary);">â†’</div>
                         </div>
                     </div>
 
@@ -2455,10 +2455,7 @@
                                     <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Folders</div>
                                     <div style="font-size: 13px; color: var(--text-secondary);">Manage your folders</div>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="font-size: 20px; color: var(--text-primary);">ðŸ“</div>
-                                    <span id="folder-toggle-arrow" style="font-size: 16px; transition: transform 0.3s; color: var(--text-secondary);">â–¼</span>
-                                </div>
+                                <span id="folder-toggle-arrow" style="font-size: 18px; transition: transform 0.3s; color: var(--text-secondary);">â†’</span>
                             </div>
                             
                             <!-- Expandable Folders List -->
@@ -2484,10 +2481,7 @@
                                     <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">My Groups</div>
                                     <div style="font-size: 13px; color: var(--text-secondary);">Organize contacts into groups</div>
                                 </div>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div style="font-size: 20px; color: var(--text-primary);">ðŸ‘¥</div>
-                                    <span id="groups-toggle-arrow" style="font-size: 16px; transition: transform 0.3s; color: var(--text-secondary);">â–¼</span>
-                                </div>
+                                <span id="groups-toggle-arrow" style="font-size: 18px; transition: transform 0.3s; color: var(--text-secondary);">â†’</span>
                             </div>
                             
                             <!-- Expandable Groups List -->
@@ -2513,7 +2507,7 @@
                             </div>
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <span id="inbox-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600; display: none;"></span>
-                                <div style="font-size: 20px; color: var(--text-primary);">ðŸ’¬</div>
+                                <div style="font-size: 18px; color: var(--text-secondary);">â†’</div>
                             </div>
                         </div>
                     </div>
@@ -2534,7 +2528,7 @@
                                 <div style="font-size: 15px; font-weight: 500; color: #ef4444; margin-bottom: 4px;">Clear All Data</div>
                                 <div style="font-size: 13px; color: var(--text-secondary);">Delete all events, tasks, and notes</div>
                             </div>
-                            <div style="font-size: 20px; color: #ef4444;">ðŸ—‘ï¸</div>
+                            <div style="font-size: 24px; color: #ef4444; font-weight: bold; line-height: 1;">Ã—</div>
                         </div>
                     </div>
 
@@ -2730,7 +2724,7 @@
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <button class="btn btn-primary" onclick="openShareFolderModal()" style="font-size: 13px; padding: 8px 16px;">
-                        ðŸ”— Share Folder
+                        Share Folder
                     </button>
                     <button class="close-btn" onclick="closeModal('folder-view-modal')">&times;</button>
                 </div>
@@ -2739,7 +2733,7 @@
                 <!-- Events Section -->
                 <div style="margin-bottom: 24px;">
                     <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span>ðŸ“…</span>
+                        Events
                         <span>Events</span>
                         <span id="folder-events-count" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;"></span>
                     </h4>
@@ -2751,7 +2745,7 @@
                 <!-- Tasks Section -->
                 <div style="margin-bottom: 24px;">
                     <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span>âœ“</span>
+                        Tasks
                         <span>Active Tasks</span>
                         <span id="folder-active-tasks-count" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;"></span>
                     </h4>
@@ -2777,7 +2771,7 @@
                 <!-- Notes Section -->
                 <div>
                     <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                        <span>ðŸ“</span>
+                        Notes
                         <span>Notes</span>
                         <span id="folder-notes-count" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;"></span>
                     </h4>
@@ -2793,9 +2787,9 @@
     <div id="inbox-modal" class="modal">
         <div class="modal-content" style="max-width: 700px; max-height: 90vh;">
             <div class="modal-header">
-                <h3>ðŸ“¬ Inbox</h3>
+                <h3>Inbox</h3>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-primary" onclick="openComposeMessage()" style="font-size: 14px; padding: 8px 16px;">âœ‰ï¸ New Message</button>
+                    <button class="btn btn-primary" onclick="openComposeMessage()" style="font-size: 14px; padding: 8px 16px;">New Message</button>
                     <button class="close-btn" onclick="closeModal('inbox-modal')">&times;</button>
                 </div>
             </div>
@@ -2811,7 +2805,7 @@
     <div id="compose-message-modal" class="modal">
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
-                <h3>âœ‰ï¸ New Message</h3>
+                <h3>New Message</h3>
                 <button class="close-btn" onclick="closeModal('compose-message-modal')">&times;</button>
             </div>
             <div style="padding: 8px 0 24px 0;">
@@ -2826,7 +2820,7 @@
                             </div>
                         </div>
                         <button type="button" onclick="openGroupPicker('compose')" style="padding: 12px 16px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; white-space: nowrap;">
-                            ðŸ‘¥ Select from Group
+                            Select from Group
                         </button>
                     </div>
                 </div>
@@ -2876,7 +2870,7 @@
                 <div id="message-detail-body" style="font-size: 15px; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px;">
                 </div>
                 <div id="message-detail-folder-invitation" style="display: none; padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; margin-bottom: 16px;">
-                    <div style="font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">ðŸ“ Folder Invitation</div>
+                    <div style="font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">Folder Invitation</div>
                     <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">You've been invited to collaborate on: <span id="message-detail-folder-name" style="font-weight: 500; color: var(--text-primary);"></span></div>
                     <div style="display: flex; gap: 8px;">
                         <button class="btn btn-primary" onclick="acceptFolderInvitation()" style="font-size: 13px; padding: 6px 16px;">Accept</button>
@@ -2895,7 +2889,7 @@
     <div id="add-group-modal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
-                <h3>ðŸ‘¥ Add New Group</h3>
+                <h3>Add New Group</h3>
                 <button class="close-btn" onclick="closeModal('add-group-modal')">&times;</button>
             </div>
             <div style="padding: 8px 0 24px 0;">
@@ -2916,12 +2910,12 @@
         <div class="modal-content" style="max-width: 650px; max-height: 90vh;">
             <div class="modal-header">
                 <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 20px;">ðŸ‘¥</span>
+                    <span style="font-size: 16px; font-weight: 600;">Group:</span>
                     <h3 id="group-details-title">Group Name</h3>
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <button class="btn btn-secondary" onclick="deleteGroup()" style="font-size: 13px; padding: 8px 16px; color: #ef4444; border-color: #ef4444;">
-                        ðŸ—‘ï¸ Delete
+                        Delete
                     </button>
                     <button class="close-btn" onclick="closeModal('group-details-modal')">&times;</button>
                 </div>
@@ -2965,7 +2959,7 @@
     <div id="group-picker-modal" class="modal">
         <div class="modal-content" style="max-width: 500px; max-height: 80vh;">
             <div class="modal-header">
-                <h3>ðŸ‘¥ Select from Groups</h3>
+                <h3>Select from Groups</h3>
                 <button class="close-btn" onclick="closeModal('group-picker-modal')">&times;</button>
             </div>
             <div style="padding: 16px 0; overflow-y: auto; max-height: calc(80vh - 100px);">
@@ -2980,7 +2974,7 @@
     <div id="share-folder-modal" class="modal">
         <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
-                <h3>ðŸ”— Share Folder</h3>
+                <h3>Share Folder</h3>
                 <button class="close-btn" onclick="closeModal('share-folder-modal')">&times;</button>
             </div>
             <div style="padding: 8px 0 24px 0;">
@@ -3003,7 +2997,7 @@
                             </div>
                         </div>
                         <button type="button" onclick="openGroupPicker('share')" style="padding: 12px 16px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; white-space: nowrap;">
-                            ðŸ‘¥ Select from Group
+                            Select from Group
                         </button>
                     </div>
                 </div>
@@ -3647,10 +3641,7 @@
         }
 
         function updateThemeIcon() {
-            const indicator = document.getElementById('theme-indicator');
-            if (indicator) {
-                indicator.textContent = currentTheme === 'dark' ? 'ðŸŒ™' : 'â˜€ï¸';
-            }
+            // Theme indicator removed - no longer needed
         }
 
         function toggleSearch() {
@@ -3713,7 +3704,7 @@
             
             if (foldersList.style.display === 'none') {
                 foldersList.style.display = 'block';
-                arrow.style.transform = 'rotate(180deg)';
+                arrow.style.transform = 'rotate(90deg)';
                 renderMenuFolders();
             } else {
                 foldersList.style.display = 'none';
@@ -3799,7 +3790,7 @@
                 eventsList.innerHTML = folderEvents.map(([id, event]) => `
                     <div style="padding: 12px; background: var(--element-bg); border-radius: 6px; border-left: 3px solid ${getFolderColor(folderName)}; cursor: pointer;" onclick="openEventModal('${id}')">
                         <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">${event.title}</div>
-                        <div style="font-size: 13px; color: var(--text-secondary);">ðŸ“… ${event.date} ${event.startTime ? 'â€¢ ' + event.startTime : ''}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">Date: ${event.date} ${event.startTime ? 'â€¢ ' + event.startTime : ''}</div>
                     </div>
                 `).join('');
             }
@@ -3811,7 +3802,7 @@
                 activeTasksList.innerHTML = activeTasks.map(([id, task]) => `
                     <div style="padding: 12px; background: var(--element-bg); border-radius: 6px; border-left: 3px solid ${getFolderColor(folderName)}; cursor: pointer;" onclick="openTaskModal('${id}')">
                         <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">${task.title}</div>
-                        <div style="font-size: 13px; color: var(--text-secondary);">${task.dueDate ? 'ðŸ“… Due: ' + task.dueDate : 'No due date'}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">${task.dueDate ? 'Date: Due: ' + task.dueDate : 'No due date'}</div>
                     </div>
                 `).join('');
             }
@@ -4021,7 +4012,7 @@
                     return `
                         <div style="margin-bottom: 20px;">
                             <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; padding-left: 4px;">
-                                ðŸ‘¥ ${group.name}
+                                ${group.name}
                             </h4>
                             <div style="display: flex; flex-direction: column; gap: 6px;">
                                 ${membersHtml}
@@ -4052,7 +4043,7 @@
             
             if (groupsList.style.display === 'none') {
                 groupsList.style.display = 'block';
-                arrow.style.transform = 'rotate(180deg)';
+                arrow.style.transform = 'rotate(90deg)';
                 renderMenuGroups();
             } else {
                 groupsList.style.display = 'none';
@@ -4083,7 +4074,7 @@
                 
                 groupDiv.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                        <span style="font-size: 16px;">ðŸ‘¥</span>
+                        
                         <div>
                             <div style="font-size: 14px; color: var(--text-primary);">${group.name}</div>
                             <div style="font-size: 12px; color: var(--text-secondary);">${group.members?.length || 0} members</div>
@@ -4523,7 +4514,7 @@
                 if (sharedFolders[folder]) {
                     const sharedIcon = document.createElement('span');
                     sharedIcon.style.cssText = 'font-size: 12px; color: rgba(59, 130, 246, 0.8); margin-left: 6px;';
-                    sharedIcon.textContent = 'ðŸ‘¥';
+                    sharedIcon.textContent = 'S';
                     sharedIcon.title = sharedFolders[folder].owner === currentUser?.email 
                         ? `Shared with ${sharedFolders[folder].collaborators?.length || 0} people`
                         : `Shared by ${sharedFolders[folder].owner}`;
@@ -4543,7 +4534,7 @@
                 // Share button
                 const shareBtn = document.createElement('button');
                 shareBtn.className = 'folder-item-compact-action';
-                shareBtn.innerHTML = 'ðŸ”—';
+                shareBtn.innerHTML = 'Share';
                 shareBtn.title = 'Share folder';
                 shareBtn.style.cssText = 'font-size: 16px; padding: 4px 8px;';
                 shareBtn.onclick = (e) => {
@@ -4866,7 +4857,7 @@
                 
                 const icon = document.createElement('span');
                 icon.style.cssText = 'font-size: 24px;';
-                icon.textContent = 'ðŸ“';
+                icon.textContent = 'F';
                 
                 const info = document.createElement('div');
                 info.style.cssText = 'flex: 1;';
@@ -5126,7 +5117,7 @@
                         </div>
                         <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">From: ${msg.from}</div>
                         <div style="font-size: 13px; color: var(--text-secondary);">${new Date(msg.timestamp).toLocaleDateString()} at ${new Date(msg.timestamp).toLocaleTimeString()}</div>
-                        ${msg.folderInvitation ? '<div style="font-size: 12px; color: #3b82f6; margin-top: 6px;">ðŸ“ Folder invitation</div>' : ''}
+                        ${msg.folderInvitation ? '<div style="font-size: 12px; color: #3b82f6; margin-top: 6px;">Folder invitation</div>' : ''}
                     </div>
                 `).join('');
             }
@@ -5469,9 +5460,9 @@
                     );
                     
                     showInAppNotification(
-                        `ðŸ“… ${event.title}`,
+                        `Date: ${event.title}`,
                         `Starting ${timeUntil} at ${event.startTime}`,
-                        'ðŸ“…'
+                        'Event'
                     );
                 }
             });
@@ -5525,9 +5516,9 @@
                     );
                     
                     showInAppNotification(
-                        `âœ‰ï¸ New Message`,
+                        `New Message`,
                         `From: ${msg.from} - ${msg.subject}`,
-                        'âœ‰ï¸',
+                        'Msg',
                         6000
                     );
                 }
@@ -6593,7 +6584,7 @@
             document.getElementById('current-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
             
             const grid = document.getElementById('calendar-grid');
-            console.log('ðŸ“… Calendar grid element:', grid);
+            console.log('Date: Calendar grid element:', grid);
             if (!grid) {
                 console.error('âŒ Calendar grid not found!');
                 return;
@@ -6666,7 +6657,7 @@
             
             // Debug logging for first day of month
             if (day === 1 && !isOtherMonth) {
-                console.log(`ðŸ“… Day ${day} of month ${month + 1}:`, {
+                console.log(`Date: Day ${day} of month ${month + 1}:`, {
                     dateStr,
                     eventsCount: dayEvents.length,
                     tasksCount: dayTasks.length,
