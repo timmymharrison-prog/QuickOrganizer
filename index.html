@@ -2238,7 +2238,7 @@
             }
 
             .settings-menu.active {
-                transform: translateX(0);
+                right: 0;
             }
 
             /* Folder card */
@@ -2407,14 +2407,13 @@
     <div class="organizer-container">
         <div class="main-content">
             <div class="header">
+                <button class="menu-btn" onclick="openMenu()" title="Menu" style="background: none; border: none; font-size: 24px; cursor: pointer; padding: 8px; color: var(--text-primary); display: flex; align-items: center; justify-content: center;">
+                    <span>â˜°</span>
+                </button>
                 <h1 id="header-title">Calendar</h1>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="hamburger-btn" onclick="toggleSearch()" title="Search" style="font-size: 20px;">
-                        <span>&#9906;</span>
-                    </button>
-                    <button class="hamburger-btn" onclick="toggleMenu()" title="Menu" style="position: relative;">
-                        <span>&equiv;</span>
-                        <span id="hamburger-badge" style="position: absolute; top: 6px; right: 6px; background: #ef4444; color: white; border-radius: 10px; min-width: 18px; height: 18px; font-size: 11px; font-weight: 600; align-items: center; justify-content: center; padding: 0 4px;"></span>
+                    <button class="hamburger-btn" onclick="toggleSearch()" title="Search" style="font-size: 18px;">
+                        <span>ðŸ”</span>
                     </button>
                 </div>
             </div>
@@ -2424,6 +2423,132 @@
                 <input type="text" id="search-input" placeholder="Search events, tasks, and notes..." style="width: 100%; padding: 10px 12px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;" oninput="performSearch(this.value)">
                 <div id="search-results" style="margin-top: 8px; max-height: 300px; overflow-y: auto;"></div>
             </div>
+
+            <!-- Side Menu -->
+            <div id="side-menu" style="position: fixed; top: 0; left: -350px; width: 350px; height: 100vh; background: var(--modal-bg); box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3); z-index: 3000; transition: left 0.3s ease; overflow-y: auto;">
+                <div style="padding: 24px;">
+                    <!-- Menu Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+                        <h2 style="font-size: 24px; font-weight: 300; color: var(--text-primary); margin: 0;">Menu</h2>
+                        <button onclick="closeMenu()" style="background: none; border: none; font-size: 32px; cursor: pointer; color: var(--text-primary); padding: 0; line-height: 1;">&times;</button>
+                    </div>
+
+                    <!-- 1. Theme Toggle -->
+                    <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--element-border);">
+                        <h3 style="font-size: 14px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 16px; font-weight: 600;">Appearance</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--element-bg); border-radius: 8px; cursor: pointer;" onclick="toggleTheme()">
+                            <div>
+                                <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Theme</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Switch between light and dark mode</div>
+                            </div>
+                            <div id="theme-indicator" style="font-size: 24px;">ðŸŒ™</div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Folders Management -->
+                    <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--element-border);">
+                        <h3 style="font-size: 14px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 16px; font-weight: 600;">Organization</h3>
+                        <div>
+                            <!-- Folders Header - Click to expand/collapse -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--element-bg); border-radius: 8px; cursor: pointer; margin-bottom: 8px;" onclick="toggleFoldersInMenu()">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Folders</div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">Manage your folders</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="font-size: 20px; color: var(--text-primary);">ðŸ“</div>
+                                    <span id="folder-toggle-arrow" style="font-size: 16px; transition: transform 0.3s; color: var(--text-secondary);">â–¼</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Expandable Folders List -->
+                            <div id="menu-folders-list" style="display: none; padding: 8px 0;">
+                                <div id="menu-folders-container" style="margin-bottom: 8px;">
+                                    <!-- Folders will be rendered here -->
+                                </div>
+                                <button onclick="showAddFolderInMenu(event)" style="width: 100%; padding: 8px; background: transparent; border: 1px dashed var(--element-border); border-radius: 6px; color: var(--text-secondary); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                    <span style="font-size: 16px;">+</span>
+                                    <span>Add Folder</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Groups -->
+                    <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--element-border);">
+                        <h3 style="font-size: 14px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 16px; font-weight: 600;">Groups</h3>
+                        <div>
+                            <!-- Groups Header - Click to expand/collapse -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--element-bg); border-radius: 8px; cursor: pointer; margin-bottom: 8px;" onclick="toggleGroupsInMenu()">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">My Groups</div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">Organize contacts into groups</div>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div style="font-size: 20px; color: var(--text-primary);">ðŸ‘¥</div>
+                                    <span id="groups-toggle-arrow" style="font-size: 16px; transition: transform 0.3s; color: var(--text-secondary);">â–¼</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Expandable Groups List -->
+                            <div id="menu-groups-list" style="display: none; padding: 8px 0;">
+                                <div id="menu-groups-container" style="margin-bottom: 8px;">
+                                    <!-- Groups will be rendered here -->
+                                </div>
+                                <button onclick="openAddGroupModal(event)" style="width: 100%; padding: 8px; background: transparent; border: 1px dashed var(--element-border); border-radius: 6px; color: var(--text-secondary); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                    <span style="font-size: 16px;">+</span>
+                                    <span>Add Group</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Inbox/Messages -->
+                    <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--element-border);">
+                        <h3 style="font-size: 14px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 16px; font-weight: 600;">Messages</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--element-bg); border-radius: 8px; cursor: pointer; position: relative;" onclick="openInbox()">
+                            <div>
+                                <div style="font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">Inbox</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">View and send messages</div>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span id="inbox-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600; display: none;"></span>
+                                <div style="font-size: 20px; color: var(--text-primary);">ðŸ’¬</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 5. Account Settings -->
+                    <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--element-border);">
+                        <h3 style="font-size: 14px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 16px; font-weight: 600;">Account</h3>
+                        <div style="padding: 12px; background: var(--element-bg); border-radius: 8px;">
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">Logged in as</div>
+                            <div id="menu-user-email" style="font-size: 14px; font-weight: 500; color: var(--text-primary);">Loading...</div>
+                        </div>
+                    </div>
+
+                    <!-- 6. Clear All Data -->
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--element-bg); border-radius: 8px; cursor: pointer;" onclick="clearAllData()">
+                            <div>
+                                <div style="font-size: 15px; font-weight: 500; color: #ef4444; margin-bottom: 4px;">Clear All Data</div>
+                                <div style="font-size: 13px; color: var(--text-secondary);">Delete all events, tasks, and notes</div>
+                            </div>
+                            <div style="font-size: 20px; color: #ef4444;">ðŸ—‘ï¸</div>
+                        </div>
+                    </div>
+
+                    <!-- 7. Log Out -->
+                    <div>
+                        <button onclick="logoutUser()" style="width: 100%; padding: 14px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer;">
+                            Log Out
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Overlay -->
+            <div id="menu-overlay" onclick="closeMenu()" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 2999; display: none;"></div>
             
             <!-- Folder Invitations Banner -->
             <div id="invitations-banner" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; padding: 12px 16px; margin: 0 20px 16px 20px; align-items: center; gap: 12px;">
@@ -2569,107 +2694,326 @@
         <button class="add-btn" onclick="handleAdd()">+</button>
     </div>
 
-    <!-- Settings Menu -->
-    <div id="settings-menu" class="settings-menu">
-        <div class="settings-content">
-            <div class="settings-header">
-                <h3>Settings</h3>
-                <button class="close-btn" onclick="toggleMenu()">&times;</button>
+    <!-- Add Folder Modal -->
+    <div id="add-folder-modal" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <h3>Add New Folder</h3>
+                <button class="close-btn" onclick="closeModal('add-folder-modal')">&times;</button>
             </div>
-            
-            <div class="settings-section">
-                <h4 class="section-title">Appearance</h4>
-                <div class="setting-item theme-setting">
-                    <div class="setting-content">
-                        <div class="setting-info">
-                            <div class="setting-title">Theme</div>
-                            <div class="setting-description">Switch between light and dark mode</div>
-                        </div>
+            <div style="padding: 8px 0 24px 0;">
+                <div class="form-group">
+                    <label>Folder Name</label>
+                    <input type="text" id="add-folder-name-input" placeholder="Enter folder name" style="width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                </div>
+                <div class="form-group">
+                    <label>Folder Color</label>
+                    <div id="add-folder-color-grid" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-top: 8px;">
+                        <!-- Colors will be populated here -->
                     </div>
-                    <button class="theme-switch" onclick="toggleTheme()">
-                        <span class="switch-track">
-                            <span class="switch-thumb"></span>
-                        </span>
-                        <span id="theme-text" class="switch-label">Dark Mode</span>
-                    </button>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal('add-folder-modal')" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-primary" onclick="createFolderFromModal()" style="flex: 1;">Create Folder</button>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="settings-section">
-                <h4 class="section-title">Organization</h4>
-                <div class="folders-card" id="folders-card">
-                    <div class="folders-card-header" onclick="toggleFoldersCard()">
-                        <div class="setting-info">
-                            <div class="setting-title">Folders</div>
-                            <div class="setting-description" id="folders-description">Organize your events, tasks, and notes</div>
-                        </div>
-                        <button class="expand-btn" id="folders-expand-btn">
-                            <span>&gt;</span>
-                        </button>
+    <!-- Folder View Modal -->
+    <div id="folder-view-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px; max-height: 90vh;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span id="folder-view-color" style="width: 12px; height: 12px; border-radius: 50%;"></span>
+                    <h3 id="folder-view-title">Folder Name</h3>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn btn-primary" onclick="openShareFolderModal()" style="font-size: 13px; padding: 8px 16px;">
+                        ðŸ”— Share Folder
+                    </button>
+                    <button class="close-btn" onclick="closeModal('folder-view-modal')">&times;</button>
+                </div>
+            </div>
+            <div style="padding: 16px 0; overflow-y: auto; max-height: calc(90vh - 100px);">
+                <!-- Events Section -->
+                <div style="margin-bottom: 24px;">
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>ðŸ“…</span>
+                        <span>Events</span>
+                        <span id="folder-events-count" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;"></span>
+                    </h4>
+                    <div id="folder-events-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Events will be listed here -->
                     </div>
-                    <div class="folders-card-content" id="folders-card-content">
-                        <div class="folders-list-compact" id="folders-list-compact">
-                            <!-- Folders will be rendered here -->
+                </div>
+
+                <!-- Tasks Section -->
+                <div style="margin-bottom: 24px;">
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>âœ“</span>
+                        <span>Active Tasks</span>
+                        <span id="folder-active-tasks-count" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;"></span>
+                    </h4>
+                    <div id="folder-active-tasks-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+                        <!-- Active tasks will be listed here -->
+                    </div>
+                    
+                    <!-- Completed Tasks (Collapsible) -->
+                    <div id="folder-completed-section" style="display: none;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--element-bg); border-radius: 6px; cursor: pointer; margin-bottom: 8px;" onclick="toggleFolderCompletedTasks()">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 14px; font-weight: 500; color: var(--text-secondary);">Completed Tasks</span>
+                                <span id="folder-completed-tasks-count" style="font-size: 13px; color: var(--text-secondary);"></span>
+                            </div>
+                            <span id="folder-completed-toggle" style="font-size: 14px; transition: transform 0.3s; color: var(--text-secondary);">â–¼</span>
                         </div>
-                        <button class="add-folder-btn" onclick="showAddFolderInput()">
-                            <span>+</span>
-                            <span>Add Folder</span>
-                        </button>
-                        <div class="add-folder-input" id="add-folder-input" style="display: none;">
-                            <input type="text" id="new-folder-name-inline" placeholder="Folder name" />
-                            <div class="add-folder-actions">
-                                <button class="btn btn-secondary btn-small" onclick="cancelAddFolder()">Cancel</button>
-                                <button class="btn btn-primary btn-small" onclick="addFolderInline()">Add</button>
+                        <div id="folder-completed-tasks-list" style="display: none; flex-direction: column; gap: 8px;">
+                            <!-- Completed tasks will be listed here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notes Section -->
+                <div>
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>ðŸ“</span>
+                        <span>Notes</span>
+                        <span id="folder-notes-count" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;"></span>
+                    </h4>
+                    <div id="folder-notes-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Notes will be listed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inbox Modal -->
+    <div id="inbox-modal" class="modal">
+        <div class="modal-content" style="max-width: 700px; max-height: 90vh;">
+            <div class="modal-header">
+                <h3>ðŸ“¬ Inbox</h3>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary" onclick="openComposeMessage()" style="font-size: 14px; padding: 8px 16px;">âœ‰ï¸ New Message</button>
+                    <button class="close-btn" onclick="closeModal('inbox-modal')">&times;</button>
+                </div>
+            </div>
+            <div style="padding: 16px 0; overflow-y: auto; max-height: calc(90vh - 100px);">
+                <div id="inbox-messages-list">
+                    <!-- Messages will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compose Message Modal -->
+    <div id="compose-message-modal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3>âœ‰ï¸ New Message</h3>
+                <button class="close-btn" onclick="closeModal('compose-message-modal')">&times;</button>
+            </div>
+            <div style="padding: 8px 0 24px 0;">
+                <div class="form-group">
+                    <label>To (Email Address)</label>
+                    <div style="display: flex; gap: 8px;">
+                        <div style="flex: 1; position: relative;">
+                            <input type="email" id="compose-recipient" placeholder="recipient@example.com" oninput="checkEmailInGroups(this.value, 'compose-check')" style="width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                            <div id="compose-check" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; align-items: center; gap: 8px;">
+                                <span style="font-size: 14px; color: var(--text-primary); font-weight: 500;"></span>
+                                <span style="font-size: 18px; color: #3b82f6;">âœ“</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-section">
-                <h4 class="section-title">Messages</h4>
-                <div class="setting-item" onclick="openInbox()" style="cursor: pointer; position: relative;">
-                    <div class="setting-info">
-                        <div class="setting-title">Inbox</div>
-                        <div class="setting-description">View and send messages</div>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <span id="unread-badge-menu" style="background: #ef4444; color: white; border-radius: 10px; padding: 4px 8px; font-size: 12px; font-weight: 600;"></span>
-                        <button class="btn-icon">
-                            <span>&gt;</span>
+                        <button type="button" onclick="openGroupPicker('compose')" style="padding: 12px 16px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; white-space: nowrap;">
+                            ðŸ‘¥ Select from Group
                         </button>
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>Subject</label>
+                    <input type="text" id="compose-subject" placeholder="Message subject" style="width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="compose-body" placeholder="Write your message..." style="width: 100%; min-height: 150px; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; resize: vertical;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="compose-share-folder" style="width: 18px; height: 18px; cursor: pointer;">
+                        <span>Share a folder with this message</span>
+                    </label>
+                    <select id="compose-folder-select" style="width: 100%; padding: 10px 12px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; margin-top: 8px; display: none;">
+                        <option value="">Select folder to share...</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal('compose-message-modal')" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-primary" onclick="sendMessage()" style="flex: 1;">Send Message</button>
+                </div>
             </div>
+        </div>
+    </div>
 
-            <div class="settings-section">
-                <h4 class="section-title">Account</h4>
-                <div class="setting-item" onclick="testNotifications()" style="cursor: pointer;">
-                    <div class="setting-info">
-                        <div class="setting-title">Test Notifications</div>
-                        <div class="setting-description">Send test browser and in-app notifications</div>
+    <!-- Message Detail Modal -->
+    <div id="message-detail-modal" class="modal">
+        <div class="modal-content" style="max-width: 650px;">
+            <div class="modal-header">
+                <h3 id="message-detail-subject">Message</h3>
+                <button class="close-btn" onclick="closeModal('message-detail-modal')">&times;</button>
+            </div>
+            <div style="padding: 16px 0;">
+                <div style="margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--element-border);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <div style="font-size: 14px; color: var(--text-secondary);">From:</div>
+                        <div id="message-detail-from" style="font-size: 14px; font-weight: 500; color: var(--text-primary);"></div>
                     </div>
-                    <button class="btn-icon">
-                        <span style="font-size: 20px;">&#9711;</span>
+                    <div style="display: flex; justify-content: space-between;">
+                        <div style="font-size: 14px; color: var(--text-secondary);">Date:</div>
+                        <div id="message-detail-date" style="font-size: 14px; color: var(--text-secondary);"></div>
+                    </div>
+                </div>
+                <div id="message-detail-body" style="font-size: 15px; color: var(--text-primary); line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px;">
+                </div>
+                <div id="message-detail-folder-invitation" style="display: none; padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; margin-bottom: 16px;">
+                    <div style="font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 8px;">ðŸ“ Folder Invitation</div>
+                    <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">You've been invited to collaborate on: <span id="message-detail-folder-name" style="font-weight: 500; color: var(--text-primary);"></span></div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary" onclick="acceptFolderInvitation()" style="font-size: 13px; padding: 6px 16px;">Accept</button>
+                        <button class="btn btn-secondary" onclick="declineFolderInvitation()" style="font-size: 13px; padding: 6px 16px;">Decline</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-secondary" onclick="closeModal('message-detail-modal')" style="flex: 1;">Close</button>
+                    <button class="btn btn-primary" onclick="replyToMessage()" style="flex: 1;">Reply</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Group Modal -->
+    <div id="add-group-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>ðŸ‘¥ Add New Group</h3>
+                <button class="close-btn" onclick="closeModal('add-group-modal')">&times;</button>
+            </div>
+            <div style="padding: 8px 0 24px 0;">
+                <div class="form-group">
+                    <label>Group Name</label>
+                    <input type="text" id="add-group-name" placeholder="e.g., Family, Work Team, Book Club" style="width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal('add-group-modal')" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-primary" onclick="createGroup()" style="flex: 1;">Create Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Details Modal -->
+    <div id="group-details-modal" class="modal">
+        <div class="modal-content" style="max-width: 650px; max-height: 90vh;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 20px;">ðŸ‘¥</span>
+                    <h3 id="group-details-title">Group Name</h3>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button class="btn btn-secondary" onclick="deleteGroup()" style="font-size: 13px; padding: 8px 16px; color: #ef4444; border-color: #ef4444;">
+                        ðŸ—‘ï¸ Delete
+                    </button>
+                    <button class="close-btn" onclick="closeModal('group-details-modal')">&times;</button>
+                </div>
+            </div>
+            <div style="padding: 16px 0; overflow-y: auto; max-height: calc(90vh - 100px);">
+                <!-- Members List -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>Members</span>
+                        <span id="group-members-count" style="font-size: 14px; color: var(--text-secondary); font-weight: 400;"></span>
+                    </h4>
+                    <div id="group-members-list" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;">
+                        <!-- Members will be listed here -->
+                    </div>
+                    <button class="btn btn-primary" onclick="openAddMemberForm()" style="width: 100%; font-size: 14px;">
+                        + Add Member
                     </button>
                 </div>
-                <div class="setting-item" onclick="clearAllData()" style="cursor: pointer;">
-                    <div class="setting-info">
-                        <div class="setting-title" style="color: #ef4444;">Clear All Data</div>
-                        <div class="setting-description">Delete all events, tasks, notes, and folders</div>
+                
+                <!-- Add Member Form (Hidden by default) -->
+                <div id="add-member-form" style="display: none; padding: 16px; background: var(--element-bg); border-radius: 8px; margin-bottom: 16px;">
+                    <h5 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px;">Add New Member</h5>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Name</label>
+                        <input type="text" id="member-name-input" placeholder="John Doe" style="width: 100%; padding: 10px 12px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
                     </div>
-                    <button class="btn-icon" style="color: #ef4444;">
-                        <span style="font-size: 20px;">Ã—</span>
-                    </button>
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label>Email</label>
+                        <input type="email" id="member-email-input" placeholder="john@example.com" style="width: 100%; padding: 10px 12px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary" onclick="closeAddMemberForm()" style="flex: 1;">Cancel</button>
+                        <button class="btn btn-primary" onclick="addMemberToGroup()" style="flex: 1;">Add Member</button>
+                    </div>
                 </div>
-                <div class="setting-item" onclick="logoutUser()" style="cursor: pointer;">
-                    <div class="setting-info">
-                        <div class="setting-title">Log Out</div>
-                        <div class="setting-description" id="user-email-display" style="font-size: 12px; color: var(--text-muted); opacity: 0.6;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Group Picker Modal -->
+    <div id="group-picker-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px; max-height: 80vh;">
+            <div class="modal-header">
+                <h3>ðŸ‘¥ Select from Groups</h3>
+                <button class="close-btn" onclick="closeModal('group-picker-modal')">&times;</button>
+            </div>
+            <div style="padding: 16px 0; overflow-y: auto; max-height: calc(80vh - 100px);">
+                <div id="group-picker-list">
+                    <!-- Groups and members will be listed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Folder Modal -->
+    <div id="share-folder-modal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3>ðŸ”— Share Folder</h3>
+                <button class="close-btn" onclick="closeModal('share-folder-modal')">&times;</button>
+            </div>
+            <div style="padding: 8px 0 24px 0;">
+                <div style="padding: 12px; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px; margin-bottom: 20px;">
+                    <div style="font-size: 14px; color: var(--text-primary); margin-bottom: 4px;">
+                        <strong>Sharing:</strong> <span id="share-folder-name"></span>
                     </div>
-                    <button class="btn-icon">
-                        <span>&gt;</span>
-                    </button>
+                    <div style="font-size: 13px; color: var(--text-secondary);">
+                        This will send an invitation to collaborate on this folder. They'll be able to view and edit all events, tasks, and notes in this folder.
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Invite User by Email</label>
+                    <div style="display: flex; gap: 8px;">
+                        <div style="flex: 1; position: relative;">
+                            <input type="email" id="share-folder-email" placeholder="user@example.com" oninput="checkEmailInGroups(this.value, 'share-check')" style="width: 100%; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;">
+                            <div id="share-check" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); display: none; align-items: center; gap: 8px;">
+                                <span style="font-size: 14px; color: var(--text-primary); font-weight: 500;"></span>
+                                <span style="font-size: 18px; color: #3b82f6;">âœ“</span>
+                            </div>
+                        </div>
+                        <button type="button" onclick="openGroupPicker('share')" style="padding: 12px 16px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; cursor: pointer; white-space: nowrap;">
+                            ðŸ‘¥ Select from Group
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Include a Message (Optional)</label>
+                    <textarea id="share-folder-message" placeholder="Hi! I'd like to collaborate with you on this folder..." style="width: 100%; min-height: 100px; padding: 12px 16px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px; resize: vertical;"></textarea>
+                </div>
+                <div style="display: flex; gap: 12px; margin-top: 24px;">
+                    <button class="btn btn-secondary" onclick="closeModal('share-folder-modal')" style="flex: 1;">Cancel</button>
+                    <button class="btn btn-primary" onclick="sendFolderInvitation()" style="flex: 1;">Send Invitation</button>
                 </div>
             </div>
         </div>
@@ -3226,6 +3570,7 @@
         //   }
         // }
         let messages = {};
+        let groups = {}; // { groupId: { name: 'Family', members: [{ name: 'John', email: 'john@example.com' }] } }
         
         // Notification preferences
         let notificationPreferences = {
@@ -3290,7 +3635,7 @@
 
         function initTheme() {
             document.documentElement.setAttribute('data-theme', currentTheme);
-            updateThemeText();
+            updateThemeIcon();
             updateFoldersDescription();
         }
 
@@ -3298,17 +3643,14 @@
             currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
             document.documentElement.setAttribute('data-theme', currentTheme);
             localStorage.setItem('theme', currentTheme);
-            updateThemeText();
+            updateThemeIcon();
         }
 
-        function updateThemeText() {
-            const text = document.getElementById('theme-text');
-            text.textContent = currentTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
-        }
-
-        function toggleMenu() {
-            const menu = document.getElementById('settings-menu');
-            menu.classList.toggle('active');
+        function updateThemeIcon() {
+            const indicator = document.getElementById('theme-indicator');
+            if (indicator) {
+                indicator.textContent = currentTheme === 'dark' ? 'ðŸŒ™' : 'â˜€ï¸';
+            }
         }
 
         function toggleSearch() {
@@ -3323,6 +3665,707 @@
                 searchBar.style.display = 'none';
                 searchInput.value = '';
                 searchResults.innerHTML = '';
+            }
+        }
+
+        function openMenu() {
+            console.log('ðŸ” openMenu called');
+            const menu = document.getElementById('side-menu');
+            const overlay = document.getElementById('menu-overlay');
+            const userEmail = document.getElementById('menu-user-email');
+            
+            console.log('Menu elements:', { menu, overlay, userEmail });
+            
+            if (!menu || !overlay) {
+                console.error('âŒ Menu or overlay not found!');
+                return;
+            }
+            
+            // Show menu and overlay
+            menu.style.left = '0';
+            overlay.style.display = 'block';
+            
+            console.log('âœ… Menu should be visible now');
+            
+            // Update user email
+            if (currentUser && currentUser.email) {
+                userEmail.textContent = currentUser.email;
+            }
+            
+            // Update inbox badge
+            updateInboxBadge();
+            
+            // Render folders in menu
+            renderMenuFolders();
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('side-menu');
+            const overlay = document.getElementById('menu-overlay');
+            
+            menu.style.left = '-350px';
+            overlay.style.display = 'none';
+        }
+
+        function toggleFoldersInMenu() {
+            const foldersList = document.getElementById('menu-folders-list');
+            const arrow = document.getElementById('folder-toggle-arrow');
+            
+            if (foldersList.style.display === 'none') {
+                foldersList.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+                renderMenuFolders();
+            } else {
+                foldersList.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function renderMenuFolders() {
+            const container = document.getElementById('menu-folders-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            if (folders.length === 0) {
+                container.innerHTML = '<div style="padding: 8px; text-align: center; color: var(--text-secondary); font-size: 13px;">No folders yet</div>';
+                return;
+            }
+            
+            folders.forEach(folder => {
+                const folderDiv = document.createElement('div');
+                folderDiv.style.cssText = 'display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--element-bg); border-radius: 6px; margin-bottom: 4px; cursor: pointer; border-left: 3px solid ' + getFolderColor(folder);
+                folderDiv.onclick = () => {
+                    closeMenu();
+                    openFolderViewModal(folder);
+                };
+                
+                folderDiv.innerHTML = `
+                    <div style="font-size: 14px; color: var(--text-primary); flex: 1;">${folder}</div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">â†’</div>
+                `;
+                
+                container.appendChild(folderDiv);
+            });
+        }
+
+        function openFolderViewModal(folderName) {
+            window.currentViewingFolder = folderName; // Store for sharing
+            const modal = document.getElementById('folder-view-modal');
+            const title = document.getElementById('folder-view-title');
+            const color = document.getElementById('folder-view-color');
+            
+            const eventsList = document.getElementById('folder-events-list');
+            const activeTasksList = document.getElementById('folder-active-tasks-list');
+            const completedTasksList = document.getElementById('folder-completed-tasks-list');
+            const notesList = document.getElementById('folder-notes-list');
+            
+            const eventsCount = document.getElementById('folder-events-count');
+            const activeTasksCount = document.getElementById('folder-active-tasks-count');
+            const completedTasksCount = document.getElementById('folder-completed-tasks-count');
+            const notesCount = document.getElementById('folder-notes-count');
+            const completedSection = document.getElementById('folder-completed-section');
+            
+            // Set folder name and color
+            title.textContent = folderName;
+            color.style.background = getFolderColor(folderName);
+            
+            // Filter items by folder
+            const folderEvents = Object.entries(events).filter(([id, event]) => event.folder === folderName);
+            const folderTasks = Object.entries(tasks).filter(([id, task]) => task.folder === folderName);
+            const folderNotes = Object.entries(notes).filter(([id, note]) => note.folder === folderName);
+            
+            // Separate active and completed tasks
+            const activeTasks = folderTasks.filter(([id, task]) => !task.completed);
+            const completedTasks = folderTasks.filter(([id, task]) => task.completed);
+            
+            // Update counts
+            eventsCount.textContent = `(${folderEvents.length})`;
+            activeTasksCount.textContent = `(${activeTasks.length})`;
+            completedTasksCount.textContent = `(${completedTasks.length})`;
+            notesCount.textContent = `(${folderNotes.length})`;
+            
+            // Show/hide completed section
+            if (completedTasks.length > 0) {
+                completedSection.style.display = 'block';
+            } else {
+                completedSection.style.display = 'none';
+            }
+            
+            // Render Events
+            if (folderEvents.length === 0) {
+                eventsList.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 14px;">No events in this folder</div>';
+            } else {
+                eventsList.innerHTML = folderEvents.map(([id, event]) => `
+                    <div style="padding: 12px; background: var(--element-bg); border-radius: 6px; border-left: 3px solid ${getFolderColor(folderName)}; cursor: pointer;" onclick="openEventModal('${id}')">
+                        <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">${event.title}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">ðŸ“… ${event.date} ${event.startTime ? 'â€¢ ' + event.startTime : ''}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // Render Active Tasks
+            if (activeTasks.length === 0) {
+                activeTasksList.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 14px;">No active tasks in this folder</div>';
+            } else {
+                activeTasksList.innerHTML = activeTasks.map(([id, task]) => `
+                    <div style="padding: 12px; background: var(--element-bg); border-radius: 6px; border-left: 3px solid ${getFolderColor(folderName)}; cursor: pointer;" onclick="openTaskModal('${id}')">
+                        <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">${task.title}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">${task.dueDate ? 'ðŸ“… Due: ' + task.dueDate : 'No due date'}</div>
+                    </div>
+                `).join('');
+            }
+            
+            // Render Completed Tasks
+            if (completedTasks.length > 0) {
+                completedTasksList.innerHTML = completedTasks.map(([id, task]) => `
+                    <div style="padding: 12px; background: var(--element-bg); border-radius: 6px; border-left: 3px solid ${getFolderColor(folderName)}; cursor: pointer; opacity: 0.7;" onclick="openTaskModal('${id}')">
+                        <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px; text-decoration: line-through;">${task.title}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">âœ“ Completed</div>
+                    </div>
+                `).join('');
+            }
+            
+            // Render Notes
+            if (folderNotes.length === 0) {
+                notesList.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 14px;">No notes in this folder</div>';
+            } else {
+                notesList.innerHTML = folderNotes.map(([id, note]) => `
+                    <div style="padding: 12px; background: var(--element-bg); border-radius: 6px; border-left: 3px solid ${getFolderColor(folderName)}; cursor: pointer;" onclick="openNoteModal('${id}')">
+                        <div style="font-weight: 500; color: var(--text-primary); margin-bottom: 4px;">${note.title}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${note.content.substring(0, 100)}${note.content.length > 100 ? '...' : ''}</div>
+                    </div>
+                `).join('');
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function toggleFolderCompletedTasks() {
+            const list = document.getElementById('folder-completed-tasks-list');
+            const toggle = document.getElementById('folder-completed-toggle');
+            
+            if (list.style.display === 'none') {
+                list.style.display = 'flex';
+                toggle.style.transform = 'rotate(180deg)';
+            } else {
+                list.style.display = 'none';
+                toggle.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function openShareFolderModal() {
+            if (!window.currentViewingFolder) {
+                alert('Please select a folder first');
+                return;
+            }
+            
+            const modal = document.getElementById('share-folder-modal');
+            const folderNameDisplay = document.getElementById('share-folder-name');
+            const emailInput = document.getElementById('share-folder-email');
+            const messageInput = document.getElementById('share-folder-message');
+            
+            folderNameDisplay.textContent = window.currentViewingFolder;
+            emailInput.value = '';
+            messageInput.value = '';
+            
+            closeModal('folder-view-modal');
+            modal.style.display = 'flex';
+            emailInput.focus();
+        }
+
+        async function sendFolderInvitation() {
+            const folderName = window.currentViewingFolder;
+            const email = document.getElementById('share-folder-email').value.trim();
+            const customMessage = document.getElementById('share-folder-message').value.trim();
+            
+            if (!email) {
+                alert('Please enter an email address');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            if (!folderName) {
+                alert('Folder not found');
+                return;
+            }
+            
+            try {
+                // Check if recipient exists
+                const recipientSnapshot = await db.collection('users')
+                    .where('email', '==', email)
+                    .get();
+                
+                if (recipientSnapshot.empty) {
+                    alert('User not found. They need to create an account first.');
+                    return;
+                }
+                
+                const recipientDoc = recipientSnapshot.docs[0];
+                const recipientData = recipientDoc.data();
+                
+                // Create invitation message
+                const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                const invitationMessage = {
+                    from: currentUser.email,
+                    to: email,
+                    subject: `Folder Invitation: ${folderName}`,
+                    body: customMessage || `${currentUser.email} has invited you to collaborate on the folder "${folderName}". Accept this invitation to view and edit all events, tasks, and notes in this folder.`,
+                    timestamp: new Date().toISOString(),
+                    read: false,
+                    folderInvitation: {
+                        folderName: folderName,
+                        folderColor: getFolderColor(folderName),
+                        from: currentUser.email
+                    }
+                };
+                
+                // Add to recipient's messages
+                const recipientMessages = recipientData.messages || {};
+                recipientMessages[messageId] = invitationMessage;
+                
+                await recipientDoc.ref.update({
+                    messages: recipientMessages
+                });
+                
+                // Update shared folders
+                if (!sharedFolders[folderName]) {
+                    sharedFolders[folderName] = {
+                        owner: currentUser.email,
+                        collaborators: [],
+                        createdAt: new Date().toISOString()
+                    };
+                }
+                
+                await saveData();
+                
+                alert(`Invitation sent to ${email}!`);
+                closeModal('share-folder-modal');
+                
+            } catch (error) {
+                console.error('Error sending invitation:', error);
+                alert('Failed to send invitation. Please try again.');
+            }
+        }
+
+        // ===== GROUPS MANAGEMENT =====
+
+        let currentViewingGroup = null;
+
+        function checkEmailInGroups(email, checkElementId) {
+            const checkElement = document.getElementById(checkElementId);
+            if (!checkElement) return;
+            
+            email = email.trim().toLowerCase();
+            
+            // Hide if email is empty
+            if (!email) {
+                checkElement.style.display = 'none';
+                return;
+            }
+            
+            // Search through all groups for this email
+            let foundMember = null;
+            
+            for (const [groupId, group] of Object.entries(groups)) {
+                if (group.members) {
+                    const member = group.members.find(m => m.email.toLowerCase() === email);
+                    if (member) {
+                        foundMember = member;
+                        break;
+                    }
+                }
+            }
+            
+            // Show checkmark and name if found
+            if (foundMember) {
+                const nameSpan = checkElement.querySelector('span:first-child');
+                nameSpan.textContent = foundMember.name;
+                checkElement.style.display = 'flex';
+            } else {
+                checkElement.style.display = 'none';
+            }
+        }
+
+        let groupPickerTarget = null; // 'compose' or 'share'
+
+        function openGroupPicker(target) {
+            groupPickerTarget = target;
+            const modal = document.getElementById('group-picker-modal');
+            const list = document.getElementById('group-picker-list');
+            
+            const groupEntries = Object.entries(groups);
+            
+            if (groupEntries.length === 0) {
+                list.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">No groups yet. Create a group to organize your contacts!</div>';
+            } else {
+                list.innerHTML = groupEntries.map(([groupId, group]) => {
+                    const membersHtml = group.members && group.members.length > 0
+                        ? group.members.map(member => `
+                            <div onclick="selectMemberFromGroup('${member.email.replace(/'/g, "\\'")}', '${member.name.replace(/'/g, "\\'")}', '${target}')" style="padding: 10px 12px; background: var(--element-bg); border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onmouseover="this.style.background='var(--hover-bg)'" onmouseout="this.style.background='var(--element-bg)'">
+                                <div>
+                                    <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">${member.name}</div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">${member.email}</div>
+                                </div>
+                                <span style="font-size: 12px; color: var(--text-secondary);">Select â†’</span>
+                            </div>
+                        `).join('')
+                        : '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 13px;">No members in this group</div>';
+                    
+                    return `
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 10px; padding-left: 4px;">
+                                ðŸ‘¥ ${group.name}
+                            </h4>
+                            <div style="display: flex; flex-direction: column; gap: 6px;">
+                                ${membersHtml}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function selectMemberFromGroup(email, name, target) {
+            if (target === 'compose') {
+                document.getElementById('compose-recipient').value = email;
+                checkEmailInGroups(email, 'compose-check');
+            } else if (target === 'share') {
+                document.getElementById('share-folder-email').value = email;
+                checkEmailInGroups(email, 'share-check');
+            }
+            
+            closeModal('group-picker-modal');
+        }
+
+        function toggleGroupsInMenu() {
+            const groupsList = document.getElementById('menu-groups-list');
+            const arrow = document.getElementById('groups-toggle-arrow');
+            
+            if (groupsList.style.display === 'none') {
+                groupsList.style.display = 'block';
+                arrow.style.transform = 'rotate(180deg)';
+                renderMenuGroups();
+            } else {
+                groupsList.style.display = 'none';
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function renderMenuGroups() {
+            const container = document.getElementById('menu-groups-container');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const groupEntries = Object.entries(groups);
+            
+            if (groupEntries.length === 0) {
+                container.innerHTML = '<div style="padding: 8px; text-align: center; color: var(--text-secondary); font-size: 13px;">No groups yet</div>';
+                return;
+            }
+            
+            groupEntries.forEach(([groupId, group]) => {
+                const groupDiv = document.createElement('div');
+                groupDiv.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--element-bg); border-radius: 6px; margin-bottom: 4px; cursor: pointer;';
+                groupDiv.onclick = () => {
+                    closeMenu();
+                    openGroupDetailsModal(groupId);
+                };
+                
+                groupDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                        <span style="font-size: 16px;">ðŸ‘¥</span>
+                        <div>
+                            <div style="font-size: 14px; color: var(--text-primary);">${group.name}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${group.members?.length || 0} members</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; color: var(--text-secondary);">â†’</div>
+                `;
+                
+                container.appendChild(groupDiv);
+            });
+        }
+
+        function openAddGroupModal(event) {
+            event.stopPropagation();
+            closeMenu();
+            
+            const modal = document.getElementById('add-group-modal');
+            const input = document.getElementById('add-group-name');
+            
+            input.value = '';
+            modal.style.display = 'flex';
+            input.focus();
+        }
+
+        async function createGroup() {
+            const input = document.getElementById('add-group-name');
+            const groupName = input.value.trim();
+            
+            if (!groupName) {
+                alert('Please enter a group name');
+                return;
+            }
+            
+            // Create group with unique ID
+            const groupId = 'group_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            groups[groupId] = {
+                name: groupName,
+                members: [],
+                createdAt: new Date().toISOString()
+            };
+            
+            await saveData();
+            
+            closeModal('add-group-modal');
+            
+            // Open the newly created group
+            openGroupDetailsModal(groupId);
+        }
+
+        function openGroupDetailsModal(groupId) {
+            currentViewingGroup = groupId;
+            const group = groups[groupId];
+            if (!group) return;
+            
+            const modal = document.getElementById('group-details-modal');
+            const title = document.getElementById('group-details-title');
+            const membersList = document.getElementById('group-members-list');
+            const membersCount = document.getElementById('group-members-count');
+            
+            title.textContent = group.name;
+            membersCount.textContent = `(${group.members?.length || 0})`;
+            
+            // Render members
+            if (!group.members || group.members.length === 0) {
+                membersList.innerHTML = '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 14px;">No members yet</div>';
+            } else {
+                membersList.innerHTML = group.members.map((member, index) => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--element-bg); border-radius: 6px;">
+                        <div>
+                            <div style="font-size: 14px; font-weight: 500; color: var(--text-primary);">${member.name}</div>
+                            <div style="font-size: 13px; color: var(--text-secondary);">${member.email}</div>
+                        </div>
+                        <button onclick="removeMember(${index})" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 18px; padding: 4px 8px;" title="Remove member">Ã—</button>
+                    </div>
+                `).join('');
+            }
+            
+            // Hide add member form
+            document.getElementById('add-member-form').style.display = 'none';
+            
+            modal.style.display = 'flex';
+        }
+
+        function openAddMemberForm() {
+            const form = document.getElementById('add-member-form');
+            const nameInput = document.getElementById('member-name-input');
+            const emailInput = document.getElementById('member-email-input');
+            
+            nameInput.value = '';
+            emailInput.value = '';
+            form.style.display = 'block';
+            nameInput.focus();
+        }
+
+        function closeAddMemberForm() {
+            document.getElementById('add-member-form').style.display = 'none';
+        }
+
+        async function addMemberToGroup() {
+            const name = document.getElementById('member-name-input').value.trim();
+            const email = document.getElementById('member-email-input').value.trim();
+            
+            if (!name || !email) {
+                alert('Please enter both name and email');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            const group = groups[currentViewingGroup];
+            if (!group) return;
+            
+            // Check for duplicate email
+            if (group.members && group.members.some(m => m.email === email)) {
+                alert('This email is already in the group');
+                return;
+            }
+            
+            if (!group.members) {
+                group.members = [];
+            }
+            
+            group.members.push({ name, email });
+            
+            await saveData();
+            
+            // Refresh the modal
+            openGroupDetailsModal(currentViewingGroup);
+        }
+
+        async function removeMember(index) {
+            if (!confirm('Remove this member from the group?')) return;
+            
+            const group = groups[currentViewingGroup];
+            if (!group || !group.members) return;
+            
+            group.members.splice(index, 1);
+            
+            await saveData();
+            
+            // Refresh the modal
+            openGroupDetailsModal(currentViewingGroup);
+        }
+
+        async function deleteGroup() {
+            const group = groups[currentViewingGroup];
+            if (!group) return;
+            
+            if (!confirm(`Delete the group "${group.name}"? This cannot be undone.`)) return;
+            
+            delete groups[currentViewingGroup];
+            
+            await saveData();
+            
+            closeModal('group-details-modal');
+        }
+
+        function showAddFolderInMenu(event) {
+            event.stopPropagation();
+            closeMenu();
+            openAddFolderModal();
+        }
+
+        function openAddFolderModal() {
+            const modal = document.getElementById('add-folder-modal');
+            const input = document.getElementById('add-folder-name-input');
+            const colorGrid = document.getElementById('add-folder-color-grid');
+            
+            // Clear input
+            input.value = '';
+            
+            // Populate color grid
+            const colors = [
+                { name: 'Purple', value: 'rgba(139, 92, 246, 0.6)' },
+                { name: 'Pink', value: 'rgba(236, 72, 153, 0.6)' },
+                { name: 'Blue', value: 'rgba(59, 130, 246, 0.6)' },
+                { name: 'Green', value: 'rgba(34, 197, 94, 0.6)' },
+                { name: 'Yellow', value: 'rgba(234, 179, 8, 0.6)' },
+                { name: 'Orange', value: 'rgba(249, 115, 22, 0.6)' },
+                { name: 'Red', value: 'rgba(239, 68, 68, 0.6)' },
+                { name: 'Teal', value: 'rgba(20, 184, 166, 0.6)' },
+                { name: 'Indigo', value: 'rgba(99, 102, 241, 0.6)' },
+                { name: 'Cyan', value: 'rgba(6, 182, 212, 0.6)' },
+                { name: 'Lime', value: 'rgba(132, 204, 22, 0.6)' },
+                { name: 'Rose', value: 'rgba(244, 63, 94, 0.6)' }
+            ];
+            
+            colorGrid.innerHTML = colors.map((color, index) => `
+                <div 
+                    data-color="${color.value}" 
+                    onclick="selectFolderColor(this)"
+                    style="
+                        width: 50px; 
+                        height: 50px; 
+                        background: ${color.value}; 
+                        border-radius: 8px; 
+                        cursor: pointer; 
+                        border: 3px solid transparent;
+                        transition: all 0.2s;
+                    "
+                    onmouseover="this.style.transform='scale(1.1)'"
+                    onmouseout="this.style.transform='scale(1)'"
+                    title="${color.name}"
+                    ${index === 0 ? 'class="selected-folder-color"' : ''}
+                ></div>
+            `).join('');
+            
+            // Set first color as selected by default
+            const firstColor = colorGrid.querySelector('[data-color]');
+            if (firstColor) {
+                firstColor.style.borderColor = 'var(--text-primary)';
+            }
+            
+            modal.style.display = 'flex';
+            input.focus();
+        }
+
+        let selectedFolderColor = 'rgba(139, 92, 246, 0.6)'; // Default purple
+
+        function selectFolderColor(element) {
+            // Remove selection from all colors
+            document.querySelectorAll('#add-folder-color-grid > div').forEach(div => {
+                div.style.borderColor = 'transparent';
+                div.classList.remove('selected-folder-color');
+            });
+            
+            // Select this color
+            element.style.borderColor = 'var(--text-primary)';
+            element.classList.add('selected-folder-color');
+            selectedFolderColor = element.getAttribute('data-color');
+        }
+
+        async function createFolderFromModal() {
+            const input = document.getElementById('add-folder-name-input');
+            const folderName = input.value.trim();
+            
+            if (!folderName) {
+                alert('Please enter a folder name');
+                return;
+            }
+            
+            if (folders.includes(folderName)) {
+                alert('A folder with this name already exists');
+                return;
+            }
+            
+            // Add folder with selected color
+            folders.push(folderName);
+            folderColors[folderName] = selectedFolderColor;
+            
+            await saveData();
+            renderCalendar();
+            renderTasks();
+            renderNotes();
+            
+            closeModal('add-folder-modal');
+            
+            // Reset for next time
+            selectedFolderColor = 'rgba(139, 92, 246, 0.6)';
+        }
+
+        function openFoldersSection() {
+            closeMenu();
+            // This is for when you click the header - you can create a full folders page here
+            alert('Full Folders Page - Coming soon!');
+        }
+
+        function updateInboxBadge() {
+            // Update inbox badge in menu
+            const badge = document.getElementById('inbox-badge');
+            const unreadCount = Object.values(messages).filter(msg => !msg.read && msg.to === currentUser.email).length;
+            
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
             }
         }
 
@@ -4063,92 +5106,241 @@
         }
 
         function openInbox() {
-            toggleMenu(); // Close settings menu
-            switchView('inbox');
+            closeMenu();
+            const modal = document.getElementById('inbox-modal');
+            const messagesList = document.getElementById('inbox-messages-list');
+            
+            // Get all messages for current user
+            const userMessages = Object.entries(messages)
+                .filter(([id, msg]) => msg.to === currentUser.email)
+                .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
+            
+            if (userMessages.length === 0) {
+                messagesList.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">No messages yet</div>';
+            } else {
+                messagesList.innerHTML = userMessages.map(([id, msg]) => `
+                    <div style="padding: 16px; background: var(--element-bg); border-radius: 8px; margin-bottom: 8px; cursor: pointer; border-left: 4px solid ${msg.read ? 'transparent' : '#3b82f6'};" onclick="openMessageDetail('${id}')">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                            <div style="font-weight: ${msg.read ? '400' : '600'}; font-size: 15px; color: var(--text-primary); flex: 1;">${msg.subject || 'No Subject'}</div>
+                            ${!msg.read ? '<div style="width: 8px; height: 8px; background: #3b82f6; border-radius: 50%; margin-left: 8px; margin-top: 4px;"></div>' : ''}
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">From: ${msg.from}</div>
+                        <div style="font-size: 13px; color: var(--text-secondary);">${new Date(msg.timestamp).toLocaleDateString()} at ${new Date(msg.timestamp).toLocaleTimeString()}</div>
+                        ${msg.folderInvitation ? '<div style="font-size: 12px; color: #3b82f6; margin-top: 6px;">ðŸ“ Folder invitation</div>' : ''}
+                    </div>
+                `).join('');
+            }
+            
+            modal.style.display = 'flex';
+            updateInboxBadge();
         }
 
-        function openComposeMessageModal() {
-            document.getElementById('message-to').value = '';
-            document.getElementById('message-subject').value = '';
-            document.getElementById('message-body').value = '';
-            openModal('compose-message-modal');
+        function openComposeMessage(replyTo = null) {
+            const modal = document.getElementById('compose-message-modal');
+            const recipientInput = document.getElementById('compose-recipient');
+            const subjectInput = document.getElementById('compose-subject');
+            const bodyInput = document.getElementById('compose-body');
+            const shareCheckbox = document.getElementById('compose-share-folder');
+            const folderSelect = document.getElementById('compose-folder-select');
+            
+            // Clear form
+            recipientInput.value = replyTo || '';
+            subjectInput.value = '';
+            bodyInput.value = '';
+            shareCheckbox.checked = false;
+            folderSelect.style.display = 'none';
+            
+            // Populate folder dropdown
+            folderSelect.innerHTML = '<option value="">Select folder to share...</option>' + 
+                folders.map(folder => `<option value="${folder}">${folder}</option>`).join('');
+            
+            // Toggle folder select visibility
+            shareCheckbox.onchange = () => {
+                folderSelect.style.display = shareCheckbox.checked ? 'block' : 'none';
+            };
+            
+            closeModal('inbox-modal');
+            modal.style.display = 'flex';
+            recipientInput.focus();
         }
 
-        async function sendMessage(event) {
-            event.preventDefault();
+        async function openMessageDetail(messageId) {
+            currentViewingMessageId = messageId;
+            const msg = messages[messageId];
+            if (!msg) return;
             
-            const to = document.getElementById('message-to').value.trim();
-            const subject = document.getElementById('message-subject').value.trim();
-            const body = document.getElementById('message-body').value.trim();
+            const modal = document.getElementById('message-detail-modal');
+            const subject = document.getElementById('message-detail-subject');
+            const from = document.getElementById('message-detail-from');
+            const date = document.getElementById('message-detail-date');
+            const body = document.getElementById('message-detail-body');
+            const folderInvitation = document.getElementById('message-detail-folder-invitation');
+            const folderName = document.getElementById('message-detail-folder-name');
             
+            // Populate message details
+            subject.textContent = msg.subject || 'No Subject';
+            from.textContent = msg.from;
+            date.textContent = new Date(msg.timestamp).toLocaleDateString() + ' at ' + new Date(msg.timestamp).toLocaleTimeString();
+            body.textContent = msg.body;
+            
+            // Show folder invitation if present
+            if (msg.folderInvitation) {
+                folderInvitation.style.display = 'block';
+                folderName.textContent = msg.folderInvitation.folderName;
+            } else {
+                folderInvitation.style.display = 'none';
+            }
+            
+            // Mark as read
+            if (!msg.read) {
+                msg.read = true;
+                await saveData();
+                updateInboxBadge();
+            }
+            
+            closeModal('inbox-modal');
+            modal.style.display = 'flex';
+        }
+
+        async function sendMessage() {
+            const recipient = document.getElementById('compose-recipient').value.trim();
+            const subject = document.getElementById('compose-subject').value.trim();
+            const body = document.getElementById('compose-body').value.trim();
+            const shareFolder = document.getElementById('compose-share-folder').checked;
+            const selectedFolder = document.getElementById('compose-folder-select').value;
+            
+            if (!recipient || !body) {
+                alert('Please fill in recipient and message');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(recipient)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            if (shareFolder && !selectedFolder) {
+                alert('Please select a folder to share');
+                return;
+            }
+            
+            // Check if recipient exists in Firebase
             try {
-                // Find recipient
                 const recipientSnapshot = await db.collection('users')
-                    .where('email', '==', to)
+                    .where('email', '==', recipient)
                     .get();
                 
                 if (recipientSnapshot.empty) {
-                    alert('User not found. Make sure they have an account.');
+                    alert('User not found. They need to create an account first.');
                     return;
                 }
                 
                 const recipientDoc = recipientSnapshot.docs[0];
-                const messageId = Date.now().toString();
+                const recipientData = recipientDoc.data();
                 
+                // Create message
+                const messageId = 'msg_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 const newMessage = {
                     from: currentUser.email,
-                    to: to,
-                    subject: subject,
+                    to: recipient,
+                    subject: subject || 'No Subject',
                     body: body,
                     timestamp: new Date().toISOString(),
-                    read: false,
-                    type: 'message'
+                    read: false
                 };
                 
+                // Add folder invitation if sharing
+                if (shareFolder && selectedFolder) {
+                    newMessage.folderInvitation = {
+                        folderName: selectedFolder,
+                        folderColor: getFolderColor(selectedFolder),
+                        from: currentUser.email
+                    };
+                }
+                
                 // Add to recipient's messages
-                const recipientData = recipientDoc.data();
                 const recipientMessages = recipientData.messages || {};
                 recipientMessages[messageId] = newMessage;
                 
-                await db.collection('users').doc(recipientDoc.id).update({
+                await recipientDoc.ref.update({
                     messages: recipientMessages
                 });
                 
                 alert('Message sent successfully!');
                 closeModal('compose-message-modal');
+                
             } catch (error) {
                 console.error('Error sending message:', error);
-                alert('Failed to send message: ' + error.message);
+                alert('Failed to send message. Please try again.');
             }
-        }
-
-        async function openViewMessageModal(messageId) {
-            currentViewingMessageId = messageId;
-            const msg = messages[messageId];
-            
-            document.getElementById('view-message-subject').textContent = msg.subject;
-            document.getElementById('view-message-from').textContent = msg.from;
-            document.getElementById('view-message-time').textContent = new Date(msg.timestamp).toLocaleString();
-            document.getElementById('view-message-body').textContent = msg.body;
-            
-            // Mark as read
-            if (!msg.read) {
-                msg.read = true;
-                await db.collection('users').doc(currentUser.uid).update({
-                    messages: messages
-                });
-                renderMessages();
-            }
-            
-            openModal('view-message-modal');
         }
 
         function replyToMessage() {
             const msg = messages[currentViewingMessageId];
-            closeModal('view-message-modal');
+            if (!msg) return;
             
-            document.getElementById('message-to').value = msg.from;
-            document.getElementById('message-subject').value = 'Re: ' + msg.subject;
+            closeModal('message-detail-modal');
+            openComposeMessage(msg.from);
+            
+            // Pre-fill subject with "Re:"
+            const subjectInput = document.getElementById('compose-subject');
+            const originalSubject = msg.subject || 'No Subject';
+            subjectInput.value = originalSubject.startsWith('Re:') ? originalSubject : 'Re: ' + originalSubject;
+        }
+
+        async function acceptFolderInvitation() {
+            const msg = messages[currentViewingMessageId];
+            if (!msg || !msg.folderInvitation) return;
+            
+            const invitation = msg.folderInvitation;
+            
+            // Add folder to user's folders if not already present
+            if (!folders.includes(invitation.folderName)) {
+                folders.push(invitation.folderName);
+                folderColors[invitation.folderName] = invitation.folderColor;
+            }
+            
+            // Add to shared folders
+            if (!sharedFolders[invitation.folderName]) {
+                sharedFolders[invitation.folderName] = {
+                    owner: invitation.from,
+                    collaborators: [currentUser.email],
+                    createdAt: new Date().toISOString()
+                };
+            } else if (!sharedFolders[invitation.folderName].collaborators.includes(currentUser.email)) {
+                sharedFolders[invitation.folderName].collaborators.push(currentUser.email);
+            }
+            
+            // Remove invitation from message
+            delete msg.folderInvitation;
+            
+            await saveData();
+            
+            alert(`You now have access to the "${invitation.folderName}" folder!`);
+            closeModal('message-detail-modal');
+            renderCalendar();
+            renderTasks();
+            renderNotes();
+        }
+
+        async function declineFolderInvitation() {
+            const msg = messages[currentViewingMessageId];
+            if (!msg || !msg.folderInvitation) return;
+            
+            // Remove invitation from message
+            delete msg.folderInvitation;
+            
+            await saveData();
+            
+            alert('Folder invitation declined');
+            closeModal('message-detail-modal');
+        }
+
+        function openComposeMessageModal() {
+            document.getElementById('message-to').value = '';
+            document.getElementById('message-subject').value = '';
             document.getElementById('message-body').value = '';
             openModal('compose-message-modal');
         }
@@ -4358,7 +5550,7 @@
             );
             
             // Close settings menu
-            toggleMenu();
+            closeMenu();
             
             // Schedule test notifications for 5 seconds later
             setTimeout(() => {
@@ -4419,7 +5611,7 @@
         }
 
         function openFolderManager() {
-            toggleMenu();
+            closeMenu();
             toggleFoldersCard();
         }
 
@@ -4526,7 +5718,7 @@
                     folderColors = {};
                     document.documentElement.removeAttribute('data-initialized');
                     showLoginModal();
-                    toggleMenu(); // Close settings menu
+                    closeMenu(); // Close settings menu
                 } catch (error) {
                     console.error('Logout error:', error);
                     alert('Logout failed: ' + error.message);
@@ -4555,7 +5747,7 @@
                         renderFoldersCompact();
                         updateFoldersDescription();
                         
-                        toggleMenu(); // Close settings menu
+                        closeMenu(); // Close settings menu
                         alert('âœ… All data has been cleared successfully.');
                     } catch (error) {
                         console.error('Error clearing data:', error);
@@ -4756,7 +5948,7 @@
             // Close hamburger menu before opening modal
             const settingsMenu = document.getElementById('settings-menu');
             if (settingsMenu && settingsMenu.classList.contains('active')) {
-                toggleMenu();
+                closeMenu();
             }
             
             modal.classList.add('active');
@@ -5045,6 +6237,7 @@
                     folderColors: folderColors,
                     sharedFolders: sharedFolders,
                     messages: messages,
+                    groups: groups,
                     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
                 });
                 
@@ -5149,6 +6342,7 @@
                     sharedFolders = data.sharedFolders || {};
                     pendingInvitations = data.pendingInvitations || [];
                     messages = data.messages || {};
+                    groups = data.groups || {};
                 }
                 
                 // Load data from folders shared WITH this user and set up real-time listeners
@@ -5392,17 +6586,25 @@
 
         // Calendar functions
         function renderCalendar() {
+            console.log('ðŸ”„ renderCalendar called');
             const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                               'July', 'August', 'September', 'October', 'November', 'December'];
             
             document.getElementById('current-month').textContent = `${monthNames[currentMonth]} ${currentYear}`;
             
             const grid = document.getElementById('calendar-grid');
+            console.log('ðŸ“… Calendar grid element:', grid);
+            if (!grid) {
+                console.error('âŒ Calendar grid not found!');
+                return;
+            }
             grid.innerHTML = '';
             
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+            
+            console.log('ðŸ“Š Calendar info:', { currentMonth, currentYear, firstDay, daysInMonth });
             
             const todayDate = today.getDate();
             const todayMonth = today.getMonth();
@@ -6023,7 +7225,11 @@
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none'; // Also set display to none
+            }
             currentEditingId = null;
         }
 
