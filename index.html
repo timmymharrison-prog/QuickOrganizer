@@ -1864,10 +1864,10 @@
             .sidebar {
                 width: 100%;
                 height: auto;
-                min-height: 45px;
+                min-height: 35px; /* Absolute minimum */
                 flex-direction: row;
                 padding: 0;
-                padding-bottom: env(safe-area-inset-bottom, 8px); /* Respect notch */
+                padding-bottom: env(safe-area-inset-bottom, 5px); /* Minimal bottom padding */
                 justify-content: space-around;
                 order: 2; /* Move to bottom */
                 border-right: none;
@@ -1879,22 +1879,23 @@
             .tab {
                 flex: 1;
                 border-left: none !important;
-                border-bottom: 3px solid transparent;
+                border-bottom: 2px solid transparent; /* Thinner indicator */
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 8px 4px; /* Reduced even more: 12px â†’ 8px */
+                padding: 6px 4px; /* Absolute minimum padding */
             }
 
             .tab span {
                 writing-mode: horizontal-tb !important;
                 transform: none !important;
-                font-size: 10px; /* Back to 10px for compactness */
-                letter-spacing: 0.5px;
+                font-size: 9px; /* Smallest readable size */
+                letter-spacing: 0.3px;
+                font-weight: 500;
             }
 
             .tab.active {
-                border-bottom: 3px solid;
+                border-bottom: 2px solid; /* Thinner to match */
             }
 
             .tab.month.active {
@@ -1931,7 +1932,7 @@
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
-                bottom: 60px; /* Adjusted for even smaller bottom navigation */
+                bottom: 50px; /* Adjusted for minimal bottom navigation */
                 right: 16px;
                 width: 56px;
                 height: 56px;
