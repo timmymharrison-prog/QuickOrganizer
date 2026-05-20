@@ -2407,22 +2407,18 @@
     <div class="organizer-container">
         <div class="main-content">
             <div class="header">
-                <button class="menu-btn" onclick="openMenu()" title="Menu" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 8px 12px; color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-weight: 500; line-height: 1;">
+                <button class="menu-btn" onclick="openMenu()" title="Menu" style="background: none; border: none; font-size: 14px; cursor: pointer; padding: 8px 12px; color: var(--text-primary); display: flex; align-items: center; justify-content: center; font-weight: 500; line-height: 1; text-decoration: underline;">
                     <span>MENU</span>
                 </button>
                 <h1 id="header-title">Calendar</h1>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="hamburger-btn" onclick="toggleSearch()" title="Search" style="font-size: 14px; padding: 8px 12px;">
-                        <span>Search</span>
-                    </button>
+                    <input type="text" id="header-search-input" placeholder="Search..." oninput="performSearch(this.value)" style="width: 150px; padding: 6px 10px; background: var(--input-bg); border: 1px solid var(--element-border); border-radius: 6px; color: var(--text-primary); font-size: 13px;">
                 </div>
             </div>
             
-            <!-- Search Bar (hidden by default) -->
-            <div id="search-bar" style="display: none; padding: 8px 20px; background: var(--header-bg); border-bottom: 1px solid var(--element-border);">
-                <input type="text" id="search-input" placeholder="Search events, tasks, and notes..." style="width: 100%; padding: 10px 12px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 8px; color: var(--text-primary); font-size: 14px;" oninput="performSearch(this.value)">
-                <div id="search-results" style="margin-top: 8px; max-height: 300px; overflow-y: auto;"></div>
-            </div>
+            <!-- Search Results Dropdown (hidden by default) -->
+            <div id="header-search-results" style="display: none; position: absolute; right: 20px; top: 60px; width: 300px; max-height: 400px; overflow-y: auto; background: var(--modal-bg); border: 1px solid var(--element-border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); z-index: 1000; padding: 8px;"></div>
+            
 
             <!-- Side Menu -->
             <div id="side-menu" style="position: fixed; top: 0; left: -350px; width: 350px; height: 100vh; background: var(--modal-bg); box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3); z-index: 3000; transition: left 0.3s ease; overflow-y: auto;">
@@ -4361,10 +4357,11 @@
         }
 
         function performSearch(query) {
-            const searchResults = document.getElementById('search-results');
+            const searchResults = document.getElementById('header-search-results');
             
             if (!query || query.trim() === '') {
                 searchResults.innerHTML = '';
+                searchResults.style.display = 'none';
                 return;
             }
             
@@ -4419,6 +4416,7 @@
             // Display results
             if (results.length === 0) {
                 searchResults.innerHTML = '<div style="padding: 12px; color: var(--text-secondary); text-align: center;">No results found</div>';
+                searchResults.style.display = 'block';
             } else {
                 searchResults.innerHTML = results.map(result => {
                     const folderColor = result.folder ? getFolderColor(result.folder) : '#64748b';
@@ -4431,14 +4429,17 @@
                         </div>
                     `;
                 }).join('');
+                searchResults.style.display = 'block';
             }
         }
 
         function openSearchResult(type, id) {
             // Close search
-            document.getElementById('search-bar').style.display = 'none';
-            document.getElementById('search-input').value = '';
-            document.getElementById('search-results').innerHTML = '';
+            const searchInput = document.getElementById('header-search-input');
+            const searchResults = document.getElementById('header-search-results');
+            searchInput.value = '';
+            searchResults.innerHTML = '';
+            searchResults.style.display = 'none';
             
             // Open the appropriate modal or view
             if (type === 'event') {
