@@ -457,6 +457,9 @@
             max-height: 80vh;
             overflow-y: auto;
             padding: 32px;
+            position: relative;
+            z-index: 1001;
+            pointer-events: auto;
         }
 
         .modal-header {
@@ -1908,15 +1911,15 @@
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                padding: 0 16px !important; /* Equal padding on both sides */
+                padding: 0 !important; /* NO padding, let it center naturally */
                 margin: 0 !important;
                 background: transparent !important;
                 overflow: hidden !important;
+                width: 33.333% !important; /* Equal thirds */
             }
             
             .tab:last-child {
                 border-right: none !important; /* Remove separator after last tab */
-                padding-right: 16px !important; /* Keep equal padding */
             }
 
             .tab span {
@@ -2327,13 +2330,13 @@
 
             .tab {
                 height: 61px !important;
-                padding: 0 16px !important; /* Equal padding for centering */
+                padding: 0 !important;
+                width: 33.333% !important;
                 border-right: 2px solid rgba(0, 0, 0, 0.5) !important; /* Dark separator */
             }
             
             .tab:last-child {
                 border-right: none !important;
-                padding-right: 16px !important;
             }
 
             .add-btn {
@@ -2825,20 +2828,52 @@
                     <label>Description (Optional)</label>
                     <textarea id="event-description" placeholder="Add details about the event"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Reminder (Optional)</label>
-                    <select id="event-reminder">
-                        <option value="">No reminder</option>
-                        <option value="0">At time of event</option>
-                        <option value="5">5 minutes before</option>
-                        <option value="15">15 minutes before</option>
-                        <option value="30">30 minutes before</option>
-                        <option value="60">1 hour before</option>
-                        <option value="120">2 hours before</option>
-                        <option value="1440">1 day before</option>
-                        <option value="2880">2 days before</option>
-                        <option value="10080">1 week before</option>
-                    </select>
+                <div class="form-group" onclick="event.stopPropagation()">
+                    <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 8px 0;" id="event-reminder-header">
+                        <span style="font-weight: 500; color: var(--text-primary);">Reminder (Optional)</span>
+                        <span id="event-reminder-toggle" style="font-size: 14px; transition: transform 0.2s;">â–¼</span>
+                    </div>
+                    <div id="event-reminder-section" style="display: none; margin-top: 12px;" onclick="event.stopPropagation()">
+                        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Date</label>
+                                <input type="date" id="event-reminder-date" style="width: 100%; padding: 8px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 4px; color: var(--text-primary);">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Time</label>
+                                <input type="time" id="event-reminder-time" style="width: 100%; padding: 8px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 4px; color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Remind me before</label>
+                            <select id="event-reminder-before" style="width: 100%; padding: 8px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 4px; color: var(--text-primary);">
+                                <option value="0">0 minutes</option>
+                                <option value="5">5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hours</option>
+                                <option value="180">3 hours</option>
+                                <option value="240">4 hours</option>
+                                <option value="300">5 hours</option>
+                                <option value="360">6 hours</option>
+                                <option value="420">7 hours</option>
+                                <option value="480">8 hours</option>
+                                <option value="540">9 hours</option>
+                                <option value="600">10 hours</option>
+                                <option value="660">11 hours</option>
+                                <option value="720">12 hours</option>
+                                <option value="1080">18 hours</option>
+                                <option value="1440">1 day</option>
+                                <option value="2880">2 days</option>
+                                <option value="4320">3 days</option>
+                                <option value="5760">4 days</option>
+                                <option value="10080">1 week</option>
+                                <option value="20160">2 weeks</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('event-modal')">Cancel</button>
@@ -2885,15 +2920,52 @@
                     </div>
                     <textarea id="task-description" placeholder="Add task details" onkeydown="handleTextareaEnter(event)"></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Reminder (Optional)</label>
-                    <select id="task-reminder">
-                        <option value="">No reminder</option>
-                        <option value="0">On due date</option>
-                        <option value="1440">1 day before</option>
-                        <option value="2880">2 days before</option>
-                        <option value="10080">1 week before</option>
-                    </select>
+                <div class="form-group" onclick="event.stopPropagation()">
+                    <div style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 8px 0;" id="task-reminder-header">
+                        <span style="font-weight: 500; color: var(--text-primary);">Reminder (Optional)</span>
+                        <span id="task-reminder-toggle" style="font-size: 14px; transition: transform 0.2s;">â–¼</span>
+                    </div>
+                    <div id="task-reminder-section" style="display: none; margin-top: 12px;" onclick="event.stopPropagation()">
+                        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Date</label>
+                                <input type="date" id="task-reminder-date" style="width: 100%; padding: 8px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 4px; color: var(--text-primary);">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Time</label>
+                                <input type="time" id="task-reminder-time" style="width: 100%; padding: 8px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 4px; color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; display: block;">Remind me before</label>
+                            <select id="task-reminder-before" style="width: 100%; padding: 8px; background: var(--element-bg); border: 1px solid var(--element-border); border-radius: 4px; color: var(--text-primary);">
+                                <option value="0">0 minutes</option>
+                                <option value="5">5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="15">15 minutes</option>
+                                <option value="30">30 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="120">2 hours</option>
+                                <option value="180">3 hours</option>
+                                <option value="240">4 hours</option>
+                                <option value="300">5 hours</option>
+                                <option value="360">6 hours</option>
+                                <option value="420">7 hours</option>
+                                <option value="480">8 hours</option>
+                                <option value="540">9 hours</option>
+                                <option value="600">10 hours</option>
+                                <option value="660">11 hours</option>
+                                <option value="720">12 hours</option>
+                                <option value="1080">18 hours</option>
+                                <option value="1440">1 day</option>
+                                <option value="2880">2 days</option>
+                                <option value="4320">3 days</option>
+                                <option value="5760">4 days</option>
+                                <option value="10080">1 week</option>
+                                <option value="20160">2 weeks</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('task-modal')">Cancel</button>
@@ -5680,6 +5752,24 @@
             openTaskModal(null, selectedAgendaDate);
         }
 
+        function toggleReminderExpanded(type) {
+            console.log('toggleReminderExpanded called for:', type);
+            const section = document.getElementById(`${type}-reminder-section`);
+            const toggle = document.getElementById(`${type}-reminder-toggle`);
+            
+            console.log('section:', section, 'display:', section.style.display);
+            
+            if (section.style.display === 'none' || section.style.display === '') {
+                section.style.display = 'block';
+                toggle.style.transform = 'rotate(180deg)';
+                console.log('Expanded');
+            } else {
+                section.style.display = 'none';
+                toggle.style.transform = 'rotate(0deg)';
+                console.log('Collapsed');
+            }
+        }
+
         function openEventModal(eventId = null, dateStr = null) {
             currentEditingId = eventId;
             const modal = document.getElementById('event-modal');
@@ -5702,7 +5792,17 @@
                 setTimePicker('event-end', endTime);
                 
                 document.getElementById('event-description').value = events[eventId].description || '';
-                document.getElementById('event-reminder').value = events[eventId].reminder || '';
+                
+                // Populate new reminder fields if reminder exists
+                if (events[eventId].reminder && typeof events[eventId].reminder === 'object') {
+                    document.getElementById('event-reminder-date').value = events[eventId].reminder.date || '';
+                    document.getElementById('event-reminder-time').value = events[eventId].reminder.time || '';
+                    document.getElementById('event-reminder-before').value = events[eventId].reminder.before || '0';
+                    // Expand reminder section if there's a reminder
+                    document.getElementById('event-reminder-section').style.display = 'block';
+                    document.getElementById('event-reminder-toggle').style.transform = 'rotate(180deg)';
+                }
+                
                 deleteBtn.style.display = 'block';
             } else {
                 // New event
@@ -5736,7 +5836,17 @@
                 populateFolderDropdown('task-folder', tasks[taskId].folder);
                 document.getElementById('task-date').value = tasks[taskId].dueDate || '';
                 document.getElementById('task-description').value = tasks[taskId].description || '';
-                document.getElementById('task-reminder').value = tasks[taskId].reminder || '';
+                
+                // Populate new reminder fields if reminder exists
+                if (tasks[taskId].reminder && typeof tasks[taskId].reminder === 'object') {
+                    document.getElementById('task-reminder-date').value = tasks[taskId].reminder.date || '';
+                    document.getElementById('task-reminder-time').value = tasks[taskId].reminder.time || '';
+                    document.getElementById('task-reminder-before').value = tasks[taskId].reminder.before || '0';
+                    // Expand reminder section if there's a reminder
+                    document.getElementById('task-reminder-section').style.display = 'block';
+                    document.getElementById('task-reminder-toggle').style.transform = 'rotate(180deg)';
+                }
+                
                 deleteBtn.style.display = 'block';
             } else {
                 document.getElementById('task-modal-title').textContent = 'New Task';
@@ -6215,6 +6325,20 @@
                 // Set flag to prevent onSnapshot from reloading during save
                 isSavingData = true;
                 
+                // Build reminder object if reminder section is filled out
+                let reminderData = null;
+                const reminderDate = document.getElementById('event-reminder-date').value;
+                const reminderTime = document.getElementById('event-reminder-time').value;
+                const reminderBefore = document.getElementById('event-reminder-before').value;
+                
+                if (reminderDate && reminderTime) {
+                    reminderData = {
+                        date: reminderDate,
+                        time: reminderTime,
+                        before: reminderBefore || '0'
+                    };
+                }
+                
                 const eventData = {
                     title: document.getElementById('event-title').value,
                     folder: document.getElementById('event-folder').value,
@@ -6222,7 +6346,7 @@
                     startTime: document.getElementById('event-start-time').value,
                     endTime: document.getElementById('event-end-time').value,
                     description: document.getElementById('event-description').value,
-                    reminder: document.getElementById('event-reminder').value
+                    reminder: reminderData
                 };
                 
                 if (currentEditingId) {
@@ -6252,12 +6376,26 @@
                 // Set flag to prevent onSnapshot from reloading during save
                 isSavingData = true;
                 
+                // Build reminder object if reminder section is filled out
+                let reminderData = null;
+                const reminderDate = document.getElementById('task-reminder-date').value;
+                const reminderTime = document.getElementById('task-reminder-time').value;
+                const reminderBefore = document.getElementById('task-reminder-before').value;
+                
+                if (reminderDate && reminderTime) {
+                    reminderData = {
+                        date: reminderDate,
+                        time: reminderTime,
+                        before: reminderBefore || '0'
+                    };
+                }
+                
                 const taskData = {
                     title: document.getElementById('task-title').value,
                     folder: document.getElementById('task-folder').value,
                     dueDate: document.getElementById('task-date').value,
                     description: document.getElementById('task-description').value,
-                    reminder: document.getElementById('task-reminder').value,
+                    reminder: reminderData,
                     completed: currentEditingId && tasks[currentEditingId] ? tasks[currentEditingId].completed : false
                 };
                 
@@ -6366,14 +6504,39 @@
             });
         });
 
-        // Close modals when clicking outside
+        // Close modals when clicking outside - TEMPORARILY DISABLED
+        // TODO: Re-enable after fixing reminder section click propagation
+        /*
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
+                // Only close if clicking directly on the modal background itself
+                // Not if clicking on modal-content or any of its children
+                if (e.target === modal && !e.target.closest('.modal-content')) {
                     closeModal(modal.id);
                 }
             });
         });
+        */
+
+        // Reminder section toggle listeners
+        const eventReminderHeader = document.getElementById('event-reminder-header');
+        const taskReminderHeader = document.getElementById('task-reminder-header');
+        
+        if (eventReminderHeader) {
+            eventReminderHeader.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                toggleReminderExpanded('event');
+            });
+        }
+        
+        if (taskReminderHeader) {
+            taskReminderHeader.addEventListener('click', function(e) {
+                e.stopPropagation();
+                e.preventDefault();
+                toggleReminderExpanded('task');
+            });
+        }
 
         // Close time pickers when clicking outside
         document.addEventListener('click', function(e) {
