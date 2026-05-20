@@ -515,6 +515,19 @@
             color: #0f172a !important;
         }
 
+        /* Light mode - darker text for event/task badges */
+        [data-theme="light"] .event-badge {
+            background: rgba(139, 92, 246, 0.2);
+            color: rgba(88, 28, 135, 1); /* Dark purple text */
+            border-left-color: rgba(139, 92, 246, 1);
+        }
+
+        [data-theme="light"] .task-badge {
+            background: rgba(236, 72, 153, 0.2);
+            color: rgba(157, 23, 77, 1); /* Dark pink text */
+            border-left-color: rgba(236, 72, 153, 1);
+        }
+
         .form-group input,
         .form-group textarea,
         .form-group select {
@@ -2396,8 +2409,8 @@
             <div class="header">
                 <h1 id="header-title">Calendar</h1>
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <button class="hamburger-btn" onclick="toggleSearch()" title="Search" style="font-size: 18px;">
-                        <span>&#128269;</span>
+                    <button class="hamburger-btn" onclick="toggleSearch()" title="Search" style="font-size: 20px;">
+                        <span>&#9906;</span>
                     </button>
                     <button class="hamburger-btn" onclick="toggleMenu()" title="Menu" style="position: relative;">
                         <span>&equiv;</span>
