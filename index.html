@@ -341,6 +341,23 @@
             height: calc(100% - 120px);
         }
 
+        .calendar-skeleton {
+            background: var(--element-bg);
+            border: 1px solid var(--element-border);
+            border-radius: 8px;
+            min-height: 80px;
+            animation: skeleton-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes skeleton-pulse {
+            0%, 100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 0.2;
+            }
+        }
+
         .calendar-day {
             background: var(--calendar-day-bg);
             border: 1px solid var(--calendar-day-border);
@@ -2175,6 +2192,8 @@
                 width: 100%;
                 max-width: 100%;
                 border-radius: 0;
+                height: calc(100vh - 40px); /* Account for bottom tabs */
+                padding-bottom: 60px; /* Extra padding at bottom */
             }
 
             .settings-menu.active {
@@ -2385,7 +2404,51 @@
                         <div class="weekday">Sat</div>
                     </div>
                     
-                    <div class="calendar-grid" id="calendar-grid"></div>
+                    <div class="calendar-grid" id="calendar-grid">
+                        <!-- Loading skeleton - 42 placeholder boxes (6 weeks x 7 days) -->
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                        <div class="calendar-skeleton"></div>
+                    </div>
                 </div>
 
                 <!-- Tasks View -->
