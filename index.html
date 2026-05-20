@@ -1881,10 +1881,10 @@
             .sidebar {
                 width: 100%;
                 height: auto;
-                min-height: 35px; /* Absolute minimum */
+                min-height: 30px; /* Reduced from 35px */
                 flex-direction: row;
                 padding: 0;
-                padding-bottom: env(safe-area-inset-bottom, 5px); /* Minimal bottom padding */
+                padding-bottom: env(safe-area-inset-bottom, 4px); /* Minimal bottom padding */
                 justify-content: space-around;
                 order: 2; /* Move to bottom */
                 border-right: none;
@@ -1900,7 +1900,7 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 6px 4px; /* Absolute minimum padding */
+                padding: 4px 2px; /* Reduced from 6px 4px - minimal clickable area */
             }
 
             .tab span {
@@ -1949,7 +1949,7 @@
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
-                bottom: 50px; /* Adjusted for minimal bottom navigation */
+                bottom: 45px; /* Adjusted for minimal bottom navigation */
                 right: 16px;
                 width: 56px;
                 height: 56px;
