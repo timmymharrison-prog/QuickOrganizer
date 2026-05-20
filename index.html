@@ -2920,7 +2920,7 @@
                         <button type="button" class="formatting-btn" onclick="formatText('task-description', 'underline')" title="Underline"><u>U</u></button>
                         <button type="button" class="formatting-btn" onclick="formatText('task-description', 'strike')" title="Strikethrough"><s>S</s></button>
                         <div class="formatting-btn separator"></div>
-                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'bulletList')" title="Bullet List">â€¢ â€¢ â€¢</button>
+                        <button type="button" class="formatting-btn" onclick="formatText('task-description', 'bulletList')" title="Bullet List">- - -</button>
                         <button type="button" class="formatting-btn" onclick="formatText('task-description', 'numberList')" title="Numbered List">1. 2. 3.</button>
                         <button type="button" class="formatting-btn" onclick="formatText('task-description', 'checkList')" title="Checklist">[ ] [ ] [ ]</button>
                     </div>
@@ -5437,8 +5437,8 @@
                 if (format === 'bulletList') {
                     formattedLines = lines.map(line => {
                         // Remove existing bullet if present
-                        const cleaned = line.replace(/^[â€¢\-\*]\s*/, '');
-                        return cleaned ? `â€¢ ${cleaned}` : 'â€¢ ';
+                        const cleaned = line.replace(/^[\-\*]\s*/, '');
+                        return cleaned ? `- ${cleaned}` : '- ';
                     }).join('\n');
                 } else if (format === 'numberList') {
                     formattedLines = lines.map((line, i) => {
@@ -5449,8 +5449,8 @@
                 } else if (format === 'checkList') {
                     formattedLines = lines.map(line => {
                         // Remove existing checkbox if present
-                        const cleaned = line.replace(/^[â˜â˜‘âœ“]\s*/, '');
-                        return cleaned ? `â˜ ${cleaned}` : 'â˜ ';
+                        const cleaned = line.replace(/^\[\s*\]\s*/, '');
+                        return cleaned ? `[ ] ${cleaned}` : '[ ] ';
                     }).join('\n');
                 }
                 
