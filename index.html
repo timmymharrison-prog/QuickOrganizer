@@ -4863,6 +4863,13 @@
                 renderNotes();
                 updateFoldersDescription();
                 
+                // Force re-render after a short delay to ensure mobile views update
+                setTimeout(() => {
+                    renderCalendar();
+                    renderTasks();
+                    renderNotes();
+                }, 500);
+                
                 // Initialize UI on first load
                 if (!document.documentElement.hasAttribute('data-initialized')) {
                     initTheme();
