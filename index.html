@@ -1864,10 +1864,10 @@
             .sidebar {
                 width: 100%;
                 height: auto;
-                min-height: 50px;
+                min-height: 45px;
                 flex-direction: row;
                 padding: 0;
-                padding-bottom: env(safe-area-inset-bottom, 10px); /* Respect notch */
+                padding-bottom: env(safe-area-inset-bottom, 8px); /* Respect notch */
                 justify-content: space-around;
                 order: 2; /* Move to bottom */
                 border-right: none;
@@ -1883,13 +1883,13 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                padding: 12px 8px; /* Reduced from 20px to 12px */
+                padding: 8px 4px; /* Reduced even more: 12px â†’ 8px */
             }
 
             .tab span {
                 writing-mode: horizontal-tb !important;
                 transform: none !important;
-                font-size: 11px; /* Slightly larger for readability */
+                font-size: 10px; /* Back to 10px for compactness */
                 letter-spacing: 0.5px;
             }
 
@@ -1931,7 +1931,7 @@
             /* Move add button to fixed position */
             .add-btn {
                 position: fixed;
-                bottom: 70px; /* Adjusted for smaller bottom navigation */
+                bottom: 60px; /* Adjusted for even smaller bottom navigation */
                 right: 16px;
                 width: 56px;
                 height: 56px;
@@ -3068,17 +3068,18 @@
                 // Load data first (don't block on notification permission)
                 loadUserData();
                 
+                // TEMPORARILY DISABLED - Notifications causing mobile issues
                 // Request notification permission in background (non-blocking, delayed)
-                setTimeout(() => {
-                    try {
-                        requestNotificationPermission().catch(err => {
-                            console.log('Notification permission request failed:', err);
-                        });
-                        startNotificationChecker();
-                    } catch (error) {
-                        console.log('Notification system error:', error);
-                    }
-                }, 2000); // Wait 2 seconds after login
+                // setTimeout(() => {
+                //     try {
+                //         requestNotificationPermission().catch(err => {
+                //             console.log('Notification permission request failed:', err);
+                //         });
+                //         startNotificationChecker();
+                //     } catch (error) {
+                //         console.log('Notification system error:', error);
+                //     }
+                // }, 2000); // Wait 2 seconds after login
             } else {
                 // Stop notification checker on logout
                 if (notificationCheckInterval) {
