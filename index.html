@@ -5719,7 +5719,9 @@
 
         function updateFoldersDescription() {
             const desc = document.getElementById('folders-description');
-            desc.textContent = `${folders.length} folder${folders.length !== 1 ? 's' : ''}`;
+            if (desc) {
+                desc.textContent = `${folders.length} folder${folders.length !== 1 ? 's' : ''}`;
+            }
         }
 
         function openFolderManager() {
@@ -6358,7 +6360,11 @@
                 
             } catch (error) {
                 console.error('Error saving data:', error);
-                alert('Failed to save data. Please try again.');
+                if (error.code === 'invalid-argument' || error.message.includes('too large')) {
+                    alert('Failed to save: Document size exceeds Firestore 1MB limit. Please reduce attachment sizes.');
+                } else {
+                    alert('Failed to save data. Please try again. Error: ' + error.message);
+                }
             }
         }
 
@@ -8165,6 +8171,12 @@
                     completed: currentEditingId && tasks[currentEditingId] ? tasks[currentEditingId].completed : false
                 };
                 
+                console.log('Saving task with attachments:', taskAttachments.length, 'files');
+                if (taskAttachments.length > 0) {
+                    const totalSize = taskAttachments.reduce((sum, att) => sum + att.size, 0);
+                    console.log('Total attachment size:', (totalSize / 1024).toFixed(2), 'KB');
+                }
+                
                 if (currentEditingId) {
                     tasks[currentEditingId] = taskData;
                 } else {
@@ -8172,6 +8184,7 @@
                 }
                 
                 await saveData();
+                clearAttachments('task'); // Clear attachment arrays after save
                 renderCalendar(); // Update calendar to show new/edited task
                 renderTasks();
                 closeModal('task-modal');
@@ -8203,6 +8216,7 @@
                 }
                 
                 await saveData();
+                clearAttachments('note'); // Clear attachment arrays after save
                 renderNotes();
                 closeModal('note-modal');
                 
