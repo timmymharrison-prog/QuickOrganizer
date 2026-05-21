@@ -3632,6 +3632,8 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+        const storage = firebase.storage();
+        const storageRef = storage.ref();
 
         // Data storage
         let events = {};
@@ -3652,7 +3654,7 @@
         let taskAttachments = [];
         let noteAttachments = [];
         const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
-        const MAX_TOTAL_SIZE = 10 * 1024 * 1024; // 10MB total per item
+        const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 20MB total per task/note
         
         // Shared folder structure:
         // sharedFolders = {
@@ -7339,7 +7341,34 @@
             });
         }
         
+        async function uploadToStorage(file, path) {
+            try {
+                const fileRef = storageRef.child(path);
+                const snapshot = await fileRef.put(file);
+                const downloadURL = await snapshot.ref.getDownloadURL();
+                return downloadURL;
+            } catch (error) {
+                console.error('Error uploading to Storage:', error);
+                throw error;
+            }
+        }
+        
+        async function deleteFromStorage(url) {
+            try {
+                const fileRef = storage.refFromURL(url);
+                await fileRef.delete();
+            } catch (error) {
+                console.error('Error deleting from Storage:', error);
+                // Don't throw - file might already be deleted
+            }
+        }
+        
         async function handleTaskAttachments(files) {
+            if (!currentUser) {
+                alert('Please log in to attach files.');
+                return;
+            }
+            
             const list = document.getElementById('task-attachments-list');
             
             for (let file of files) {
@@ -7352,29 +7381,54 @@
                 // Check total size
                 const currentTotalSize = taskAttachments.reduce((sum, att) => sum + att.size, 0);
                 if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
-                    alert('Total attachment size exceeds 10MB limit.');
+                    alert('Total attachment size exceeds 20MB limit.');
                     break;
                 }
                 
                 try {
-                    const base64 = await fileToBase64(file);
-                    const attachment = {
+                    // Show uploading indicator
+                    const tempAttachment = {
                         name: file.name,
                         size: file.size,
                         type: file.type,
-                        data: base64
+                        uploading: true
+                    };
+                    const tempIndex = taskAttachments.length;
+                    taskAttachments.push(tempAttachment);
+                    renderTaskAttachment(tempAttachment, tempIndex);
+                    
+                    // Upload to Firebase Storage
+                    const timestamp = Date.now();
+                    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                    const storagePath = `attachments/${currentUser.uid}/tasks/${timestamp}_${sanitizedFileName}`;
+                    const downloadURL = await uploadToStorage(file, storagePath);
+                    
+                    // Update attachment with URL
+                    taskAttachments[tempIndex] = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        url: downloadURL,
+                        storagePath: storagePath
                     };
                     
-                    taskAttachments.push(attachment);
-                    renderTaskAttachment(attachment, taskAttachments.length - 1);
+                    renderTaskAttachmentsList();
                 } catch (error) {
-                    console.error('Error reading file:', error);
-                    alert(`Failed to read file "${file.name}"`);
+                    console.error('Error uploading file:', error);
+                    alert(`Failed to upload file "${file.name}"`);
+                    // Remove the failed attachment
+                    taskAttachments.pop();
+                    renderTaskAttachmentsList();
                 }
             }
         }
         
         async function handleNoteAttachments(files) {
+            if (!currentUser) {
+                alert('Please log in to attach files.');
+                return;
+            }
+            
             const list = document.getElementById('note-attachments-list');
             
             for (let file of files) {
@@ -7387,24 +7441,44 @@
                 // Check total size
                 const currentTotalSize = noteAttachments.reduce((sum, att) => sum + att.size, 0);
                 if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
-                    alert('Total attachment size exceeds 10MB limit.');
+                    alert('Total attachment size exceeds 20MB limit.');
                     break;
                 }
                 
                 try {
-                    const base64 = await fileToBase64(file);
-                    const attachment = {
+                    // Show uploading indicator
+                    const tempAttachment = {
                         name: file.name,
                         size: file.size,
                         type: file.type,
-                        data: base64
+                        uploading: true
+                    };
+                    const tempIndex = noteAttachments.length;
+                    noteAttachments.push(tempAttachment);
+                    renderNoteAttachment(tempAttachment, tempIndex);
+                    
+                    // Upload to Firebase Storage
+                    const timestamp = Date.now();
+                    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+                    const storagePath = `attachments/${currentUser.uid}/notes/${timestamp}_${sanitizedFileName}`;
+                    const downloadURL = await uploadToStorage(file, storagePath);
+                    
+                    // Update attachment with URL
+                    noteAttachments[tempIndex] = {
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        url: downloadURL,
+                        storagePath: storagePath
                     };
                     
-                    noteAttachments.push(attachment);
-                    renderNoteAttachment(attachment, noteAttachments.length - 1);
+                    renderNoteAttachmentsList();
                 } catch (error) {
-                    console.error('Error reading file:', error);
-                    alert(`Failed to read file "${file.name}"`);
+                    console.error('Error uploading file:', error);
+                    alert(`Failed to upload file "${file.name}"`);
+                    // Remove the failed attachment
+                    noteAttachments.pop();
+                    renderNoteAttachmentsList();
                 }
             }
         }
@@ -7413,14 +7487,18 @@
             const list = document.getElementById('task-attachments-list');
             const item = document.createElement('div');
             item.className = 'attachment-item';
+            
+            const statusText = attachment.uploading ? '<span style="color: #6366f1;">Uploading...</span>' : '';
+            const downloadBtn = attachment.uploading ? '' : `<button type="button" class="attachment-btn" onclick="downloadAttachment(${index}, 'task')">Download</button>`;
+            
             item.innerHTML = `
                 <span class="attachment-icon">${getFileIcon(attachment.name)}</span>
                 <div class="attachment-info">
-                    <div class="attachment-name">${attachment.name}</div>
+                    <div class="attachment-name">${attachment.name} ${statusText}</div>
                     <div class="attachment-size">${formatFileSize(attachment.size)}</div>
                 </div>
                 <div class="attachment-actions">
-                    <button type="button" class="attachment-btn" onclick="downloadAttachment(${index}, 'task')">Download</button>
+                    ${downloadBtn}
                     <button type="button" class="attachment-btn delete" onclick="removeTaskAttachment(${index})">Remove</button>
                 </div>
             `;
@@ -7431,26 +7509,38 @@
             const list = document.getElementById('note-attachments-list');
             const item = document.createElement('div');
             item.className = 'attachment-item';
+            
+            const statusText = attachment.uploading ? '<span style="color: #6366f1;">Uploading...</span>' : '';
+            const downloadBtn = attachment.uploading ? '' : `<button type="button" class="attachment-btn" onclick="downloadAttachment(${index}, 'note')">Download</button>`;
+            
             item.innerHTML = `
                 <span class="attachment-icon">${getFileIcon(attachment.name)}</span>
                 <div class="attachment-info">
-                    <div class="attachment-name">${attachment.name}</div>
+                    <div class="attachment-name">${attachment.name} ${statusText}</div>
                     <div class="attachment-size">${formatFileSize(attachment.size)}</div>
                 </div>
                 <div class="attachment-actions">
-                    <button type="button" class="attachment-btn" onclick="downloadAttachment(${index}, 'note')">Download</button>
+                    ${downloadBtn}
                     <button type="button" class="attachment-btn delete" onclick="removeNoteAttachment(${index})">Remove</button>
                 </div>
             `;
             list.appendChild(item);
         }
         
-        function removeTaskAttachment(index) {
+        async function removeTaskAttachment(index) {
+            const attachment = taskAttachments[index];
+            if (attachment && attachment.url) {
+                await deleteFromStorage(attachment.url);
+            }
             taskAttachments.splice(index, 1);
             renderTaskAttachmentsList();
         }
         
-        function removeNoteAttachment(index) {
+        async function removeNoteAttachment(index) {
+            const attachment = noteAttachments[index];
+            if (attachment && attachment.url) {
+                await deleteFromStorage(attachment.url);
+            }
             noteAttachments.splice(index, 1);
             renderNoteAttachmentsList();
         }
@@ -7469,12 +7559,10 @@
         
         function downloadAttachment(index, type) {
             const attachment = type === 'task' ? taskAttachments[index] : noteAttachments[index];
-            if (!attachment) return;
+            if (!attachment || !attachment.url) return;
             
-            const link = document.createElement('a');
-            link.href = attachment.data;
-            link.download = attachment.name;
-            link.click();
+            // Open URL in new tab (Firebase Storage URLs trigger download automatically)
+            window.open(attachment.url, '_blank');
         }
         
         function clearAttachments(type) {
@@ -7629,6 +7717,16 @@
             // Set flag to prevent onSnapshot from reloading during deletion
             isSavingData = true;
             
+            // Delete attachments from Storage
+            const task = tasks[currentEditingId];
+            if (task && task.attachments) {
+                for (const attachment of task.attachments) {
+                    if (attachment.url) {
+                        await deleteFromStorage(attachment.url);
+                    }
+                }
+            }
+            
             delete tasks[currentEditingId];
             
             // Remove from taskOrder array as well
@@ -7670,6 +7768,17 @@
                 // Set flag to prevent onSnapshot from reloading
                 isSavingData = true;
                 console.log('ðŸš« Set isSavingData = true');
+                
+                // Delete attachments from Storage
+                const note = notes[currentEditingId];
+                if (note && note.attachments) {
+                    console.log('Deleting attachments from Storage...');
+                    for (const attachment of note.attachments) {
+                        if (attachment.url) {
+                            await deleteFromStorage(attachment.url);
+                        }
+                    }
+                }
                 
                 // Delete the note from local object
                 delete notes[currentEditingId];
