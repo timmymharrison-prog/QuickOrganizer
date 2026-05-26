@@ -7807,10 +7807,19 @@
         
         function downloadAttachment(index, type) {
             const attachment = type === 'task' ? taskAttachments[index] : noteAttachments[index];
-            if (!attachment || !attachment.url) return;
+            if (!attachment) return;
             
-            // Open URL in new tab (Firebase Storage URLs trigger download automatically)
-            window.open(attachment.url, '_blank');
+            // Handle Firebase Storage URLs (new system)
+            if (attachment.url) {
+                window.open(attachment.url, '_blank');
+            }
+            // Handle base64 data (old system)
+            else if (attachment.data) {
+                const link = document.createElement('a');
+                link.href = attachment.data;
+                link.download = attachment.name;
+                link.click();
+            }
         }
         
         function clearAttachments(type) {
