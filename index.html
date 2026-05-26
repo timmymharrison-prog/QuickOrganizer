@@ -6337,37 +6337,177 @@
 
         // Save data to localStorage
         // Save data to Firebase Firestore
+        // NEW SUBCOLLECTION-BASED DATA FUNCTIONS
+        
+        // Save a single task to its own document
+        async function saveTask(taskId, taskData) {
+            if (!currentUser) return;
+            try {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('tasks').doc(taskId).set(taskData);
+            } catch (error) {
+                console.error('Error saving task:', error);
+                throw error;
+            }
+        }
+        
+        // Save a single note to its own document
+        async function saveNote(noteId, noteData) {
+            if (!currentUser) return;
+            try {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('notes').doc(noteId).set(noteData);
+            } catch (error) {
+                console.error('Error saving note:', error);
+                throw error;
+            }
+        }
+        
+        // Save a single event to its own document
+        async function saveEvent(eventId, eventData) {
+            if (!currentUser) return;
+            try {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('events').doc(eventId).set(eventData);
+            } catch (error) {
+                console.error('Error saving event:', error);
+                throw error;
+            }
+        }
+        
+        // Delete a task document
+        async function deleteTaskDoc(taskId) {
+            if (!currentUser) return;
+            try {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('tasks').doc(taskId).delete();
+            } catch (error) {
+                console.error('Error deleting task:', error);
+                throw error;
+            }
+        }
+        
+        // Delete a note document
+        async function deleteNoteDoc(noteId) {
+            if (!currentUser) return;
+            try {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('notes').doc(noteId).delete();
+            } catch (error) {
+                console.error('Error deleting note:', error);
+                throw error;
+            }
+        }
+        
+        // Delete an event document
+        async function deleteEventDoc(eventId) {
+            if (!currentUser) return;
+            try {
+                await db.collection('users').doc(currentUser.uid)
+                    .collection('events').doc(eventId).delete();
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                throw error;
+            }
+        }
+        
+        // Save metadata (folders, colors, taskOrder, etc.) - these can stay in main doc since they're small
+        async function saveMetadata() {
+            if (!currentUser) return;
+            try {
+                await db.collection('users').doc(currentUser.uid).set({
+                    folders: folders,
+                    folderColors: folderColors,
+                    taskOrder: taskOrder,
+                    sharedFolders: sharedFolders,
+                    messages: messages,
+                    groups: groups,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            } catch (error) {
+                console.error('Error saving metadata:', error);
+                throw error;
+            }
+        }
+        
+        
+        // MIGRATION FUNCTION - Run this once to migrate from old structure to subcollections
+        async function migrateToSubcollections() {
+            if (!currentUser) {
+                alert('Please log in first');
+                return;
+            }
+            
+            if (!confirm('This will migrate your data to the new structure. This only needs to be done once. Continue?')) {
+                return;
+            }
+            
+            try {
+                console.log('Starting migration...');
+                
+                // Get current data from main document
+                const userDoc = await db.collection('users').doc(currentUser.uid).get();
+                if (!userDoc.exists) {
+                    alert('No data to migrate');
+                    return;
+                }
+                
+                const data = userDoc.data();
+                const oldTasks = data.tasks || {};
+                const oldNotes = data.notes || {};
+                const oldEvents = data.events || {};
+                
+                console.log('Found:', Object.keys(oldTasks).length, 'tasks,', Object.keys(oldNotes).length, 'notes,', Object.keys(oldEvents).length, 'events');
+                
+                // Migrate tasks to subcollection
+                for (const [taskId, taskData] of Object.entries(oldTasks)) {
+                    await saveTask(taskId, taskData);
+                    console.log('Migrated task:', taskId);
+                }
+                
+                // Migrate notes to subcollection
+                for (const [noteId, noteData] of Object.entries(oldNotes)) {
+                    await saveNote(noteId, noteData);
+                    console.log('Migrated note:', noteId);
+                }
+                
+                // Migrate events to subcollection
+                for (const [eventId, eventData] of Object.entries(oldEvents)) {
+                    await saveEvent(eventId, eventData);
+                    console.log('Migrated event:', eventId);
+                }
+                
+                console.log('Migration complete! Cleaning up old data...');
+                
+                // Remove old data from main document (keep metadata)
+                await db.collection('users').doc(currentUser.uid).update({
+                    tasks: firebase.firestore.FieldValue.delete(),
+                    notes: firebase.firestore.FieldValue.delete(),
+                    events: firebase.firestore.FieldValue.delete()
+                });
+                
+                alert('Migration complete! Please refresh the page.');
+                
+            } catch (error) {
+                console.error('Migration error:', error);
+                alert('Migration failed: ' + error.message);
+            }
+        }
+        
+        // Legacy saveData function - now saves metadata only
         async function saveData() {
             if (!currentUser) {
                 return;
             }
             
             try {
-                // Save to current user's document
-                // Note: We send complete objects, so we overwrite these fields entirely
-                await db.collection('users').doc(currentUser.uid).set({
-                    events: events,
-                    tasks: tasks,
-                    taskOrder: taskOrder,
-                    notes: notes,
-                    folders: folders,
-                    folderColors: folderColors,
-                    sharedFolders: sharedFolders,
-                    messages: messages,
-                    groups: groups,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
+                await saveMetadata();
                 // Also sync shared folder items to the owner's account
                 await syncSharedFolderItems();
                 
             } catch (error) {
                 console.error('Error saving data:', error);
-                if (error.code === 'invalid-argument' || error.message.includes('too large')) {
-                    alert('Failed to save: Document size exceeds Firestore 1MB limit. Please reduce attachment sizes.');
-                } else {
-                    alert('Failed to save data. Please try again. Error: ' + error.message);
-                }
+                alert('Failed to save data. Please try again. Error: ' + error.message);
             }
         }
 
@@ -6430,6 +6570,60 @@
             }
         }
 
+        
+        // SUBCOLLECTION LOADING FUNCTIONS
+        
+        // Load all tasks from subcollection
+        async function loadAllTasks() {
+            if (!currentUser) return {};
+            try {
+                const tasksSnapshot = await db.collection('users').doc(currentUser.uid)
+                    .collection('tasks').get();
+                const loadedTasks = {};
+                tasksSnapshot.forEach(doc => {
+                    loadedTasks[doc.id] = doc.data();
+                });
+                return loadedTasks;
+            } catch (error) {
+                console.error('Error loading tasks:', error);
+                return {};
+            }
+        }
+        
+        // Load all notes from subcollection
+        async function loadAllNotes() {
+            if (!currentUser) return {};
+            try {
+                const notesSnapshot = await db.collection('users').doc(currentUser.uid)
+                    .collection('notes').get();
+                const loadedNotes = {};
+                notesSnapshot.forEach(doc => {
+                    loadedNotes[doc.id] = doc.data();
+                });
+                return loadedNotes;
+            } catch (error) {
+                console.error('Error loading notes:', error);
+                return {};
+            }
+        }
+        
+        // Load all events from subcollection
+        async function loadAllEvents() {
+            if (!currentUser) return {};
+            try {
+                const eventsSnapshot = await db.collection('users').doc(currentUser.uid)
+                    .collection('events').get();
+                const loadedEvents = {};
+                eventsSnapshot.forEach(doc => {
+                    loadedEvents[doc.id] = doc.data();
+                });
+                return loadedEvents;
+            } catch (error) {
+                console.error('Error loading events:', error);
+                return {};
+            }
+        }
+
         // Load user data from Firebase Firestore
         // Real-time listener for user data
         let unsubscribeListener = null;
@@ -6445,7 +6639,7 @@
             sharedFolderListeners.forEach(unsubscribe => unsubscribe());
             sharedFolderListeners = [];
             
-            // Set up real-time listener for user's own data
+            // Set up real-time listener for user's own data (metadata only)
             unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc) => {
                 // Skip snapshot updates during save operations to prevent race condition
                 if (isSavingData) {
@@ -6455,21 +6649,24 @@
                 
                 console.log('ðŸ“¡ onSnapshot: Loading data from Firebase');
                 
+                // Load metadata from main document
                 if (doc.exists) {
                     const data = doc.data();
-                    events = data.events || {};
-                    tasks = data.tasks || {};
-                    taskOrder = data.taskOrder || [];
-                    notes = data.notes || {};
                     folders = data.folders || ['Personal', 'Work'];
                     folderColors = data.folderColors || {};
+                    taskOrder = data.taskOrder || [];
                     sharedFolders = data.sharedFolders || {};
                     pendingInvitations = data.pendingInvitations || [];
                     messages = data.messages || {};
                     groups = data.groups || {};
-                    
-                    console.log('ðŸ“¡ onSnapshot: notes loaded:', Object.keys(notes).length, 'notes');
                 }
+                
+                // Load tasks, notes, and events from subcollections
+                tasks = await loadAllTasks();
+                notes = await loadAllNotes();
+                events = await loadAllEvents();
+                
+                console.log('ðŸ“¡ onSnapshot: Loaded', Object.keys(tasks).length, 'tasks,', Object.keys(notes).length, 'notes,', Object.keys(events).length, 'events');
                 
                 // Load data from folders shared WITH this user and set up real-time listeners
                 await loadSharedDataWithRealTimeSync();
@@ -7690,10 +7887,12 @@
             if (currentEditingId && confirm('Are you sure you want to delete this event?')) {
                 // Store the date BEFORE deleting the event
                 const eventDate = events[currentEditingId].date;
+                
+                // Delete from local state
                 delete events[currentEditingId];
                 
-                // Wait for the save to complete before continuing
-                await saveData();
+                // Delete from Firestore subcollection
+                await deleteEventDoc(currentEditingId);
                 
                 renderCalendar();
                 closeModal('event-modal');
@@ -7728,6 +7927,7 @@
                 }
             }
             
+            // Delete from local state
             delete tasks[currentEditingId];
             
             // Remove from taskOrder array as well
@@ -7736,7 +7936,11 @@
                 taskOrder.splice(index, 1);
             }
             
-            await saveData();
+            // Delete from Firestore subcollection
+            await deleteTaskDoc(currentEditingId);
+            
+            // Save updated metadata (taskOrder)
+            await saveMetadata();
             
             renderCalendar();
             renderTasks();
@@ -7785,13 +7989,10 @@
                 delete notes[currentEditingId];
                 console.log('âœ… Deleted from local notes object');
                 
-                // Save directly to Firebase with await
-                console.log('ðŸ’¾ Saving to Firebase...');
-                await db.collection('users').doc(currentUser.uid).update({
-                    notes: notes,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                console.log('âœ… Firebase update confirmed');
+                // Delete from Firestore subcollection
+                console.log('ðŸ’¾ Deleting from Firebase...');
+                await deleteNoteDoc(currentEditingId);
+                console.log('âœ… Firebase delete confirmed');
                 
                 // Update UI immediately
                 renderNotes();
@@ -7934,8 +8135,13 @@
                 // Set flag to prevent onSnapshot reload
                 isSavingData = true;
                 
+                // Update local state
                 task.completed = e.target.checked;
-                await saveData();
+                tasks[taskId].completed = e.target.checked;
+                
+                // Save to Firestore subcollection
+                await saveTask(taskId, tasks[taskId]);
+                
                 renderCalendar(); // Update calendar to show/hide completed indicator
                 renderTasks();
                 
@@ -8230,13 +8436,15 @@
                     reminder: reminderData
                 };
                 
-                if (currentEditingId) {
-                    events[currentEditingId] = eventData;
-                } else {
-                    events[Date.now()] = eventData;
-                }
+                // Determine event ID
+                const eventId = currentEditingId || Date.now().toString();
                 
-                await saveData();
+                // Update local state
+                events[eventId] = eventData;
+                
+                // Save to Firestore subcollection
+                await saveEvent(eventId, eventData);
+                
                 renderCalendar();
                 closeModal('event-modal');
                 
@@ -8287,13 +8495,18 @@
                     console.log('Total attachment size:', (totalSize / 1024).toFixed(2), 'KB');
                 }
                 
-                if (currentEditingId) {
-                    tasks[currentEditingId] = taskData;
-                } else {
-                    tasks[Date.now()] = taskData;
-                }
+                // Determine task ID
+                const taskId = currentEditingId || Date.now().toString();
                 
-                await saveData();
+                // Update local state
+                tasks[taskId] = taskData;
+                
+                // Save to Firestore subcollection
+                await saveTask(taskId, taskData);
+                
+                // Save metadata (taskOrder)
+                await saveMetadata();
+                
                 clearAttachments('task'); // Clear attachment arrays after save
                 renderCalendar(); // Update calendar to show new/edited task
                 renderTasks();
@@ -8319,13 +8532,15 @@
                     date: new Date().toLocaleDateString()
                 };
                 
-                if (currentEditingId) {
-                    notes[currentEditingId] = noteData;
-                } else {
-                    notes[Date.now()] = noteData;
-                }
+                // Determine note ID
+                const noteId = currentEditingId || Date.now().toString();
                 
-                await saveData();
+                // Update local state
+                notes[noteId] = noteData;
+                
+                // Save to Firestore subcollection
+                await saveNote(noteId, noteData);
+                
                 clearAttachments('note'); // Clear attachment arrays after save
                 renderNotes();
                 closeModal('note-modal');
