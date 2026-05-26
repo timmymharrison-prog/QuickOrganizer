@@ -8510,9 +8510,13 @@
                     dueDate: document.getElementById('task-date').value,
                     description: document.getElementById('task-description').value,
                     reminder: reminderData,
-                    attachments: taskAttachments.length > 0 ? [...taskAttachments] : undefined,
                     completed: currentEditingId && tasks[currentEditingId] ? tasks[currentEditingId].completed : false
                 };
+                
+                // Only add attachments if there are any
+                if (taskAttachments.length > 0) {
+                    taskData.attachments = [...taskAttachments];
+                }
                 
                 console.log('ðŸ“ Task data:', taskData);
                 console.log('Saving task with attachments:', taskAttachments.length, 'files');
@@ -8569,9 +8573,13 @@
                     title: document.getElementById('note-title').value,
                     folder: document.getElementById('note-folder').value,
                     content: document.getElementById('note-content').value,
-                    attachments: noteAttachments.length > 0 ? [...noteAttachments] : undefined,
                     date: new Date().toLocaleDateString()
                 };
+                
+                // Only add attachments if there are any
+                if (noteAttachments.length > 0) {
+                    noteData.attachments = [...noteAttachments];
+                }
                 
                 // Determine note ID
                 const noteId = currentEditingId || Date.now().toString();
