@@ -6683,12 +6683,38 @@
                     pendingInvitations = data.pendingInvitations || [];
                     messages = data.messages || {};
                     groups = data.groups || {};
+                    
+                    // FALLBACK: If subcollections are empty, try loading from old structure
+                    const subcollectionTasks = await loadAllTasks();
+                    const subcollectionNotes = await loadAllNotes();
+                    const subcollectionEvents = await loadAllEvents();
+                    
+                    if (Object.keys(subcollectionTasks).length === 0 && data.tasks) {
+                        console.log('âš ï¸ No tasks in subcollections, using old structure');
+                        tasks = data.tasks;
+                    } else {
+                        tasks = subcollectionTasks;
+                    }
+                    
+                    if (Object.keys(subcollectionNotes).length === 0 && data.notes) {
+                        console.log('âš ï¸ No notes in subcollections, using old structure');
+                        notes = data.notes;
+                    } else {
+                        notes = subcollectionNotes;
+                    }
+                    
+                    if (Object.keys(subcollectionEvents).length === 0 && data.events) {
+                        console.log('âš ï¸ No events in subcollections, using old structure');
+                        events = data.events;
+                    } else {
+                        events = subcollectionEvents;
+                    }
+                } else {
+                    // New user, try loading from subcollections
+                    tasks = await loadAllTasks();
+                    notes = await loadAllNotes();
+                    events = await loadAllEvents();
                 }
-                
-                // Load tasks, notes, and events from subcollections
-                tasks = await loadAllTasks();
-                notes = await loadAllNotes();
-                events = await loadAllEvents();
                 
                 console.log('ðŸ“¡ onSnapshot: Loaded', Object.keys(tasks).length, 'tasks,', Object.keys(notes).length, 'notes,', Object.keys(events).length, 'events');
                 
@@ -8456,9 +8482,13 @@
                     date: document.getElementById('event-date').value,
                     startTime: document.getElementById('event-start-time').value,
                     endTime: document.getElementById('event-end-time').value,
-                    description: document.getElementById('event-description').value,
-                    reminder: reminderData
+                    description: document.getElementById('event-description').value
                 };
+                
+                // Only add reminder if it exists
+                if (reminderData) {
+                    eventData.reminder = reminderData;
+                }
                 
                 // Determine event ID
                 const eventId = currentEditingId || Date.now().toString();
@@ -8509,9 +8539,13 @@
                     folder: document.getElementById('task-folder').value,
                     dueDate: document.getElementById('task-date').value,
                     description: document.getElementById('task-description').value,
-                    reminder: reminderData,
                     completed: currentEditingId && tasks[currentEditingId] ? tasks[currentEditingId].completed : false
                 };
+                
+                // Only add reminder if it exists
+                if (reminderData) {
+                    taskData.reminder = reminderData;
+                }
                 
                 // Only add attachments if there are any
                 if (taskAttachments.length > 0) {
