@@ -6343,8 +6343,16 @@
         async function saveTask(taskId, taskData) {
             if (!currentUser) return;
             try {
+                // Remove undefined fields (Firestore doesn't allow undefined)
+                const cleanData = {};
+                for (const [key, value] of Object.entries(taskData)) {
+                    if (value !== undefined) {
+                        cleanData[key] = value;
+                    }
+                }
+                
                 await db.collection('users').doc(currentUser.uid)
-                    .collection('tasks').doc(taskId).set(taskData);
+                    .collection('tasks').doc(taskId).set(cleanData);
             } catch (error) {
                 console.error('Error saving task:', error);
                 throw error;
@@ -6355,8 +6363,16 @@
         async function saveNote(noteId, noteData) {
             if (!currentUser) return;
             try {
+                // Remove undefined fields (Firestore doesn't allow undefined)
+                const cleanData = {};
+                for (const [key, value] of Object.entries(noteData)) {
+                    if (value !== undefined) {
+                        cleanData[key] = value;
+                    }
+                }
+                
                 await db.collection('users').doc(currentUser.uid)
-                    .collection('notes').doc(noteId).set(noteData);
+                    .collection('notes').doc(noteId).set(cleanData);
             } catch (error) {
                 console.error('Error saving note:', error);
                 throw error;
@@ -6367,8 +6383,16 @@
         async function saveEvent(eventId, eventData) {
             if (!currentUser) return;
             try {
+                // Remove undefined fields (Firestore doesn't allow undefined)
+                const cleanData = {};
+                for (const [key, value] of Object.entries(eventData)) {
+                    if (value !== undefined) {
+                        cleanData[key] = value;
+                    }
+                }
+                
                 await db.collection('users').doc(currentUser.uid)
-                    .collection('events').doc(eventId).set(eventData);
+                    .collection('events').doc(eventId).set(cleanData);
             } catch (error) {
                 console.error('Error saving event:', error);
                 throw error;
@@ -8461,6 +8485,7 @@
 
             document.getElementById('task-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
+                console.log('ðŸ”µ Task form submitted');
                 
                 // Set flag to prevent onSnapshot from reloading during save
                 isSavingData = true;
@@ -8489,28 +8514,44 @@
                     completed: currentEditingId && tasks[currentEditingId] ? tasks[currentEditingId].completed : false
                 };
                 
+                console.log('ðŸ“ Task data:', taskData);
                 console.log('Saving task with attachments:', taskAttachments.length, 'files');
                 if (taskAttachments.length > 0) {
                     const totalSize = taskAttachments.reduce((sum, att) => sum + att.size, 0);
                     console.log('Total attachment size:', (totalSize / 1024).toFixed(2), 'KB');
                 }
                 
-                // Determine task ID
-                const taskId = currentEditingId || Date.now().toString();
-                
-                // Update local state
-                tasks[taskId] = taskData;
-                
-                // Save to Firestore subcollection
-                await saveTask(taskId, taskData);
-                
-                // Save metadata (taskOrder)
-                await saveMetadata();
-                
-                clearAttachments('task'); // Clear attachment arrays after save
-                renderCalendar(); // Update calendar to show new/edited task
-                renderTasks();
-                closeModal('task-modal');
+                try {
+                    // Determine task ID
+                    const taskId = currentEditingId || Date.now().toString();
+                    console.log('ðŸ’¾ Saving task ID:', taskId);
+                    
+                    // Update local state
+                    tasks[taskId] = taskData;
+                    
+                    // Save to Firestore subcollection
+                    console.log('ðŸ’¾ Calling saveTask...');
+                    await saveTask(taskId, taskData);
+                    console.log('âœ… saveTask complete');
+                    
+                    // Save metadata (taskOrder)
+                    if (!taskOrder.includes(taskId)) {
+                        taskOrder.push(taskId);
+                    }
+                    console.log('ðŸ’¾ Calling saveMetadata...');
+                    await saveMetadata();
+                    console.log('âœ… saveMetadata complete');
+                    
+                    clearAttachments('task'); // Clear attachment arrays after save
+                    renderCalendar(); // Update calendar to show new/edited task
+                    renderTasks();
+                    closeModal('task-modal');
+                    
+                    console.log('âœ… Task saved successfully');
+                } catch (error) {
+                    console.error('âŒ Error saving task:', error);
+                    alert('Failed to save task: ' + error.message);
+                }
                 
                 // Clear flag after a delay to ensure Firestore has propagated
                 setTimeout(() => {
