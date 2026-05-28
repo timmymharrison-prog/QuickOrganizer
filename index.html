@@ -503,18 +503,15 @@
             display: block;
             margin-bottom: 8px;
             font-size: 13px;
-            color: var(--text-primary);
+            color: #ffffff !important;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-weight: 600;
             opacity: 1;
             transition: color 0.3s ease;
         }
-        
-        /* Ensure labels are visible in both themes */
-        [data-theme="light"] .form-group label,
-        [data-theme="light"] .modal .form-group label,
-        [data-theme="light"] .modal-content .form-group label {
+
+        [data-theme="light"] .form-group label {
             color: #0f172a !important;
         }
 
@@ -614,11 +611,12 @@
         .btn-delete {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
-            border: 1px solid rgba(239, 68, 68, 0.3);
+            border: 2px solid rgba(239, 68, 68, 0.5);
         }
 
         .btn-delete:hover {
             background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
         }
 
         /* Add Button */
@@ -1720,10 +1718,10 @@
         .time-picker-display {
             width: 100%;
             padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--input-bg);
+            border: 1px solid var(--element-border);
             border-radius: 8px;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
             font-size: 14px;
             cursor: pointer;
             text-align: center;
@@ -1731,13 +1729,13 @@
         }
 
         .time-picker-display:hover {
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.15);
+            background: var(--element-bg);
+            border-color: var(--text-secondary);
         }
 
         .time-picker-display.active {
             border-color: rgba(139, 92, 246, 0.5);
-            background: rgba(255, 255, 255, 0.08);
+            background: var(--element-bg);
         }
 
         .time-picker-dropdown {
@@ -2403,92 +2401,6 @@
             .notes-container {
                 grid-template-columns: repeat(2, 1fr);
             }
-        }
-        
-        /* Attachment Styles */
-        .attachment-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: var(--element-bg);
-            border: 1px solid var(--element-border);
-            border-radius: 6px;
-            font-size: 13px;
-            color: var(--text-secondary);
-            transition: all 0.2s;
-        }
-        
-        .attachment-item:hover {
-            background: var(--element-hover);
-        }
-        
-        .attachment-icon {
-            font-size: 16px;
-            flex-shrink: 0;
-        }
-        
-        .attachment-info {
-            flex: 1;
-            min-width: 0;
-        }
-        
-        .attachment-name {
-            font-weight: 500;
-            color: var(--text-primary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .attachment-size {
-            font-size: 11px;
-            color: var(--text-tertiary);
-        }
-        
-        .attachment-actions {
-            display: flex;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-        
-        .attachment-btn {
-            padding: 4px 8px;
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: 4px;
-            color: rgba(99, 102, 241, 0.9);
-            cursor: pointer;
-            font-size: 11px;
-            transition: all 0.2s;
-        }
-        
-        .attachment-btn:hover {
-            background: rgba(99, 102, 241, 0.2);
-        }
-        
-        .attachment-btn.delete {
-            background: rgba(239, 68, 68, 0.1);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: rgba(239, 68, 68, 0.9);
-        }
-        
-        .attachment-btn.delete:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-        
-        .attachment-preview {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 8px;
-            margin-top: 8px;
-            cursor: pointer;
-        }
-        
-        /* White attachment button hover effect */
-        button[onclick*="attachment-input"]:hover {
-            background: #f5f5f5 !important;
-            border-color: #6366f1 !important;
         }
     </style>
 </head>
@@ -3424,18 +3336,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <input type="file" id="task-attachment-input" multiple style="display: none;" onchange="handleTaskAttachments(this.files)" accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.msg,.eml,.csv,.zip,.rar,.ppt,.pptx">
-                        <button type="button" onclick="document.getElementById('task-attachment-input').click()" style="width: 100%; padding: 16px; background: #ffffff; color: #000000; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
-                            <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2">
-                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-                            </svg>
-                            Click to Attach
-                        </button>
-                        <div id="task-attachments-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                    </div>
-                </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('task-modal')">Cancel</button>
                     <button type="button" class="btn btn-delete" id="delete-task-btn" onclick="event.preventDefault(); event.stopPropagation(); deleteTask();" style="display: none;">Delete</button>
@@ -3476,18 +3376,6 @@
                         <button type="button" class="formatting-btn" onclick="formatText('note-content', 'checkList')" title="Checklist">[ ] [ ] [ ]</button>
                     </div>
                     <textarea id="note-content" placeholder="Write your note here..." style="min-height: 200px;" required onkeydown="handleTextareaEnter(event)"></textarea>
-                </div>
-                <div class="form-group">
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <input type="file" id="note-attachment-input" multiple style="display: none;" onchange="handleNoteAttachments(this.files)" accept="image/*,.pdf,.doc,.docx,.txt,.xls,.xlsx,.msg,.eml,.csv,.zip,.rar,.ppt,.pptx">
-                        <button type="button" onclick="document.getElementById('note-attachment-input').click()" style="width: 100%; padding: 16px; background: #ffffff; color: #000000; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s;">
-                            <svg style="width: 18px; height: 18px;" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2">
-                                <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-                            </svg>
-                            Click to Attach
-                        </button>
-                        <div id="note-attachments-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal('note-modal')">Cancel</button>
@@ -3615,7 +3503,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
     <script>
         // Firebase Configuration
@@ -3633,8 +3520,6 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
-        const storageRef = storage.ref();
 
         // Data storage
         let events = {};
@@ -3650,12 +3535,6 @@
         let isSavingData = false; // Flag to prevent snapshot reload during save operations
         let selectedTasksFolder = '';
         let selectedNotesFolder = '';
-        
-        // Attachment handling
-        let taskAttachments = [];
-        let noteAttachments = [];
-        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB per file
-        const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 20MB total per task/note
         
         // Shared folder structure:
         // sharedFolders = {
@@ -5722,9 +5601,7 @@
 
         function updateFoldersDescription() {
             const desc = document.getElementById('folders-description');
-            if (desc) {
-                desc.textContent = `${folders.length} folder${folders.length !== 1 ? 's' : ''}`;
-            }
+            desc.textContent = `${folders.length} folder${folders.length !== 1 ? 's' : ''}`;
         }
 
         function openFolderManager() {
@@ -6068,7 +5945,7 @@
                 closeMenu();
             }
             
-            modal.classList.add('active');
+            modal.style.display = 'flex';
         }
 
         // Edit Folder Modal
@@ -6116,7 +5993,7 @@
                 colorsContainer.appendChild(colorBtn);
             });
             
-            modal.classList.add('active');
+            modal.style.display = 'flex';
         }
 
         function formatTime(time24) {
@@ -6337,201 +6214,33 @@
 
         // Save data to localStorage
         // Save data to Firebase Firestore
-        // NEW SUBCOLLECTION-BASED DATA FUNCTIONS
-        
-        // Save a single task to its own document
-        async function saveTask(taskId, taskData) {
-            if (!currentUser) return;
-            try {
-                // Remove undefined fields (Firestore doesn't allow undefined)
-                const cleanData = {};
-                for (const [key, value] of Object.entries(taskData)) {
-                    if (value !== undefined) {
-                        cleanData[key] = value;
-                    }
-                }
-                
-                await db.collection('users').doc(currentUser.uid)
-                    .collection('tasks').doc(taskId).set(cleanData);
-            } catch (error) {
-                console.error('Error saving task:', error);
-                throw error;
-            }
-        }
-        
-        // Save a single note to its own document
-        async function saveNote(noteId, noteData) {
-            if (!currentUser) return;
-            try {
-                // Remove undefined fields (Firestore doesn't allow undefined)
-                const cleanData = {};
-                for (const [key, value] of Object.entries(noteData)) {
-                    if (value !== undefined) {
-                        cleanData[key] = value;
-                    }
-                }
-                
-                await db.collection('users').doc(currentUser.uid)
-                    .collection('notes').doc(noteId).set(cleanData);
-            } catch (error) {
-                console.error('Error saving note:', error);
-                throw error;
-            }
-        }
-        
-        // Save a single event to its own document
-        async function saveEvent(eventId, eventData) {
-            if (!currentUser) return;
-            try {
-                // Remove undefined fields (Firestore doesn't allow undefined)
-                const cleanData = {};
-                for (const [key, value] of Object.entries(eventData)) {
-                    if (value !== undefined) {
-                        cleanData[key] = value;
-                    }
-                }
-                
-                await db.collection('users').doc(currentUser.uid)
-                    .collection('events').doc(eventId).set(cleanData);
-            } catch (error) {
-                console.error('Error saving event:', error);
-                throw error;
-            }
-        }
-        
-        // Delete a task document
-        async function deleteTaskDoc(taskId) {
-            if (!currentUser) return;
-            try {
-                await db.collection('users').doc(currentUser.uid)
-                    .collection('tasks').doc(taskId).delete();
-            } catch (error) {
-                console.error('Error deleting task:', error);
-                throw error;
-            }
-        }
-        
-        // Delete a note document
-        async function deleteNoteDoc(noteId) {
-            if (!currentUser) return;
-            try {
-                await db.collection('users').doc(currentUser.uid)
-                    .collection('notes').doc(noteId).delete();
-            } catch (error) {
-                console.error('Error deleting note:', error);
-                throw error;
-            }
-        }
-        
-        // Delete an event document
-        async function deleteEventDoc(eventId) {
-            if (!currentUser) return;
-            try {
-                await db.collection('users').doc(currentUser.uid)
-                    .collection('events').doc(eventId).delete();
-            } catch (error) {
-                console.error('Error deleting event:', error);
-                throw error;
-            }
-        }
-        
-        // Save metadata (folders, colors, taskOrder, etc.) - these can stay in main doc since they're small
-        async function saveMetadata() {
-            if (!currentUser) return;
-            try {
-                await db.collection('users').doc(currentUser.uid).set({
-                    folders: folders,
-                    folderColors: folderColors,
-                    taskOrder: taskOrder,
-                    sharedFolders: sharedFolders,
-                    messages: messages,
-                    groups: groups,
-                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
-            } catch (error) {
-                console.error('Error saving metadata:', error);
-                throw error;
-            }
-        }
-        
-        
-        // MIGRATION FUNCTION - Run this once to migrate from old structure to subcollections
-        async function migrateToSubcollections() {
-            if (!currentUser) {
-                alert('Please log in first');
-                return;
-            }
-            
-            if (!confirm('This will migrate your data to the new structure. This only needs to be done once. Continue?')) {
-                return;
-            }
-            
-            try {
-                console.log('Starting migration...');
-                
-                // Get current data from main document
-                const userDoc = await db.collection('users').doc(currentUser.uid).get();
-                if (!userDoc.exists) {
-                    alert('No data to migrate');
-                    return;
-                }
-                
-                const data = userDoc.data();
-                const oldTasks = data.tasks || {};
-                const oldNotes = data.notes || {};
-                const oldEvents = data.events || {};
-                
-                console.log('Found:', Object.keys(oldTasks).length, 'tasks,', Object.keys(oldNotes).length, 'notes,', Object.keys(oldEvents).length, 'events');
-                
-                // Migrate tasks to subcollection
-                for (const [taskId, taskData] of Object.entries(oldTasks)) {
-                    await saveTask(taskId, taskData);
-                    console.log('Migrated task:', taskId);
-                }
-                
-                // Migrate notes to subcollection
-                for (const [noteId, noteData] of Object.entries(oldNotes)) {
-                    await saveNote(noteId, noteData);
-                    console.log('Migrated note:', noteId);
-                }
-                
-                // Migrate events to subcollection
-                for (const [eventId, eventData] of Object.entries(oldEvents)) {
-                    await saveEvent(eventId, eventData);
-                    console.log('Migrated event:', eventId);
-                }
-                
-                console.log('Migration complete! Cleaning up old data...');
-                
-                // Remove old data from main document (keep metadata)
-                await db.collection('users').doc(currentUser.uid).update({
-                    tasks: firebase.firestore.FieldValue.delete(),
-                    notes: firebase.firestore.FieldValue.delete(),
-                    events: firebase.firestore.FieldValue.delete()
-                });
-                
-                alert('Migration complete! Please refresh the page.');
-                
-            } catch (error) {
-                console.error('Migration error:', error);
-                alert('Migration failed: ' + error.message);
-            }
-        }
-        
-        // Legacy saveData function - now saves metadata only
         async function saveData() {
             if (!currentUser) {
                 return;
             }
             
             try {
-                await saveMetadata();
+                // Save to current user's document
+                // Note: We send complete objects, so we overwrite these fields entirely
+                await db.collection('users').doc(currentUser.uid).set({
+                    events: events,
+                    tasks: tasks,
+                    taskOrder: taskOrder,
+                    notes: notes,
+                    folders: folders,
+                    folderColors: folderColors,
+                    sharedFolders: sharedFolders,
+                    messages: messages,
+                    groups: groups,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
                 // Also sync shared folder items to the owner's account
                 await syncSharedFolderItems();
                 
             } catch (error) {
                 console.error('Error saving data:', error);
-                alert('Failed to save data. Please try again. Error: ' + error.message);
+                alert('Failed to save data. Please try again.');
             }
         }
 
@@ -6594,60 +6303,6 @@
             }
         }
 
-        
-        // SUBCOLLECTION LOADING FUNCTIONS
-        
-        // Load all tasks from subcollection
-        async function loadAllTasks() {
-            if (!currentUser) return {};
-            try {
-                const tasksSnapshot = await db.collection('users').doc(currentUser.uid)
-                    .collection('tasks').get();
-                const loadedTasks = {};
-                tasksSnapshot.forEach(doc => {
-                    loadedTasks[doc.id] = doc.data();
-                });
-                return loadedTasks;
-            } catch (error) {
-                console.error('Error loading tasks:', error);
-                return {};
-            }
-        }
-        
-        // Load all notes from subcollection
-        async function loadAllNotes() {
-            if (!currentUser) return {};
-            try {
-                const notesSnapshot = await db.collection('users').doc(currentUser.uid)
-                    .collection('notes').get();
-                const loadedNotes = {};
-                notesSnapshot.forEach(doc => {
-                    loadedNotes[doc.id] = doc.data();
-                });
-                return loadedNotes;
-            } catch (error) {
-                console.error('Error loading notes:', error);
-                return {};
-            }
-        }
-        
-        // Load all events from subcollection
-        async function loadAllEvents() {
-            if (!currentUser) return {};
-            try {
-                const eventsSnapshot = await db.collection('users').doc(currentUser.uid)
-                    .collection('events').get();
-                const loadedEvents = {};
-                eventsSnapshot.forEach(doc => {
-                    loadedEvents[doc.id] = doc.data();
-                });
-                return loadedEvents;
-            } catch (error) {
-                console.error('Error loading events:', error);
-                return {};
-            }
-        }
-
         // Load user data from Firebase Firestore
         // Real-time listener for user data
         let unsubscribeListener = null;
@@ -6663,7 +6318,7 @@
             sharedFolderListeners.forEach(unsubscribe => unsubscribe());
             sharedFolderListeners = [];
             
-            // Set up real-time listener for user's own data (metadata only)
+            // Set up real-time listener for user's own data
             unsubscribeListener = db.collection('users').doc(currentUser.uid).onSnapshot(async (doc) => {
                 // Skip snapshot updates during save operations to prevent race condition
                 if (isSavingData) {
@@ -6673,50 +6328,21 @@
                 
                 console.log('ðŸ“¡ onSnapshot: Loading data from Firebase');
                 
-                // Load metadata from main document
                 if (doc.exists) {
                     const data = doc.data();
+                    events = data.events || {};
+                    tasks = data.tasks || {};
+                    taskOrder = data.taskOrder || [];
+                    notes = data.notes || {};
                     folders = data.folders || ['Personal', 'Work'];
                     folderColors = data.folderColors || {};
-                    taskOrder = data.taskOrder || [];
                     sharedFolders = data.sharedFolders || {};
                     pendingInvitations = data.pendingInvitations || [];
                     messages = data.messages || {};
                     groups = data.groups || {};
                     
-                    // FALLBACK: If subcollections are empty, try loading from old structure
-                    const subcollectionTasks = await loadAllTasks();
-                    const subcollectionNotes = await loadAllNotes();
-                    const subcollectionEvents = await loadAllEvents();
-                    
-                    if (Object.keys(subcollectionTasks).length === 0 && data.tasks) {
-                        console.log('âš ï¸ No tasks in subcollections, using old structure');
-                        tasks = data.tasks;
-                    } else {
-                        tasks = subcollectionTasks;
-                    }
-                    
-                    if (Object.keys(subcollectionNotes).length === 0 && data.notes) {
-                        console.log('âš ï¸ No notes in subcollections, using old structure');
-                        notes = data.notes;
-                    } else {
-                        notes = subcollectionNotes;
-                    }
-                    
-                    if (Object.keys(subcollectionEvents).length === 0 && data.events) {
-                        console.log('âš ï¸ No events in subcollections, using old structure');
-                        events = data.events;
-                    } else {
-                        events = subcollectionEvents;
-                    }
-                } else {
-                    // New user, try loading from subcollections
-                    tasks = await loadAllTasks();
-                    notes = await loadAllNotes();
-                    events = await loadAllEvents();
+                    console.log('ðŸ“¡ onSnapshot: notes loaded:', Object.keys(notes).length, 'notes');
                 }
-                
-                console.log('ðŸ“¡ onSnapshot: Loaded', Object.keys(tasks).length, 'tasks,', Object.keys(notes).length, 'notes,', Object.keys(events).length, 'events');
                 
                 // Load data from folders shared WITH this user and set up real-time listeners
                 await loadSharedDataWithRealTimeSync();
@@ -7443,7 +7069,7 @@
                 }
             }
             
-            modal.classList.add('active');
+            modal.style.display = 'flex';
         }
 
         function formatTime(time24) {
@@ -7531,317 +7157,7 @@
                 deleteBtn.style.display = 'none';
             }
             
-            modal.classList.add('active');
-        }
-
-        // Attachment handling functions
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-        }
-        
-        function getFileIcon(filename) {
-            const ext = filename.split('.').pop().toLowerCase();
-            // Return SVG icons as HTML strings
-            const createIcon = (path, color = 'currentColor') => `
-                <svg style="width: 16px; height: 16px; flex-shrink: 0;" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2">
-                    ${path}
-                </svg>
-            `;
-            
-            const icons = {
-                'pdf': createIcon('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M10 12h4"/><path d="M10 16h4"/>'),
-                'doc': createIcon('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M10 12h4"/><path d="M10 16h4"/><path d="M10 20h4"/>'),
-                'docx': createIcon('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M10 12h4"/><path d="M10 16h4"/><path d="M10 20h4"/>'),
-                'xls': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/>'),
-                'xlsx': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/>'),
-                'csv': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/>'),
-                'ppt': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v8H8z"/>'),
-                'pptx': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v8H8z"/>'),
-                'txt': createIcon('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>'),
-                'msg': createIcon('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/>'),
-                'eml': createIcon('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/>'),
-                'zip': createIcon('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v4"/><circle cx="12" cy="18" r="1"/>'),
-                'rar': createIcon('<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M12 12v4"/><circle cx="12" cy="18" r="1"/>'),
-                'jpg': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>'),
-                'jpeg': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>'),
-                'png': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>'),
-                'gif': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>'),
-                'webp': createIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>')
-            };
-            return icons[ext] || createIcon('<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>');
-        }
-        
-        function isImageFile(filename) {
-            const ext = filename.split('.').pop().toLowerCase();
-            return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
-        }
-        
-        async function fileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-        
-        async function uploadToStorage(file, path) {
-            try {
-                const fileRef = storageRef.child(path);
-                const snapshot = await fileRef.put(file);
-                const downloadURL = await snapshot.ref.getDownloadURL();
-                return downloadURL;
-            } catch (error) {
-                console.error('Error uploading to Storage:', error);
-                throw error;
-            }
-        }
-        
-        async function deleteFromStorage(url) {
-            try {
-                const fileRef = storage.refFromURL(url);
-                await fileRef.delete();
-            } catch (error) {
-                console.error('Error deleting from Storage:', error);
-                // Don't throw - file might already be deleted
-            }
-        }
-        
-        async function handleTaskAttachments(files) {
-            if (!currentUser) {
-                alert('Please log in to attach files.');
-                return;
-            }
-            
-            const list = document.getElementById('task-attachments-list');
-            
-            for (let file of files) {
-                // Check file size
-                if (file.size > MAX_FILE_SIZE) {
-                    alert(`File "${file.name}" is too large. Maximum size is 5MB per file.`);
-                    continue;
-                }
-                
-                // Check total size
-                const currentTotalSize = taskAttachments.reduce((sum, att) => sum + att.size, 0);
-                if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
-                    alert('Total attachment size exceeds 20MB limit.');
-                    break;
-                }
-                
-                try {
-                    // Show uploading indicator
-                    const tempAttachment = {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        uploading: true
-                    };
-                    const tempIndex = taskAttachments.length;
-                    taskAttachments.push(tempAttachment);
-                    renderTaskAttachment(tempAttachment, tempIndex);
-                    
-                    // Upload to Firebase Storage
-                    const timestamp = Date.now();
-                    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                    const storagePath = `attachments/${currentUser.uid}/tasks/${timestamp}_${sanitizedFileName}`;
-                    const downloadURL = await uploadToStorage(file, storagePath);
-                    
-                    // Update attachment with URL
-                    taskAttachments[tempIndex] = {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        url: downloadURL,
-                        storagePath: storagePath
-                    };
-                    
-                    renderTaskAttachmentsList();
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                    alert(`Failed to upload file "${file.name}"`);
-                    // Remove the failed attachment
-                    taskAttachments.pop();
-                    renderTaskAttachmentsList();
-                }
-            }
-        }
-        
-        async function handleNoteAttachments(files) {
-            if (!currentUser) {
-                alert('Please log in to attach files.');
-                return;
-            }
-            
-            const list = document.getElementById('note-attachments-list');
-            
-            for (let file of files) {
-                // Check file size
-                if (file.size > MAX_FILE_SIZE) {
-                    alert(`File "${file.name}" is too large. Maximum size is 5MB per file.`);
-                    continue;
-                }
-                
-                // Check total size
-                const currentTotalSize = noteAttachments.reduce((sum, att) => sum + att.size, 0);
-                if (currentTotalSize + file.size > MAX_TOTAL_SIZE) {
-                    alert('Total attachment size exceeds 20MB limit.');
-                    break;
-                }
-                
-                try {
-                    // Show uploading indicator
-                    const tempAttachment = {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        uploading: true
-                    };
-                    const tempIndex = noteAttachments.length;
-                    noteAttachments.push(tempAttachment);
-                    renderNoteAttachment(tempAttachment, tempIndex);
-                    
-                    // Upload to Firebase Storage
-                    const timestamp = Date.now();
-                    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-                    const storagePath = `attachments/${currentUser.uid}/notes/${timestamp}_${sanitizedFileName}`;
-                    const downloadURL = await uploadToStorage(file, storagePath);
-                    
-                    // Update attachment with URL
-                    noteAttachments[tempIndex] = {
-                        name: file.name,
-                        size: file.size,
-                        type: file.type,
-                        url: downloadURL,
-                        storagePath: storagePath
-                    };
-                    
-                    renderNoteAttachmentsList();
-                } catch (error) {
-                    console.error('Error uploading file:', error);
-                    alert(`Failed to upload file "${file.name}"`);
-                    // Remove the failed attachment
-                    noteAttachments.pop();
-                    renderNoteAttachmentsList();
-                }
-            }
-        }
-        
-        function renderTaskAttachment(attachment, index) {
-            const list = document.getElementById('task-attachments-list');
-            const item = document.createElement('div');
-            item.className = 'attachment-item';
-            
-            const statusText = attachment.uploading ? '<span style="color: #6366f1;">Uploading...</span>' : '';
-            const downloadBtn = attachment.uploading ? '' : `<button type="button" class="attachment-btn" onclick="downloadAttachment(${index}, 'task')">Download</button>`;
-            
-            item.innerHTML = `
-                <span class="attachment-icon">${getFileIcon(attachment.name)}</span>
-                <div class="attachment-info">
-                    <div class="attachment-name">${attachment.name} ${statusText}</div>
-                    <div class="attachment-size">${formatFileSize(attachment.size)}</div>
-                </div>
-                <div class="attachment-actions">
-                    ${downloadBtn}
-                    <button type="button" class="attachment-btn delete" onclick="removeTaskAttachment(${index})">Remove</button>
-                </div>
-            `;
-            list.appendChild(item);
-        }
-        
-        function renderNoteAttachment(attachment, index) {
-            const list = document.getElementById('note-attachments-list');
-            const item = document.createElement('div');
-            item.className = 'attachment-item';
-            
-            const statusText = attachment.uploading ? '<span style="color: #6366f1;">Uploading...</span>' : '';
-            const downloadBtn = attachment.uploading ? '' : `<button type="button" class="attachment-btn" onclick="downloadAttachment(${index}, 'note')">Download</button>`;
-            
-            item.innerHTML = `
-                <span class="attachment-icon">${getFileIcon(attachment.name)}</span>
-                <div class="attachment-info">
-                    <div class="attachment-name">${attachment.name} ${statusText}</div>
-                    <div class="attachment-size">${formatFileSize(attachment.size)}</div>
-                </div>
-                <div class="attachment-actions">
-                    ${downloadBtn}
-                    <button type="button" class="attachment-btn delete" onclick="removeNoteAttachment(${index})">Remove</button>
-                </div>
-            `;
-            list.appendChild(item);
-        }
-        
-        async function removeTaskAttachment(index) {
-            const attachment = taskAttachments[index];
-            if (attachment && attachment.url) {
-                await deleteFromStorage(attachment.url);
-            }
-            taskAttachments.splice(index, 1);
-            renderTaskAttachmentsList();
-        }
-        
-        async function removeNoteAttachment(index) {
-            const attachment = noteAttachments[index];
-            if (attachment && attachment.url) {
-                await deleteFromStorage(attachment.url);
-            }
-            noteAttachments.splice(index, 1);
-            renderNoteAttachmentsList();
-        }
-        
-        function renderTaskAttachmentsList() {
-            const list = document.getElementById('task-attachments-list');
-            list.innerHTML = '';
-            taskAttachments.forEach((att, idx) => renderTaskAttachment(att, idx));
-        }
-        
-        function renderNoteAttachmentsList() {
-            const list = document.getElementById('note-attachments-list');
-            list.innerHTML = '';
-            noteAttachments.forEach((att, idx) => renderNoteAttachment(att, idx));
-        }
-        
-        function downloadAttachment(index, type) {
-            const attachment = type === 'task' ? taskAttachments[index] : noteAttachments[index];
-            if (!attachment) return;
-            
-            // Handle Firebase Storage URLs (new system)
-            if (attachment.url) {
-                window.open(attachment.url, '_blank');
-            }
-            // Handle base64 data (old system)
-            else if (attachment.data) {
-                const link = document.createElement('a');
-                link.href = attachment.data;
-                link.download = attachment.name;
-                link.click();
-            }
-        }
-        
-        function clearAttachments(type) {
-            if (type === 'task') {
-                taskAttachments = [];
-                document.getElementById('task-attachments-list').innerHTML = '';
-                document.getElementById('task-attachment-input').value = '';
-            } else {
-                noteAttachments = [];
-                document.getElementById('note-attachments-list').innerHTML = '';
-                document.getElementById('note-attachment-input').value = '';
-            }
-        }
-        
-        function loadTaskAttachments(attachments) {
-            taskAttachments = attachments || [];
-            renderTaskAttachmentsList();
-        }
-        
-        function loadNoteAttachments(attachments) {
-            noteAttachments = attachments || [];
-            renderNoteAttachmentsList();
+            modal.style.display = 'flex';
         }
 
         function openTaskModal(taskId = null, dateStr = null) {
@@ -7851,7 +7167,6 @@
             const deleteBtn = document.getElementById('delete-task-btn');
             
             form.reset();
-            clearAttachments('task');
             
             if (taskId && tasks[taskId]) {
                 document.getElementById('task-modal-title').textContent = 'Edit Task';
@@ -7859,11 +7174,6 @@
                 populateFolderDropdown('task-folder', tasks[taskId].folder);
                 document.getElementById('task-date').value = tasks[taskId].dueDate || '';
                 document.getElementById('task-description').value = tasks[taskId].description || '';
-                
-                // Load attachments if they exist
-                if (tasks[taskId].attachments) {
-                    loadTaskAttachments(tasks[taskId].attachments);
-                }
                 
                 // Populate new reminder fields if reminder exists
                 if (tasks[taskId].reminder && typeof tasks[taskId].reminder === 'object') {
@@ -7885,7 +7195,7 @@
                 deleteBtn.style.display = 'none';
             }
             
-            modal.classList.add('active');
+            modal.style.display = 'flex';
         }
 
         function openNoteModal(noteId = null) {
@@ -7895,19 +7205,12 @@
             const deleteBtn = document.getElementById('delete-note-btn');
             
             form.reset();
-            clearAttachments('note');
             
             if (noteId && notes[noteId]) {
                 document.getElementById('note-modal-title').textContent = 'Edit Note';
                 document.getElementById('note-title').value = notes[noteId].title;
                 populateFolderDropdown('note-folder', notes[noteId].folder);
                 document.getElementById('note-content').value = notes[noteId].content;
-                
-                // Load attachments if they exist
-                if (notes[noteId].attachments) {
-                    loadNoteAttachments(notes[noteId].attachments);
-                }
-                
                 deleteBtn.style.display = 'block';
             } else {
                 document.getElementById('note-modal-title').textContent = 'New Note';
@@ -7915,7 +7218,7 @@
                 deleteBtn.style.display = 'none';
             }
             
-            modal.classList.add('active');
+            modal.style.display = 'flex';
         }
 
         function openModal(modalId) {
@@ -7926,7 +7229,7 @@
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.classList.remove('active');
-                modal.style.display = ''; // Clear inline style to allow CSS class to work
+                modal.style.display = 'none'; // Also set display to none
             }
             currentEditingId = null;
         }
@@ -7946,12 +7249,10 @@
             if (currentEditingId && confirm('Are you sure you want to delete this event?')) {
                 // Store the date BEFORE deleting the event
                 const eventDate = events[currentEditingId].date;
-                
-                // Delete from local state
                 delete events[currentEditingId];
                 
-                // Delete from Firestore subcollection
-                await deleteEventDoc(currentEditingId);
+                // Wait for the save to complete before continuing
+                await saveData();
                 
                 renderCalendar();
                 closeModal('event-modal');
@@ -7976,17 +7277,6 @@
             // Set flag to prevent onSnapshot from reloading during deletion
             isSavingData = true;
             
-            // Delete attachments from Storage
-            const task = tasks[currentEditingId];
-            if (task && task.attachments) {
-                for (const attachment of task.attachments) {
-                    if (attachment.url) {
-                        await deleteFromStorage(attachment.url);
-                    }
-                }
-            }
-            
-            // Delete from local state
             delete tasks[currentEditingId];
             
             // Remove from taskOrder array as well
@@ -7995,11 +7285,7 @@
                 taskOrder.splice(index, 1);
             }
             
-            // Delete from Firestore subcollection
-            await deleteTaskDoc(currentEditingId);
-            
-            // Save updated metadata (taskOrder)
-            await saveMetadata();
+            await saveData();
             
             renderCalendar();
             renderTasks();
@@ -8033,25 +7319,17 @@
                 isSavingData = true;
                 console.log('ðŸš« Set isSavingData = true');
                 
-                // Delete attachments from Storage
-                const note = notes[currentEditingId];
-                if (note && note.attachments) {
-                    console.log('Deleting attachments from Storage...');
-                    for (const attachment of note.attachments) {
-                        if (attachment.url) {
-                            await deleteFromStorage(attachment.url);
-                        }
-                    }
-                }
-                
                 // Delete the note from local object
                 delete notes[currentEditingId];
                 console.log('âœ… Deleted from local notes object');
                 
-                // Delete from Firestore subcollection
-                console.log('ðŸ’¾ Deleting from Firebase...');
-                await deleteNoteDoc(currentEditingId);
-                console.log('âœ… Firebase delete confirmed');
+                // Save directly to Firebase with await
+                console.log('ðŸ’¾ Saving to Firebase...');
+                await db.collection('users').doc(currentUser.uid).update({
+                    notes: notes,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('âœ… Firebase update confirmed');
                 
                 // Update UI immediately
                 renderNotes();
@@ -8194,13 +7472,8 @@
                 // Set flag to prevent onSnapshot reload
                 isSavingData = true;
                 
-                // Update local state
                 task.completed = e.target.checked;
-                tasks[taskId].completed = e.target.checked;
-                
-                // Save to Firestore subcollection
-                await saveTask(taskId, tasks[taskId]);
-                
+                await saveData();
                 renderCalendar(); // Update calendar to show/hide completed indicator
                 renderTasks();
                 
@@ -8239,19 +7512,6 @@
                 taskDescription.style.cssText = 'font-size: 12px; color: var(--text-secondary); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.4;';
                 taskDescription.textContent = task.description;
                 taskContent.appendChild(taskDescription);
-            }
-            
-            // Add attachment indicator if exists
-            if (task.attachments && task.attachments.length > 0) {
-                const attachmentBadge = document.createElement('div');
-                attachmentBadge.style.cssText = 'font-size: 11px; color: rgba(99, 102, 241, 0.8); margin-top: 6px; display: flex; align-items: center; gap: 4px;';
-                attachmentBadge.innerHTML = `
-                    <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-                    </svg>
-                    <span>${task.attachments.length} attachment${task.attachments.length > 1 ? 's' : ''}</span>
-                `;
-                taskContent.appendChild(attachmentBadge);
             }
             
             // Add reorder buttons
@@ -8437,20 +7697,6 @@
                 
                 noteItem.appendChild(noteTitle);
                 noteItem.appendChild(notePreview);
-                
-                // Add attachment indicator if exists
-                if (note.attachments && note.attachments.length > 0) {
-                    const attachmentBadge = document.createElement('div');
-                    attachmentBadge.style.cssText = 'font-size: 11px; color: rgba(99, 102, 241, 0.8); margin: 8px 0; display: flex; align-items: center; gap: 4px;';
-                    attachmentBadge.innerHTML = `
-                        <svg style="width: 12px; height: 12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
-                        </svg>
-                        <span>${note.attachments.length} attachment${note.attachments.length > 1 ? 's' : ''}</span>
-                    `;
-                    noteItem.appendChild(attachmentBadge);
-                }
-                
                 noteItem.appendChild(noteDate);
                 
                 container.appendChild(noteItem);
@@ -8491,23 +7737,17 @@
                     date: document.getElementById('event-date').value,
                     startTime: document.getElementById('event-start-time').value,
                     endTime: document.getElementById('event-end-time').value,
-                    description: document.getElementById('event-description').value
+                    description: document.getElementById('event-description').value,
+                    reminder: reminderData
                 };
                 
-                // Only add reminder if it exists
-                if (reminderData) {
-                    eventData.reminder = reminderData;
+                if (currentEditingId) {
+                    events[currentEditingId] = eventData;
+                } else {
+                    events[Date.now()] = eventData;
                 }
                 
-                // Determine event ID
-                const eventId = currentEditingId || Date.now().toString();
-                
-                // Update local state
-                events[eventId] = eventData;
-                
-                // Save to Firestore subcollection
-                await saveEvent(eventId, eventData);
-                
+                await saveData();
                 renderCalendar();
                 closeModal('event-modal');
                 
@@ -8524,7 +7764,6 @@
 
             document.getElementById('task-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
-                console.log('ðŸ”µ Task form submitted');
                 
                 // Set flag to prevent onSnapshot from reloading during save
                 isSavingData = true;
@@ -8548,57 +7787,20 @@
                     folder: document.getElementById('task-folder').value,
                     dueDate: document.getElementById('task-date').value,
                     description: document.getElementById('task-description').value,
+                    reminder: reminderData,
                     completed: currentEditingId && tasks[currentEditingId] ? tasks[currentEditingId].completed : false
                 };
                 
-                // Only add reminder if it exists
-                if (reminderData) {
-                    taskData.reminder = reminderData;
+                if (currentEditingId) {
+                    tasks[currentEditingId] = taskData;
+                } else {
+                    tasks[Date.now()] = taskData;
                 }
                 
-                // Only add attachments if there are any
-                if (taskAttachments.length > 0) {
-                    taskData.attachments = [...taskAttachments];
-                }
-                
-                console.log('ðŸ“ Task data:', taskData);
-                console.log('Saving task with attachments:', taskAttachments.length, 'files');
-                if (taskAttachments.length > 0) {
-                    const totalSize = taskAttachments.reduce((sum, att) => sum + att.size, 0);
-                    console.log('Total attachment size:', (totalSize / 1024).toFixed(2), 'KB');
-                }
-                
-                try {
-                    // Determine task ID
-                    const taskId = currentEditingId || Date.now().toString();
-                    console.log('ðŸ’¾ Saving task ID:', taskId);
-                    
-                    // Update local state
-                    tasks[taskId] = taskData;
-                    
-                    // Save to Firestore subcollection
-                    console.log('ðŸ’¾ Calling saveTask...');
-                    await saveTask(taskId, taskData);
-                    console.log('âœ… saveTask complete');
-                    
-                    // Save metadata (taskOrder)
-                    if (!taskOrder.includes(taskId)) {
-                        taskOrder.push(taskId);
-                    }
-                    console.log('ðŸ’¾ Calling saveMetadata...');
-                    await saveMetadata();
-                    console.log('âœ… saveMetadata complete');
-                    
-                    clearAttachments('task'); // Clear attachment arrays after save
-                    renderCalendar(); // Update calendar to show new/edited task
-                    renderTasks();
-                    closeModal('task-modal');
-                    
-                    console.log('âœ… Task saved successfully');
-                } catch (error) {
-                    console.error('âŒ Error saving task:', error);
-                    alert('Failed to save task: ' + error.message);
-                }
+                await saveData();
+                renderCalendar(); // Update calendar to show new/edited task
+                renderTasks();
+                closeModal('task-modal');
                 
                 // Clear flag after a delay to ensure Firestore has propagated
                 setTimeout(() => {
@@ -8619,21 +7821,13 @@
                     date: new Date().toLocaleDateString()
                 };
                 
-                // Only add attachments if there are any
-                if (noteAttachments.length > 0) {
-                    noteData.attachments = [...noteAttachments];
+                if (currentEditingId) {
+                    notes[currentEditingId] = noteData;
+                } else {
+                    notes[Date.now()] = noteData;
                 }
                 
-                // Determine note ID
-                const noteId = currentEditingId || Date.now().toString();
-                
-                // Update local state
-                notes[noteId] = noteData;
-                
-                // Save to Firestore subcollection
-                await saveNote(noteId, noteData);
-                
-                clearAttachments('note'); // Clear attachment arrays after save
+                await saveData();
                 renderNotes();
                 closeModal('note-modal');
                 
