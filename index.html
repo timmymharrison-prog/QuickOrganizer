@@ -7714,10 +7714,8 @@
             document.getElementById('event-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Set flag to prevent onSnapshot from reloading during save
                 isSavingData = true;
                 
-                // Build reminder object if reminder section is filled out
                 let reminderData = null;
                 const reminderDate = document.getElementById('event-reminder-date').value;
                 const reminderTime = document.getElementById('event-reminder-time').value;
@@ -7747,16 +7745,17 @@
                     events[Date.now()] = eventData;
                 }
                 
-                await saveData();
+                // Write directly to Firebase
+                await db.collection('users').doc(currentUser.uid).update({
+                    events: events,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
                 renderCalendar();
                 closeModal('event-modal');
                 
-                // Clear flag after a delay
-                setTimeout(() => {
-                    isSavingData = false;
-                }, 3000);
+                setTimeout(() => { isSavingData = false; }, 6000);
                 
-                // Reopen agenda modal if we came from there
                 if (selectedAgendaDate === eventData.date) {
                     openAgendaModal(eventData.date);
                 }
@@ -7765,10 +7764,8 @@
             document.getElementById('task-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Set flag to prevent onSnapshot from reloading during save
                 isSavingData = true;
                 
-                // Build reminder object if reminder section is filled out
                 let reminderData = null;
                 const reminderDate = document.getElementById('task-reminder-date').value;
                 const reminderTime = document.getElementById('task-reminder-time').value;
@@ -7797,21 +7794,22 @@
                     tasks[Date.now()] = taskData;
                 }
                 
-                await saveData();
-                renderCalendar(); // Update calendar to show new/edited task
+                // Write directly to Firebase
+                await db.collection('users').doc(currentUser.uid).update({
+                    tasks: tasks,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
+                renderCalendar();
                 renderTasks();
                 closeModal('task-modal');
                 
-                // Clear flag after a delay to ensure Firestore has propagated
-                setTimeout(() => {
-                    isSavingData = false;
-                }, 3000);
+                setTimeout(() => { isSavingData = false; }, 6000);
             });
 
             document.getElementById('note-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
-                // Set flag to prevent onSnapshot from reloading during save
                 isSavingData = true;
                 
                 const noteData = {
@@ -7827,14 +7825,16 @@
                     notes[Date.now()] = noteData;
                 }
                 
-                await saveData();
+                // Write directly to Firebase
+                await db.collection('users').doc(currentUser.uid).update({
+                    notes: notes,
+                    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                
                 renderNotes();
                 closeModal('note-modal');
                 
-                // Clear flag after a delay
-                setTimeout(() => {
-                    isSavingData = false;
-                }, 3000);
+                setTimeout(() => { isSavingData = false; }, 6000);
             });
 
             // Edit folder form handler
