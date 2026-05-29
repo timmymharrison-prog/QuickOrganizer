@@ -4909,7 +4909,7 @@
                     folders.push(invitation.folderName);
                 }
                 
-                // Mark this folder as shared with this user
+                // Mark this folder as shared on the current user's document
                 if (!sharedFolders[invitation.folderName]) {
                     sharedFolders[invitation.folderName] = {
                         owner: invitation.owner,
@@ -4921,15 +4921,58 @@
                 // Remove from pending invitations
                 pendingInvitations.splice(index, 1);
                 
-                // Save to Firebase
+                // Save to current user's Firebase document
                 await db.collection('users').doc(currentUser.uid).update({
                     pendingInvitations: pendingInvitations,
                     folders: folders,
                     sharedFolders: sharedFolders
                 });
                 
+                // ALSO update the OWNER's document to add current user as collaborator
+                const ownerSnapshot = await db.collection('users')
+                    .where('email', '==', invitation.owner)
+                    .get();
+                
+                if (!ownerSnapshot.empty) {
+                    const ownerDoc = ownerSnapshot.docs[0];
+                    const ownerData = ownerDoc.data();
+                    const ownerSharedFolders = ownerData.sharedFolders || {};
+                    
+                    if (!ownerSharedFolders[invitation.folderName]) {
+                        ownerSharedFolders[invitation.folderName] = {
+                            owner: invitation.owner,
+                            collaborators: [currentUser.email],
+                            permissions: 'edit'
+                        };
+                    } else {
+                        if (!ownerSharedFolders[invitation.folderName].collaborators) {
+                            ownerSharedFolders[invitation.folderName].collaborators = [];
+                        }
+                        if (!ownerSharedFolders[invitation.folderName].collaborators.includes(currentUser.email)) {
+                            ownerSharedFolders[invitation.folderName].collaborators.push(currentUser.email);
+                        }
+                    }
+                    
+                    await ownerDoc.ref.update({ sharedFolders: ownerSharedFolders });
+                    console.log('âœ… Owner collaborators list updated');
+                }
+                
                 // Reload shared data
-                await loadSharedData();
+                await loadSharedDataWithRealTimeSync();
+                
+                renderInvitationsList();
+                updateInvitationsBanner();
+                renderCalendar();
+                renderTasks();
+                renderNotes();
+                
+                alert(`You now have access to "${invitation.folderName}"!`);
+                
+            } catch (error) {
+                console.error('Error accepting invitation:', error);
+                alert('Failed to accept invitation: ' + error.message);
+            }
+        }
                 
                 renderInvitationsList();
                 updateInvitationsBanner();
@@ -5296,7 +5339,7 @@
                 folderColors[invitation.folderName] = invitation.folderColor;
             }
             
-            // Add to shared folders
+            // Add to current user's shared folders
             if (!sharedFolders[invitation.folderName]) {
                 sharedFolders[invitation.folderName] = {
                     owner: invitation.from,
@@ -5310,7 +5353,49 @@
             // Remove invitation from message
             delete msg.folderInvitation;
             
-            await saveData();
+            // Save to current user's document
+            await db.collection('users').doc(currentUser.uid).update({
+                folders: folders,
+                folderColors: folderColors,
+                sharedFolders: sharedFolders,
+                messages: messages
+            });
+            
+            // ALSO update the OWNER's document to add current user as collaborator
+            try {
+                const ownerSnapshot = await db.collection('users')
+                    .where('email', '==', invitation.from)
+                    .get();
+                
+                if (!ownerSnapshot.empty) {
+                    const ownerDoc = ownerSnapshot.docs[0];
+                    const ownerData = ownerDoc.data();
+                    const ownerSharedFolders = ownerData.sharedFolders || {};
+                    
+                    if (!ownerSharedFolders[invitation.folderName]) {
+                        ownerSharedFolders[invitation.folderName] = {
+                            owner: invitation.from,
+                            collaborators: [currentUser.email],
+                            permissions: 'edit'
+                        };
+                    } else {
+                        if (!ownerSharedFolders[invitation.folderName].collaborators) {
+                            ownerSharedFolders[invitation.folderName].collaborators = [];
+                        }
+                        if (!ownerSharedFolders[invitation.folderName].collaborators.includes(currentUser.email)) {
+                            ownerSharedFolders[invitation.folderName].collaborators.push(currentUser.email);
+                        }
+                    }
+                    
+                    await ownerDoc.ref.update({ sharedFolders: ownerSharedFolders });
+                    console.log('âœ… Owner collaborators list updated');
+                }
+            } catch (err) {
+                console.error('Error updating owner:', err);
+            }
+            
+            // Reload shared data with real-time sync
+            await loadSharedDataWithRealTimeSync();
             
             alert(`You now have access to the "${invitation.folderName}" folder!`);
             closeModal('message-detail-modal');
@@ -5611,11 +5696,15 @@
 
         // Authentication Functions
         function showLoginModal() {
-            document.getElementById('login-modal').classList.add('active');
+            const modal = document.getElementById('login-modal');
+            modal.classList.add('active');
+            modal.style.display = 'flex';
         }
 
         function hideLoginModal() {
-            document.getElementById('login-modal').classList.remove('active');
+            const modal = document.getElementById('login-modal');
+            modal.classList.remove('active');
+            modal.style.display = 'none';
         }
 
         function showAuthError(message) {
