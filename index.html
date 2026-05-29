@@ -3586,13 +3586,17 @@
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 currentUser = user;
+                
+                // Hide login modal immediately
+                hideLoginModal();
+                
                 // Update the displayed email in settings
                 const emailDisplay = document.getElementById('user-email-display');
                 if (emailDisplay) {
                     emailDisplay.textContent = user.email || 'User';
                 }
                 
-                // Ensure email is stored in Firestore (for existing users who signed up before this feature)
+                // Ensure email is stored in Firestore
                 try {
                     await db.collection('users').doc(user.uid).set({
                         email: user.email
@@ -3601,7 +3605,7 @@
                     console.error('Error storing email:', error);
                 }
                 
-                // Load data first (don't block on notification permission)
+                // Load data
                 loadUserData();
                 
                 // TEMPORARILY DISABLED - Notifications causing mobile issues
