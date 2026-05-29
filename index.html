@@ -5690,7 +5690,9 @@
 
         function updateFoldersDescription() {
             const desc = document.getElementById('folders-description');
-            desc.textContent = `${folders.length} folder${folders.length !== 1 ? 's' : ''}`;
+            if (desc) {
+                desc.textContent = `${folders.length} folder${folders.length !== 1 ? 's' : ''}`;
+            }
         }
 
         function openFolderManager() {
