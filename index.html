@@ -4977,25 +4977,6 @@
                 alert('Failed to accept invitation: ' + error.message);
             }
         }
-                
-                renderInvitationsList();
-                updateInvitationsBanner();
-                renderFoldersCompact();
-                renderCalendar();
-                renderTasks();
-                renderNotes();
-                
-                alert(`You now have access to the "${invitation.folderName}" folder!`);
-                
-                // Close modal if no more invitations
-                if (pendingInvitations.length === 0) {
-                    closeModal('invitations-modal');
-                }
-            } catch (error) {
-                console.error('Error accepting invitation:', error);
-                alert('Failed to accept invitation: ' + error.message);
-            }
-        }
 
         async function declineInvitation(index) {
             if (!confirm('Are you sure you want to decline this invitation?')) {
