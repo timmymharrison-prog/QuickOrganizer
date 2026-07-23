@@ -374,7 +374,8 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
     <header class="topbar">
       <div><h2 id="viewtitle">Today</h2><div class="datebadge" id="datebadge"></div></div>
       <div class="grow"></div>
-      <button class="iconbtn" id="m-sync" onclick="openSettings()" title="Sync & settings">&#9881;</button>
+      <button class="iconbtn" onclick="openSearch()" title="Search everything">&#128269;</button>
+      <button class="iconbtn" id="m-sync" onclick="openSettings()" title="Sync &amp; settings">&#9881;</button>
     </header>
     <div class="content" id="content"></div>
   </main>
@@ -504,6 +505,15 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
   <div class="sheet">
     <div class="sheethead"><h3 id="day-title">Day</h3><button class="xbtn" onclick="closeOv('ov-day')">&#10005;</button></div>
     <div id="day-list"></div>
+  </div>
+</div>
+
+<!-- Global search -->
+<div class="overlay" id="ov-search" onclick="if(event.target===this)closeOv('ov-search')">
+  <div class="sheet">
+    <div class="sheethead"><h3>Search</h3><button class="xbtn" onclick="closeOv('ov-search')">&#10005;</button></div>
+    <div class="searchwrap" style="margin-top:0"><span class="mag">&#128269;</span><input type="text" id="g-search" placeholder="WO #, description, building, room, person&hellip;" oninput="runSearch()" autocomplete="off"></div>
+    <div id="g-results" style="margin-top:14px"></div>
   </div>
 </div>
 
@@ -804,7 +814,8 @@ function renderCal(){
     const its=sortOrders(itemsOn(ds));
     let pills='';
     its.slice(0,3).forEach(o=>{
-      const label=o.woNum? '#'+o.woNum+(o.title?' \u00b7 '+o.title:'') : (o.title||'');
+      const loc=locStr(o);
+      const label=(o.title||(o.woNum?'#'+o.woNum:''))+(loc?' \u00b7 '+loc:'');
       pills+='<div class="cv-pill '+pillCls(o,ds,today)+'" onclick="event.stopPropagation();openDetail(\''+o.id+'\')" title="'+esc(displayTitle(o))+'">'+esc(label)+'</div>';
     });
     if(its.length>3) pills+='<div class="cv-more">+'+(its.length-3)+' more</div>';
@@ -941,6 +952,7 @@ function deleteOrder(){
 /* ================= Detail ================= */
 function findOrder(id){ return state.orders.find(o=>o.id===id); }
 function openDetail(id){
+  closeOv('ov-day'); closeOv('ov-search');
   detailId=id; const o=findOrder(id); if(!o) return;
   document.getElementById('d-title').textContent=displayTitle(o);
   document.getElementById('d-detailtext').textContent=o.details||'';
@@ -1094,6 +1106,29 @@ function toggleClosed(){
   showClosed=!showClosed; lsSet('wot-showclosed', showClosed?'1':'0');
   document.getElementById('s-showclosed').textContent=(showClosed?'Hide':'Show')+' closed items in All view';
   render();
+}
+
+/* ================= Global search ================= */
+function orderBlob(o){ return [o.title,o.woNum,o.building,o.floor,o.room,o.details,o.assignedTo,o.requestedBy,o.source,(o.updates||[]).map(u=>u.text).join(' ')].join(' ').toLowerCase(); }
+function searchHint(){ return '<div style="font-size:13px;color:var(--muted);text-align:center;padding:18px 0;line-height:1.6">Searches everything \u2014 open and closed items,<br>including update notes.</div>'; }
+function openSearch(){
+  openOv('ov-search');
+  const inp=document.getElementById('g-search');
+  inp.value='';
+  document.getElementById('g-results').innerHTML=searchHint();
+  setTimeout(()=>inp.focus(),150);
+}
+function runSearch(){
+  const q=document.getElementById('g-search').value.trim().toLowerCase();
+  const el=document.getElementById('g-results');
+  if(!q){ el.innerHTML=searchHint(); return; }
+  const hits=state.orders.filter(o=>orderBlob(o).indexOf(q)>-1);
+  const open=sortOrders(hits.filter(o=>o.status!=='closed'));
+  const closed=hits.filter(o=>o.status==='closed').sort((a,b)=>(b.closedAt||0)-(a.closedAt||0));
+  let h='';
+  if(open.length) h+=open.map(cardHTML).join('');
+  if(closed.length) h+='<div class="eyebrow" style="margin-top:12px"><span class="num">'+closed.length+'</span>Closed<span class="rule"></span></div>'+closed.map(cardHTML).join('');
+  el.innerHTML=h||'<div class="empty" style="padding:20px">No matches for \u201c'+esc(q)+'\u201d.</div>';
 }
 
 /* ================= Misc ================= */
