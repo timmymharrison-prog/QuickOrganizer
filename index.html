@@ -263,6 +263,55 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ---------- Calendar ---------- */
+.content.calmode{padding:4px 16px 16px;display:flex;flex-direction:column;overflow:hidden}
+.cv{flex:1;display:flex;flex-direction:column;min-height:0}
+.cv-head{display:flex;align-items:center;gap:10px;padding:8px 2px 12px}
+.cv-mon{font-family:'Barlow Condensed';font-weight:700;font-size:30px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink);line-height:1}
+.cv-mon span{color:var(--muted);font-weight:500}
+.cv-stats{display:flex;gap:6px;margin-left:6px}
+.cv-head .grow{flex:1}
+.cv-btn{height:36px;min-width:36px;border-radius:9px;background:var(--card);border:1px solid var(--line);color:var(--ink);font-size:13px;font-weight:700;padding:0 10px}
+.cv-btn:hover{background:var(--gray-bg)}
+.cv-body{flex:1;display:flex;gap:14px;min-height:0}
+.cv-gridwrap{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0}
+.cv-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}
+.cv-dow span{font-family:'Barlow Condensed';font-size:12.5px;font-weight:600;letter-spacing:.09em;color:var(--muted);text-transform:uppercase;padding:2px 8px}
+.cv-grid{flex:1;display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(6,minmax(0,1fr));gap:5px;min-height:0}
+.cv-cell{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;overflow:hidden;transition:border-color .12s,box-shadow .12s}
+.cv-cell:hover{border-color:#AFBDCF;box-shadow:var(--shadow)}
+.cv-cell.dim{opacity:.42}
+.cv-cell.sel{border-color:var(--accent);box-shadow:0 0 0 1.5px var(--accent)}
+.cv-dnum{font-size:12.5px;font-weight:600;color:var(--muted);width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0}
+.cv-cell.today .cv-dnum{background:var(--ink);color:#fff;font-weight:700}
+.cv-pills{display:flex;flex-direction:column;gap:3px;min-height:0;overflow:hidden}
+.cv-pill{font-size:11px;font-weight:600;line-height:1.25;padding:3px 7px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-left:3px solid;flex-shrink:0}
+.cv-pill:hover{filter:brightness(.96)}
+.cv-pill.fu{background:var(--amber-bg);color:#8A5C0E;border-color:var(--amber)}
+.cv-pill.due{background:var(--blue-bg);color:#2B517A;border-color:var(--blue)}
+.cv-pill.late{background:var(--red-bg);color:var(--red);border-color:var(--red)}
+.cv-more{font-size:10.5px;font-weight:700;color:var(--muted);padding:1px 7px;flex-shrink:0}
+.cv-agenda{width:332px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:14px;overflow-y:auto}
+.cv-aghead{font-family:'Barlow Condensed';font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink)}
+.cv-agsub{font-size:12.5px;color:var(--muted);margin:2px 0 12px}
+.cv-agenda .card{box-shadow:none}
+@keyframes cvL{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+@keyframes cvR{from{opacity:0;transform:translateX(-26px)}to{opacity:1;transform:none}}
+.cv-grid.animL{animation:cvL .22s ease-out}
+.cv-grid.animR{animation:cvR .22s ease-out}
+@media(max-width:1000px){.cv-agenda{display:none}}
+@media(max-width:767px){
+  .content.calmode{padding:4px 10px calc(72px + env(safe-area-inset-bottom))}
+  .cv-mon{font-size:23px}
+  .cv-stats{display:none}
+  .cv-grid{gap:4px}
+  .cv-cell{padding:4px 3px;border-radius:8px;gap:2px}
+  .cv-pill{font-size:9px;padding:2px 4px;border-left-width:2px;border-radius:4px}
+  .cv-more{font-size:9px;padding:0 4px}
+  .cv-dnum{width:20px;height:20px;font-size:11px}
+  .cv-dow span{padding:2px 3px;font-size:10.5px}
+}
+
 /* ---------- Mobile ---------- */
 .bottombar{display:none}
 @media(max-width:767px){
@@ -313,6 +362,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
     <div class="brand"><h1>Follow-Up<br>Tracker</h1><div class="sub">Work order desk</div></div>
     <button class="navbtn" data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span>Today<span class="cnt" id="rc-today">0</span></button>
     <button class="navbtn" data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span>Meeting Mode<span class="cnt" id="rc-meeting">0</span></button>
+    <button class="navbtn" data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span>Calendar</button>
     <button class="navbtn" data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span>My Team<span class="cnt" id="rc-people">0</span></button>
     <button class="navbtn" data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span>All Items<span class="cnt" id="rc-all">0</span></button>
     <div class="spacer"></div>
@@ -334,6 +384,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 <nav class="bottombar">
   <button data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span>Today<span class="bdg" id="bc-today" style="display:none">0</span></button>
   <button data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span>Meeting</button>
+  <button data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span>Calendar</button>
   <button data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span>Team</button>
   <button data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span>All</button>
 </nav>
@@ -344,8 +395,14 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 <div class="overlay" id="ov-add" onclick="if(event.target===this)closeOv('ov-add')">
   <div class="sheet">
     <div class="sheethead"><h3 id="add-title">Log Work Order</h3><button class="xbtn" onclick="closeOv('ov-add')">&#10005;</button></div>
-    <div class="f"><label>What needs to get done?</label><input type="text" id="a-title" placeholder="WO #4521 — replace pump at Building C" autocomplete="off"></div>
-    <div class="f"><label>Details (optional)</label><textarea id="a-details" placeholder="Any context, ticket numbers, locations…"></textarea></div>
+    <div class="f"><label>Work order # (optional)</label><input type="text" id="a-wonum" placeholder="e.g. 4521" autocomplete="off"></div>
+    <div class="frow">
+      <div class="f"><label>Building</label><input type="text" id="a-bldg" autocomplete="off"></div>
+      <div class="f"><label>Floor</label><input type="text" id="a-floor" autocomplete="off"></div>
+      <div class="f"><label>Room #</label><input type="text" id="a-room" autocomplete="off"></div>
+    </div>
+    <div class="f"><label>Description</label><textarea id="a-title" placeholder="What needs to get done?" style="min-height:56px"></textarea></div>
+    <div class="f"><label>Additional information</label><textarea id="a-details" placeholder="Context, parts needed, who to coordinate with…"></textarea></div>
     <div class="frow">
       <div class="f"><label>Came in via</label>
         <div class="seg" id="a-source">
@@ -442,6 +499,14 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
   </div>
 </div>
 
+<!-- Day agenda sheet (small screens) -->
+<div class="overlay" id="ov-day" onclick="if(event.target===this)closeOv('ov-day')">
+  <div class="sheet">
+    <div class="sheethead"><h3 id="day-title">Day</h3><button class="xbtn" onclick="closeOv('ov-day')">&#10005;</button></div>
+    <div id="day-list"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 <script>
 /* ================= Firebase ================= */
@@ -485,6 +550,8 @@ function fmtDate(s){ if(!s) return ''; const p=s.split('-'); const d=new Date(+p
 function daysDiff(s){ if(!s) return null; const p=s.split('-'); const a=new Date(+p[0],+p[1]-1,+p[2]); const t=new Date(); const b=new Date(t.getFullYear(),t.getMonth(),t.getDate()); return Math.round((b-a)/86400000); }
 function ageDays(ts){ return Math.max(0, Math.floor((Date.now()-ts)/86400000)); }
 function fmtWhen(ts){ const d=new Date(ts); const now=new Date(); const sameDay=d.toDateString()===now.toDateString(); if(sameDay) return d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'}); return d.toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+function displayTitle(o){ const wo=o.woNum? 'WO #'+o.woNum : ''; if(wo && o.title) return wo+' \u2014 '+o.title; return wo || o.title || '(untitled)'; }
+function locStr(o){ const p=[]; if(o.building) p.push('Bldg '+o.building); if(o.floor) p.push('Fl '+o.floor); if(o.room) p.push('Rm '+o.room); return p.join(' \u00b7 '); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 /* ================= Derived ================= */
@@ -572,15 +639,17 @@ function applyCode(){
 function setView(v){
   currentView=v;
   document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
-  const titles={ today:'Today', meeting:'Meeting Mode', people:'My Team', all:'All Items' };
+  const titles={ today:'Today', meeting:'Meeting Mode', cal:'Calendar', people:'My Team', all:'All Items' };
   document.getElementById('viewtitle').textContent=titles[v];
   render();
   document.getElementById('content').scrollTop=0;
 }
 function render(){
   const el=document.getElementById('content');
+  el.classList.toggle('calmode', currentView==='cal');
   if(currentView==='today') el.innerHTML=renderToday();
   else if(currentView==='meeting') el.innerHTML=renderMeeting();
+  else if(currentView==='cal') el.innerHTML=renderCal();
   else if(currentView==='people') el.innerHTML=renderPeople();
   else el.innerHTML=renderAll();
   renderCounts();
@@ -609,11 +678,12 @@ function cardHTML(o){
   const lu=lastUpdate(o);
   const luHTML = lu ? '<div class="lastupd"><b>'+fmtWhen(lu.ts)+':</b> '+esc(lu.text)+'</div>' : '';
   return '<div class="card s-'+o.status+(late?' overdue':'')+'" onclick="openDetail(\''+o.id+'\')">'
-    +'<div class="titlerow"><div class="t">'+esc(o.title)+'</div>'+(o.priority==='high'?'<span class="chip hi">HIGH</span>':'')+'</div>'
+    +'<div class="titlerow"><div class="t">'+esc(displayTitle(o))+'</div>'+(o.priority==='high'?'<span class="chip hi">HIGH</span>':'')+'</div>'
     +'<div class="metarow">'
     +'<span class="chip stamp '+o.status+'">'+STATUS_LABEL[o.status]+'</span>'
     +(o.assignedTo?'<span class="chip person">'+esc(o.assignedTo)+'</span>':'<span class="chip">Unassigned</span>')
     +dueChip
+    +(locStr(o)?'<span class="chip">&#128205; '+esc(locStr(o))+'</span>':'')
     +(o.source?'<span class="chip">via '+esc(o.source)+'</span>':'')
     +'</div>'+luHTML+'</div>';
 }
@@ -639,7 +709,7 @@ function renderMeeting(){
   const open=sortOrders(openOrders());
   if(!open.length) return emptyHTML('&#128227;','No open work orders. You are bulletproof in that meeting.');
   const q=(window._meetQ||'').toLowerCase();
-  const list=q? open.filter(o=> (o.title+' '+(o.details||'')+' '+(o.assignedTo||'')+' '+(o.requestedBy||'')).toLowerCase().includes(q)) : open;
+  const list=q? open.filter(o=> (o.title+' '+(o.woNum||'')+' '+(o.building||'')+' '+(o.floor||'')+' '+(o.room||'')+' '+(o.details||'')+' '+(o.assignedTo||'')+' '+(o.requestedBy||'')).toLowerCase().includes(q)) : open;
   let h='<div class="searchwrap"><span class="mag">&#128269;</span><input type="text" placeholder="They called a name or WO# — type to find it fast" value="'+esc(window._meetQ||'')+'" oninput="window._meetQ=this.value;rerenderMeeting(this)"></div><div class="sect" id="meetlist">';
   h+=meetListHTML(list);
   h+='</div>';
@@ -652,11 +722,12 @@ function meetListHTML(list){
     const say = lu ? esc(lu.text)+' <span style="color:var(--muted)">('+fmtWhen(lu.ts)+')</span>'
       : (o.status==='new' ? 'Not delegated yet — assigning it out.' : 'Delegated to '+esc(o.assignedTo||'the team')+', waiting on their update.');
     return '<div class="meetrow s-'+o.status+(late?' overdue':'')+'" onclick="openDetail(\''+o.id+'\')">'
-      +'<div class="t">'+esc(o.title)+'</div>'
+      +'<div class="t">'+esc(displayTitle(o))+'</div>'
       +'<div class="say"><span class="lbl">If asked, say</span>'+say+'</div>'
       +'<div class="metarow"><span class="chip stamp '+o.status+'">'+STATUS_LABEL[o.status]+'</span>'
       +(o.assignedTo?'<span class="chip person">'+esc(o.assignedTo)+'</span>':'')
       +(o.followUp?'<span class="chip due'+(late?' late':'')+'">Next check: '+fmtDate(o.followUp)+'</span>':'')
+      +(locStr(o)?'<span class="chip">&#128205; '+esc(locStr(o))+'</span>':'')
       +(o.requestedBy?'<span class="chip">for '+esc(o.requestedBy)+'</span>':'')
       +'</div></div>';
   }).join('') || emptyHTML('&#128269;','No matches. Clear the search to see everything.');
@@ -664,7 +735,7 @@ function meetListHTML(list){
 function rerenderMeeting(inp){
   const q=(window._meetQ||'').toLowerCase();
   const open=sortOrders(openOrders());
-  const list=q? open.filter(o=> (o.title+' '+(o.details||'')+' '+(o.assignedTo||'')+' '+(o.requestedBy||'')).toLowerCase().includes(q)) : open;
+  const list=q? open.filter(o=> (o.title+' '+(o.woNum||'')+' '+(o.building||'')+' '+(o.floor||'')+' '+(o.room||'')+' '+(o.details||'')+' '+(o.assignedTo||'')+' '+(o.requestedBy||'')).toLowerCase().includes(q)) : open;
   document.getElementById('meetlist').innerHTML=meetListHTML(list);
 }
 
@@ -684,7 +755,7 @@ function renderPeople(){
       +'<button class="nudgebtn" onclick="event.stopPropagation();openNudgePersonEnc(\''+encodeURIComponent(nm)+'\')">Send reminder</button></div>'
       +'<div class="personitems">'+items.map(o=>{
         const a=ageDays(o.createdAt); const late=isOverdue(o);
-        return '<div class="pitem" onclick="openDetail(\''+o.id+'\')"><span class="age'+(late?' late':'')+'">'+(a===0?'today':a+'d')+'</span><span class="pt">'+esc(o.title)+'</span><span class="chip stamp '+o.status+'" style="font-size:11px">'+STATUS_LABEL[o.status]+'</span></div>';
+        return '<div class="pitem" onclick="openDetail(\''+o.id+'\')"><span class="age'+(late?' late':'')+'">'+(a===0?'today':a+'d')+'</span><span class="pt">'+esc(displayTitle(o))+'</span><span class="chip stamp '+o.status+'" style="font-size:11px">'+STATUS_LABEL[o.status]+'</span></div>';
       }).join('')+'</div></div>';
   }).join('')+'</div>';
 }
@@ -701,33 +772,116 @@ function renderAll(){
   return h;
 }
 
-/* ================= Add / Edit ================= */
+/* ================= Calendar ================= */
+let calY=null, calM=null, calSel=null, calAnim='';
+function itemsOn(ds){ return openOrders().filter(o=>o.followUp===ds||o.dueDate===ds); }
+function pillCls(o,ds,today){ if(ds<today) return 'late'; return o.followUp===ds?'fu':'due'; }
+function renderCal(){
+  const t=new Date();
+  if(calY===null){ calY=t.getFullYear(); calM=t.getMonth(); calSel=todayStr(); }
+  const first=new Date(calY,calM,1);
+  const startDow=first.getDay();
+  const monName=first.toLocaleDateString(undefined,{month:'long'});
+  const today=todayStr();
+  const mPrefix=calY+'-'+String(calM+1).padStart(2,'0');
+  let fuCount=0,dueCount=0;
+  openOrders().forEach(o=>{ if((o.followUp||'').indexOf(mPrefix)===0) fuCount++; if((o.dueDate||'').indexOf(mPrefix)===0) dueCount++; });
+  let h='<div class="cv"><div class="cv-head"><div class="cv-mon">'+monName+' <span>'+calY+'</span></div>'
+   +'<div class="cv-stats">'+(fuCount?'<span class="chip due today">'+fuCount+' follow-up'+(fuCount>1?'s':'')+'</span>':'')
+   +(dueCount?'<span class="chip" style="background:var(--blue-bg);color:var(--blue)">'+dueCount+' due</span>':'')+'</div>'
+   +'<div class="grow"></div>'
+   +'<button class="cv-btn" onclick="calShift(-1)" title="Previous month">&#9664;</button>'
+   +'<button class="cv-btn" onclick="calGoToday()">Today</button>'
+   +'<button class="cv-btn" onclick="calShift(1)" title="Next month">&#9654;</button></div>'
+   +'<div class="cv-body"><div class="cv-gridwrap">'
+   +'<div class="cv-dow"><span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span></div>'
+   +'<div class="cv-grid '+calAnim+'" ontouchstart="window._cvx=event.touches[0].clientX" ontouchend="cvSwipe(event)">';
+  const start=new Date(calY,calM,1-startDow);
+  for(let i=0;i<42;i++){
+    const d=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i);
+    const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const inMon=d.getMonth()===calM;
+    const its=sortOrders(itemsOn(ds));
+    let pills='';
+    its.slice(0,3).forEach(o=>{
+      const label=o.woNum? '#'+o.woNum+(o.title?' \u00b7 '+o.title:'') : (o.title||'');
+      pills+='<div class="cv-pill '+pillCls(o,ds,today)+'" onclick="event.stopPropagation();openDetail(\''+o.id+'\')" title="'+esc(displayTitle(o))+'">'+esc(label)+'</div>';
+    });
+    if(its.length>3) pills+='<div class="cv-more">+'+(its.length-3)+' more</div>';
+    h+='<div class="cv-cell'+(inMon?'':' dim')+(ds===today?' today':'')+(ds===calSel?' sel':'')+'" onclick="calPick(\''+ds+'\')"><div class="cv-dnum">'+d.getDate()+'</div><div class="cv-pills">'+pills+'</div></div>';
+  }
+  h+='</div></div><aside class="cv-agenda">'+agendaHTML(calSel||today,false)+'</aside></div></div>';
+  calAnim='';
+  return h;
+}
+function agendaHTML(ds,bare){
+  const its=sortOrders(itemsOn(ds));
+  const p=ds.split('-');
+  const dt=new Date(+p[0],+p[1]-1,+p[2]);
+  const dd=daysDiff(ds);
+  const rel= dd===0?'Today': dd===-1?'Tomorrow': dd===1?'Yesterday': (dd<0? (-dd)+' days out' : dd+' days ago');
+  let h='';
+  if(!bare){
+    h+='<div class="cv-aghead">'+dt.toLocaleDateString(undefined,{weekday:'long'})+'</div>'
+      +'<div class="cv-agsub">'+dt.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})+' \u00b7 '+rel+'</div>';
+  }
+  h+= its.length? its.map(cardHTML).join('') : '<div class="empty" style="padding:20px">Nothing lands on this day.</div>';
+  h+='<button class="ghost" onclick="closeOv(\'ov-day\');openAdd(\''+ds+'\')">+ Log a work order for this day</button>';
+  return h;
+}
+function calShift(nn){ calAnim= nn>0?'animL':'animR'; calM+=nn; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;} render(); }
+function calGoToday(){ const t=new Date(); calAnim='animR'; calY=t.getFullYear(); calM=t.getMonth(); calSel=todayStr(); render(); }
+function calPick(ds){
+  calSel=ds;
+  const p=ds.split('-'); const y=+p[0], m=+p[1]-1;
+  if(y!==calY||m!==calM){ calAnim=(y*12+m)>(calY*12+calM)?'animL':'animR'; calY=y; calM=m; }
+  render();
+  if(window.matchMedia('(max-width:1000px)').matches){
+    document.getElementById('day-title').textContent=new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});
+    document.getElementById('day-list').innerHTML=agendaHTML(ds,true);
+    openOv('ov-day');
+  }
+}
+function cvSwipe(e){
+  const dx=e.changedTouches[0].clientX-(window._cvx||0);
+  if(Math.abs(dx)>60) calShift(dx<0?1:-1);
+}
+
+/* ================= Add / Edit ================= *//* ================= Add / Edit ================= */
 function segPick(btn){ btn.parentElement.querySelectorAll('button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); }
 function segVal(id){ const on=document.querySelector('#'+id+' button.on'); return on?on.dataset.x:''; }
 function segSet(id,val){ document.querySelectorAll('#'+id+' button').forEach(b=>b.classList.toggle('on', b.dataset.x===val)); }
 
-function openAdd(){
+function openAdd(prefDate){
   editId=null;
   document.getElementById('add-title').textContent='Log Work Order';
   document.getElementById('a-title').value='';
+  document.getElementById('a-wonum').value='';
+  document.getElementById('a-bldg').value='';
+  document.getElementById('a-floor').value='';
+  document.getElementById('a-room').value='';
   document.getElementById('a-details').value='';
   document.getElementById('a-reqby').value='';
   document.getElementById('a-assign').value='';
   document.getElementById('a-pri').value='normal';
-  document.getElementById('a-follow').value=addDaysStr(todayStr(),1);
+  document.getElementById('a-follow').value=(typeof prefDate==='string'&&prefDate)?prefDate:addDaysStr(todayStr(),1);
   document.getElementById('a-due').value='';
   segSet('a-source','Meeting');
   document.getElementById('a-delete').style.display='none';
   fillPeopleList();
   openOv('ov-add');
-  setTimeout(()=>document.getElementById('a-title').focus(),150);
+  setTimeout(()=>document.getElementById('a-wonum').focus(),150);
 }
 function editFromDetail(){
   const o=findOrder(detailId); if(!o) return;
   editId=o.id;
   closeOv('ov-detail');
   document.getElementById('add-title').textContent='Edit Work Order';
-  document.getElementById('a-title').value=o.title;
+  document.getElementById('a-title').value=o.title||'';
+  document.getElementById('a-wonum').value=o.woNum||'';
+  document.getElementById('a-bldg').value=o.building||'';
+  document.getElementById('a-floor').value=o.floor||'';
+  document.getElementById('a-room').value=o.room||'';
   document.getElementById('a-details').value=o.details||'';
   document.getElementById('a-reqby').value=o.requestedBy||'';
   document.getElementById('a-assign').value=o.assignedTo||'';
@@ -746,10 +900,15 @@ function fillPeopleList(){
 }
 function saveOrder(){
   const title=document.getElementById('a-title').value.trim();
-  if(!title){ toast('Give it a title first'); return; }
+  const woNum=document.getElementById('a-wonum').value.trim();
+  if(!title && !woNum){ toast('Add a WO # or a description'); return; }
   const assignedTo=document.getElementById('a-assign').value.trim();
   const vals={
-    title, details:document.getElementById('a-details').value.trim(),
+    title, woNum,
+    building:document.getElementById('a-bldg').value.trim(),
+    floor:document.getElementById('a-floor').value.trim(),
+    room:document.getElementById('a-room').value.trim(),
+    details:document.getElementById('a-details').value.trim(),
     requestedBy:document.getElementById('a-reqby').value.trim(),
     assignedTo, priority:document.getElementById('a-pri').value,
     followUp:document.getElementById('a-follow').value||null,
@@ -783,10 +942,11 @@ function deleteOrder(){
 function findOrder(id){ return state.orders.find(o=>o.id===id); }
 function openDetail(id){
   detailId=id; const o=findOrder(id); if(!o) return;
-  document.getElementById('d-title').textContent=o.title;
+  document.getElementById('d-title').textContent=displayTitle(o);
   document.getElementById('d-detailtext').textContent=o.details||'';
   document.getElementById('d-detailtext').style.display=o.details?'block':'none';
   let chips='';
+  if(locStr(o)) chips+='<span class="chip">&#128205; '+esc(locStr(o))+'</span>';
   if(o.assignedTo) chips+='<span class="chip person">'+esc(o.assignedTo)+'</span>';
   if(o.requestedBy) chips+='<span class="chip">for '+esc(o.requestedBy)+'</span>';
   if(o.source) chips+='<span class="chip">via '+esc(o.source)+'</span>';
@@ -846,7 +1006,8 @@ function addUpdate(){
 function contactFor(name){ return state.people.find(p=>p.name.toLowerCase()===String(name).toLowerCase()); }
 function buildNudge(name, items){
   const lines=items.map(o=>{
-    let l='• '+o.title;
+    let l='• '+displayTitle(o);
+    const loc=locStr(o); if(loc) l+=' ('+loc+')';
     if(o.dueDate) l+=' (needed by '+fmtDate(o.dueDate)+')';
     else if(o.followUp) l+=' (checking in '+fmtDate(o.followUp)+')';
     return l;
@@ -945,6 +1106,13 @@ function toast(msg){
 }
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open')); }
+});
+document.addEventListener('keydown', e=>{
+  if(currentView!=='cal') return;
+  if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if(document.querySelector('.overlay.open')) return;
+  if(e.key==='ArrowLeft') calShift(-1);
+  if(e.key==='ArrowRight') calShift(1);
 });
 setView('today');
 boot();
