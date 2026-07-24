@@ -29,6 +29,8 @@
   --blue-bg:#EAF1F8;
   --gray-bg:#EEF1F5;
   --accent:#E8A13D;
+  --purp:#6E56A6;
+  --purp-bg:#EFEAF8;
   --radius:10px;
   --shadow:0 1px 3px rgba(27,42,65,.10),0 4px 14px rgba(27,42,65,.06);
 }
@@ -263,6 +265,27 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ---------- Projects ---------- */
+.chip.proj{background:var(--purp-bg);color:var(--purp)}
+.chip.stamp.ontrack{color:var(--green)}
+.chip.stamp.atrisk{color:var(--amber)}
+.chip.stamp.stalled{color:var(--red)}
+.chip.stamp.done{color:#8A97A8}
+.card.h-ontrack{border-left-color:var(--green)}
+.card.h-atrisk{border-left-color:var(--amber)}
+.card.h-stalled{border-left-color:var(--red)}
+.card.h-done{border-left-color:var(--line)}
+.pbarrow{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:12px;color:var(--muted);font-weight:600}
+.pbar{height:6px;background:var(--gray-bg);border-radius:3px;overflow:hidden;flex:1}
+.pbar i{display:block;height:100%;background:var(--purp);border-radius:3px}
+.ms-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:14px;cursor:pointer}
+.ms-row:last-child{border-bottom:none}
+.ms-check{width:19px;height:19px;border:2px solid var(--line);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;flex-shrink:0}
+.ms-row.done .ms-check{background:var(--green);border-color:var(--green)}
+.ms-row.done .ms-name{text-decoration:line-through;color:var(--muted)}
+.ms-name{flex:1;min-width:0}
+.ms-date{font-size:12px;color:var(--muted);flex-shrink:0}
+
 /* ---------- Calendar ---------- */
 .content.calmode{padding:4px 16px 16px;display:flex;flex-direction:column;overflow:hidden}
 .cv{flex:1;display:flex;flex-direction:column;min-height:0}
@@ -291,6 +314,8 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 .cv-pill.due{background:var(--blue-bg);color:#2B517A;border-color:var(--blue)}
 .cv-pill.late{background:var(--red-bg);color:var(--red);border-color:var(--red)}
 .cv-more{font-size:10.5px;font-weight:700;color:var(--muted);padding:1px 7px;flex-shrink:0}
+.cv-pill.ms{background:var(--purp-bg);color:var(--purp);border-color:var(--purp)}
+.cv-pill.ms.late{background:var(--red-bg);color:var(--red);border-color:var(--red)}
 .cv-agenda{width:332px;flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:14px;overflow-y:auto}
 .cv-aghead{font-family:'Barlow Condensed';font-weight:700;font-size:20px;text-transform:uppercase;letter-spacing:.05em;color:var(--ink)}
 .cv-agsub{font-size:12.5px;color:var(--muted);margin:2px 0 12px}
@@ -325,9 +350,9 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
   }
   .bottombar button{
     flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 2px;
-    color:#93A3B8;font-size:10.5px;font-weight:600;border-radius:9px;position:relative;
+    color:#93A3B8;font-size:9.5px;font-weight:600;border-radius:9px;position:relative;
   }
-  .bottombar button .ico{font-size:19px}
+  .bottombar button .ico{font-size:17px}
   .bottombar button.active{color:#fff}
   .bottombar button .bdg{
     position:absolute;top:2px;right:calc(50% - 22px);background:var(--red);color:#fff;
@@ -363,6 +388,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
     <button class="navbtn" data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span>Today<span class="cnt" id="rc-today">0</span></button>
     <button class="navbtn" data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span>Meeting Mode<span class="cnt" id="rc-meeting">0</span></button>
     <button class="navbtn" data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span>Calendar</button>
+    <button class="navbtn" data-v="projects" onclick="setView('projects')"><span class="ico">&#127959;</span>Projects<span class="cnt" id="rc-projects">0</span></button>
     <button class="navbtn" data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span>My Team<span class="cnt" id="rc-people">0</span></button>
     <button class="navbtn" data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span>All Items<span class="cnt" id="rc-all">0</span></button>
     <div class="spacer"></div>
@@ -386,11 +412,12 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
   <button data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span>Today<span class="bdg" id="bc-today" style="display:none">0</span></button>
   <button data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span>Meeting</button>
   <button data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span>Calendar</button>
+  <button data-v="projects" onclick="setView('projects')"><span class="ico">&#127959;</span>Projects</button>
   <button data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span>Team</button>
   <button data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span>All</button>
 </nav>
 
-<button class="fab" onclick="openAdd()" title="Log a work order">+</button>
+<button class="fab" onclick="fabClick()" title="Log it">+</button>
 
 <!-- Add / Edit modal -->
 <div class="overlay" id="ov-add" onclick="if(event.target===this)closeOv('ov-add')">
@@ -417,6 +444,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
     <div class="frow">
       <div class="f"><label>Requested by (optional)</label><input type="text" id="a-reqby" placeholder="Who's asking for it" autocomplete="off"></div>
     </div>
+    <div class="f"><label>Part of project (optional)</label><select id="a-proj"><option value="">&mdash; None &mdash;</option></select></div>
     <div class="frow">
       <div class="f"><label>Assign to</label><input type="text" id="a-assign" list="peoplelist" placeholder="Team member's name" autocomplete="off"><datalist id="peoplelist"></datalist></div>
       <div class="f"><label>Priority</label><select id="a-pri"><option value="normal">Normal</option><option value="high">High</option></select></div>
@@ -508,6 +536,56 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
   </div>
 </div>
 
+<!-- New / edit project -->
+<div class="overlay" id="ov-projadd" onclick="if(event.target===this)closeOv('ov-projadd')">
+  <div class="sheet">
+    <div class="sheethead"><h3 id="pa-title">New Project</h3><button class="xbtn" onclick="closeOv('ov-projadd')">&#10005;</button></div>
+    <div class="f"><label>Project name</label><input type="text" id="pa-name" placeholder="Roof replacement &mdash; Building C" autocomplete="off"></div>
+    <div class="f"><label>Description (optional)</label><textarea id="pa-desc"></textarea></div>
+    <div class="f"><label>Point person (optional)</label><input type="text" id="pa-owner" list="peoplelist" placeholder="Who's leading it" autocomplete="off"></div>
+    <div class="frow">
+      <div class="f"><label>Next check-in</label><input type="date" id="pa-follow"></div>
+      <div class="f"><label>Target completion</label><input type="date" id="pa-target"></div>
+    </div>
+    <button class="primary" onclick="saveProj()">Save project</button>
+    <button class="ghost" id="pa-delete" style="display:none;color:var(--red)" onclick="deleteProj()">Delete project</button>
+  </div>
+</div>
+
+<!-- Project detail -->
+<div class="overlay" id="ov-proj" onclick="if(event.target===this)closeOv('ov-proj')">
+  <div class="sheet">
+    <div class="sheethead"><h3 id="pj-name" style="text-transform:none;font-family:'Inter';font-size:18px;letter-spacing:0;line-height:1.3"></h3><button class="xbtn" onclick="closeOv('ov-proj')">&#10005;</button></div>
+    <div class="detailtop" id="pj-chips"></div>
+    <div id="pj-desc" style="font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:12px"></div>
+    <div class="f"><label>Health</label>
+      <div class="seg" id="pj-health">
+        <button data-x="ontrack" onclick="setProjHealth('ontrack')">On track</button>
+        <button data-x="atrisk" onclick="setProjHealth('atrisk')">At risk</button>
+        <button data-x="stalled" onclick="setProjHealth('stalled')">Stalled</button>
+        <button data-x="done" onclick="setProjHealth('done')">Complete</button>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="f"><label>Next check-in</label><input type="date" id="pj-follow" onchange="setProjFollow(this.value)"></div>
+      <div class="f"><label>Target completion</label><input type="date" id="pj-target" onchange="setProjTarget(this.value)"></div>
+    </div>
+    <div class="f"><label>Milestones <span id="pj-msprog" style="text-transform:none;letter-spacing:0"></span></label>
+      <div id="pj-ms"></div>
+      <div class="updbox"><input type="text" id="pj-msname" placeholder="Milestone name" onkeydown="if(event.key==='Enter')addMilestone()"><input type="date" id="pj-msdate" style="flex:0 0 128px;padding:11px 8px;border:1px solid var(--line);border-radius:9px;background:#fff"><button onclick="addMilestone()">Add</button></div>
+    </div>
+    <div class="f"><label>Tasks <span id="pj-tprog" style="text-transform:none;letter-spacing:0"></span></label>
+      <div id="pj-tasks"></div>
+      <div class="updbox"><input type="text" id="pj-tname" placeholder="Task to get done" onkeydown="if(event.key==='Enter')addProjTask()"><input type="text" id="pj-towner" list="peoplelist" placeholder="Owner (opt.)" autocomplete="off" style="flex:0 0 122px;padding:11px 9px;border:1px solid var(--line);border-radius:9px;background:#fff"><button onclick="addProjTask()">Add</button></div>
+    </div>
+    <div class="f"><label>Linked work orders</label><div id="pj-wos"></div></div>
+    <div class="f"><label>Updates</label><div id="pj-upds"></div>
+      <div class="updbox"><input type="text" id="pj-newupd" placeholder="What's the latest on this project?" onkeydown="if(event.key==='Enter')addProjUpdate()"><button onclick="addProjUpdate()">Add</button></div>
+    </div>
+    <button class="ghost" onclick="editProj()">Edit details</button>
+  </div>
+</div>
+
 <!-- Global search -->
 <div class="overlay" id="ov-search" onclick="if(event.target===this)closeOv('ov-search')">
   <div class="sheet">
@@ -536,7 +614,7 @@ try {
 } catch (e) { console.error("Firebase init failed:", e); }
 
 /* ================= State ================= */
-let state = { orders: [], people: [] };
+let state = { orders: [], people: [], projects: [] };
 let workspace = null;
 let currentView = 'today';
 let detailId = null;
@@ -593,6 +671,7 @@ function startSync(){
       applyingRemote=true;
       state.orders = Array.isArray(d.orders)? d.orders : [];
       state.people = Array.isArray(d.people)? d.people : [];
+      state.projects = Array.isArray(d.projects)? d.projects : [];
       applyingRemote=false;
       lsSet('wot-cache-'+workspace, JSON.stringify(state));
       render();
@@ -610,7 +689,7 @@ function persist(){
   setSync('pending','Saving…','');
   clearTimeout(saveTimer);
   saveTimer=setTimeout(()=>{
-    docRef().set({ orders: state.orders, people: state.people, updatedAt: Date.now() })
+    docRef().set({ orders: state.orders, people: state.people, projects: state.projects, updatedAt: Date.now() })
       .then(()=>setSync('ok','Synced',''))
       .catch(e=>{ console.error(e); setSync('err','Sync blocked','Data is saved on this device. Check Firestore rules for the "woTracker" collection.'); });
   }, 600);
@@ -626,6 +705,7 @@ function boot(){
   }
   const cache = lsGet('wot-cache-'+workspace);
   if(cache){ try{ state=JSON.parse(cache); }catch(e){} }
+  state.orders=state.orders||[]; state.people=state.people||[]; state.projects=state.projects||[];
   startSync();
   render();
 }
@@ -641,7 +721,8 @@ function applyCode(){
   if(!code){ toast('Enter a sync code'); return; }
   workspace=code; lsSet('wot-workspace', code);
   const cache = lsGet('wot-cache-'+workspace);
-  state = cache ? JSON.parse(cache) : { orders: [], people: [] };
+  state = cache ? JSON.parse(cache) : { orders: [], people: [], projects: [] };
+  state.orders=state.orders||[]; state.people=state.people||[]; state.projects=state.projects||[];
   startSync(); render(); toast('Sync code applied');
 }
 
@@ -649,7 +730,7 @@ function applyCode(){
 function setView(v){
   currentView=v;
   document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
-  const titles={ today:'Today', meeting:'Meeting Mode', cal:'Calendar', people:'My Team', all:'All Items' };
+  const titles={ today:'Today', meeting:'Meeting Mode', cal:'Calendar', projects:'Projects', people:'My Team', all:'All Items' };
   document.getElementById('viewtitle').textContent=titles[v];
   render();
   document.getElementById('content').scrollTop=0;
@@ -660,6 +741,7 @@ function render(){
   if(currentView==='today') el.innerHTML=renderToday();
   else if(currentView==='meeting') el.innerHTML=renderMeeting();
   else if(currentView==='cal') el.innerHTML=renderCal();
+  else if(currentView==='projects') el.innerHTML=renderProjects();
   else if(currentView==='people') el.innerHTML=renderPeople();
   else el.innerHTML=renderAll();
   renderCounts();
@@ -669,8 +751,10 @@ function renderCounts(){
   const late=openOrders().filter(isOverdue).length;
   const chase=openOrders().filter(o=>isOverdue(o)||isChaseToday(o)).length;
   const open=openOrders().length;
-  const ppl=new Set(openOrders().map(o=>o.assignedTo).filter(Boolean)).size;
-  setTxt('rc-today', chase); setTxt('rc-meeting', open); setTxt('rc-people', ppl); setTxt('rc-all', open);
+  const _pplSet=new Set(openOrders().map(o=>o.assignedTo).filter(Boolean));
+  state.projects.forEach(pp=>{ if(pp.health!=='done') (pp.tasks||[]).forEach(t=>{ if(!t.done&&t.owner) _pplSet.add(t.owner); }); });
+  const ppl=_pplSet.size;
+  setTxt('rc-today', chase); setTxt('rc-meeting', open); setTxt('rc-people', ppl); setTxt('rc-all', open); setTxt('rc-projects', activeProjects().length);
   const b=document.getElementById('bc-today');
   if(late>0){ b.style.display='block'; b.textContent=late; } else b.style.display='none';
 }
@@ -693,6 +777,7 @@ function cardHTML(o){
     +'<span class="chip stamp '+o.status+'">'+STATUS_LABEL[o.status]+'</span>'
     +(o.assignedTo?'<span class="chip person">'+esc(o.assignedTo)+'</span>':'<span class="chip">Unassigned</span>')
     +dueChip
+    +projChip(o)
     +(locStr(o)?'<span class="chip">&#128205; '+esc(locStr(o))+'</span>':'')
     +(o.source?'<span class="chip">via '+esc(o.source)+'</span>':'')
     +'</div>'+luHTML+'</div>';
@@ -705,8 +790,10 @@ function renderToday(){
   const chase=sortOrders(open.filter(isChaseToday));
   const report=sortOrders(open.filter(o=>o.status==='ready'||updatedLast24h(o)));
   const upcoming=sortOrders(open.filter(o=>{ const d=daysDiff(o.followUp); return d!==null && d<0 && d>=-3; }));
+  const projChase=activeProjects().filter(pp=>{ const dd=daysDiff(pp.followUp); return dd!==null && dd>=0; });
   let h='';
-  if(!open.length) return emptyHTML('&#9728;','Nothing open. When your name gets called or a text comes in,<br>hit <b>+</b> and log it in ten seconds.');
+  if(!open.length && !projChase.length) return emptyHTML('&#9728;','Nothing open. When your name gets called or a text comes in,<br>hit <b>+</b> and log it in ten seconds.');
+  if(projChase.length){ h+='<div class="sect"><div class="eyebrow" style="color:var(--purp)"><span class="num" style="background:var(--purp-bg);color:var(--purp)">'+projChase.length+'</span>Projects to check on<span class="rule"></span></div>'+projChase.map(projCardHTML).join('')+'</div>'; }
   if(late.length){ h+='<div class="sect"><div class="eyebrow hot"><span class="num">'+late.length+'</span>Past follow-up — chase now<span class="rule"></span></div>'+late.map(cardHTML).join('')+'</div>'; }
   if(chase.length){ h+='<div class="sect"><div class="eyebrow warm"><span class="num">'+chase.length+'</span>Chase today<span class="rule"></span></div>'+chase.map(cardHTML).join('')+'</div>'; }
   if(report.length){ h+='<div class="sect"><div class="eyebrow good"><span class="num">'+report.length+'</span>Have answers — report at meeting<span class="rule"></span></div>'+report.map(cardHTML).join('')+'</div>'; }
@@ -717,16 +804,17 @@ function renderToday(){
 
 function renderMeeting(){
   const open=sortOrders(openOrders());
-  if(!open.length) return emptyHTML('&#128227;','No open work orders. You are bulletproof in that meeting.');
+  if(!open.length && !activeProjects().length) return emptyHTML('&#128227;','No open work orders or projects. You are bulletproof in that meeting.');
   const q=(window._meetQ||'').toLowerCase();
   const list=q? open.filter(o=> (o.title+' '+(o.woNum||'')+' '+(o.building||'')+' '+(o.floor||'')+' '+(o.room||'')+' '+(o.details||'')+' '+(o.assignedTo||'')+' '+(o.requestedBy||'')).toLowerCase().includes(q)) : open;
   let h='<div class="searchwrap"><span class="mag">&#128269;</span><input type="text" placeholder="They called a name or WO# — type to find it fast" value="'+esc(window._meetQ||'')+'" oninput="window._meetQ=this.value;rerenderMeeting(this)"></div><div class="sect" id="meetlist">';
-  h+=meetListHTML(list);
+  h+=meetListHTML(list,q);
   h+='</div>';
   return h;
 }
-function meetListHTML(list){
-  return list.map(o=>{
+function meetListHTML(list,q){
+  const pr=projMeetRows(q||'');
+  const wo=list.map(o=>{
     const lu=lastUpdate(o);
     const late=isOverdue(o);
     const say = lu ? esc(lu.text)+' <span style="color:var(--muted)">('+fmtWhen(lu.ts)+')</span>'
@@ -740,36 +828,48 @@ function meetListHTML(list){
       +(locStr(o)?'<span class="chip">&#128205; '+esc(locStr(o))+'</span>':'')
       +(o.requestedBy?'<span class="chip">for '+esc(o.requestedBy)+'</span>':'')
       +'</div></div>';
-  }).join('') || emptyHTML('&#128269;','No matches. Clear the search to see everything.');
+  }).join('');
+  if(!pr && !wo) return emptyHTML('&#128269;','No matches. Clear the search to see everything.');
+  return pr + (pr&&wo? '<div class="eyebrow" style="margin-top:14px"><span class="num">'+list.length+'</span>Work orders<span class="rule"></span></div>':'') + wo;
 }
 function rerenderMeeting(inp){
   const q=(window._meetQ||'').toLowerCase();
   const open=sortOrders(openOrders());
   const list=q? open.filter(o=> (o.title+' '+(o.woNum||'')+' '+(o.building||'')+' '+(o.floor||'')+' '+(o.room||'')+' '+(o.details||'')+' '+(o.assignedTo||'')+' '+(o.requestedBy||'')).toLowerCase().includes(q)) : open;
-  document.getElementById('meetlist').innerHTML=meetListHTML(list);
+  document.getElementById('meetlist').innerHTML=meetListHTML(list,q);
 }
 
 function renderPeople(){
   const open=openOrders().filter(o=>o.assignedTo);
-  if(!open.length) return emptyHTML('&#128101;','Once you assign work orders to your team,<br>each person shows up here with everything they owe you.');
   const groups={};
-  open.forEach(o=>{ (groups[o.assignedTo]=groups[o.assignedTo]||[]).push(o); });
-  const names=Object.keys(groups).sort((a,b)=>groups[b].length-groups[a].length);
+  open.forEach(o=>{ const k=o.assignedTo; (groups[k]=groups[k]||{orders:[],tasks:[]}).orders.push(o); });
+  state.projects.forEach(p=>{ if(p.health==='done') return; (p.tasks||[]).forEach(t=>{ if(!t.done && t.owner){ (groups[t.owner]=groups[t.owner]||{orders:[],tasks:[]}).tasks.push({t:t,p:p}); } }); });
+  const names=Object.keys(groups).sort((a,b)=>(groups[b].orders.length+groups[b].tasks.length)-(groups[a].orders.length+groups[a].tasks.length));
+  if(!names.length) return emptyHTML('&#128101;','Assign work orders or project tasks to your team,<br>and each person shows up here with everything they owe you.');
   return '<div class="sect">'+names.map(nm=>{
-    const items=sortOrders(groups[nm]);
+    const g=groups[nm];
+    const items=sortOrders(g.orders);
     const late=items.filter(isOverdue).length;
     const initials=nm.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    const stat=items.length+' open'+(late?' &middot; <span class="late">'+late+' past follow-up</span>':'');
+    const bits=[];
+    if(items.length) bits.push(items.length+' open');
+    if(g.tasks.length) bits.push(g.tasks.length+' project task'+(g.tasks.length>1?'s':''));
+    const stat=bits.join(' \u00b7 ')+(late?' \u00b7 <span class="late">'+late+' past follow-up</span>':'');
     return '<div class="persongroup"><div class="personhead"><div class="avatar">'+esc(initials)+'</div>'
       +'<div><div class="nm">'+esc(nm)+'</div><div class="st">'+stat+'</div></div>'
       +'<button class="nudgebtn" onclick="event.stopPropagation();openNudgePersonEnc(\''+encodeURIComponent(nm)+'\')">Send reminder</button></div>'
-      +'<div class="personitems">'+items.map(o=>{
-        const a=ageDays(o.createdAt); const late=isOverdue(o);
-        return '<div class="pitem" onclick="openDetail(\''+o.id+'\')"><span class="age'+(late?' late':'')+'">'+(a===0?'today':a+'d')+'</span><span class="pt">'+esc(displayTitle(o))+'</span><span class="chip stamp '+o.status+'" style="font-size:11px">'+STATUS_LABEL[o.status]+'</span></div>';
-      }).join('')+'</div></div>';
+      +'<div class="personitems">'
+      +items.map(o=>{
+        const a=ageDays(o.createdAt); const lt=isOverdue(o);
+        return '<div class="pitem" onclick="openDetail(\''+o.id+'\')"><span class="age'+(lt?' late':'')+'">'+(a===0?'today':a+'d')+'</span><span class="pt">'+esc(displayTitle(o))+'</span><span class="chip stamp '+o.status+'" style="font-size:11px">'+STATUS_LABEL[o.status]+'</span></div>';
+      }).join('')
+      +g.tasks.map(x=>{
+        const a=ageDays(x.t.createdAt||Date.now());
+        return '<div class="pitem" onclick="openProj(\''+x.p.id+'\')"><span class="age">'+(a===0?'today':a+'d')+'</span><span class="pt">'+esc(x.t.name)+'</span><span class="chip proj" style="font-size:11px">'+esc(x.p.name)+'</span></div>';
+      }).join('')
+      +'</div></div>';
   }).join('')+'</div>';
 }
-
 function renderAll(){
   let list=state.orders.slice();
   if(!showClosed) list=list.filter(o=>o.status!=='closed');
@@ -812,13 +912,18 @@ function renderCal(){
     const ds=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     const inMon=d.getMonth()===calM;
     const its=sortOrders(itemsOn(ds));
-    let pills='';
-    its.slice(0,3).forEach(o=>{
+    const pents=projEntriesOn(ds);
+    const total=its.length+pents.length;
+    let pills=''; let shown=0;
+    pents.slice(0,3).forEach(en=>{
+      pills+='<div class="cv-pill ms'+(ds<today&&!en.done?' late':'')+'" onclick="event.stopPropagation();openProj(\''+en.pid+'\')" title="'+esc(en.full)+'">'+esc(en.label)+'</div>'; shown++;
+    });
+    its.slice(0,Math.max(0,3-shown)).forEach(o=>{
       const loc=locStr(o);
       const label=(o.title||(o.woNum?'#'+o.woNum:''))+(loc?' \u00b7 '+loc:'');
-      pills+='<div class="cv-pill '+pillCls(o,ds,today)+'" onclick="event.stopPropagation();openDetail(\''+o.id+'\')" title="'+esc(displayTitle(o))+'">'+esc(label)+'</div>';
+      pills+='<div class="cv-pill '+pillCls(o,ds,today)+'" onclick="event.stopPropagation();openDetail(\''+o.id+'\')" title="'+esc(displayTitle(o))+'">'+esc(label)+'</div>'; shown++;
     });
-    if(its.length>3) pills+='<div class="cv-more">+'+(its.length-3)+' more</div>';
+    if(total>shown) pills+='<div class="cv-more">+'+(total-shown)+' more</div>';
     h+='<div class="cv-cell'+(inMon?'':' dim')+(ds===today?' today':'')+(ds===calSel?' sel':'')+'" onclick="calPick(\''+ds+'\')"><div class="cv-dnum">'+d.getDate()+'</div><div class="cv-pills">'+pills+'</div></div>';
   }
   h+='</div></div><aside class="cv-agenda">'+agendaHTML(calSel||today,false)+'</aside></div></div>';
@@ -836,7 +941,11 @@ function agendaHTML(ds,bare){
     h+='<div class="cv-aghead">'+dt.toLocaleDateString(undefined,{weekday:'long'})+'</div>'
       +'<div class="cv-agsub">'+dt.toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'})+' \u00b7 '+rel+'</div>';
   }
-  h+= its.length? its.map(cardHTML).join('') : '<div class="empty" style="padding:20px">Nothing lands on this day.</div>';
+  const pents=projEntriesOn(ds);
+  let prows='';
+  pents.forEach(en=>{ prows+='<div class="pitem" onclick="openProj(\''+en.pid+'\')"><span class="pt" style="white-space:normal">'+esc(en.label)+'</span></div>'; });
+  if(prows) prows='<div class="persongroup" style="margin-bottom:10px"><div class="personitems" style="padding-top:2px">'+prows+'</div></div>';
+  h+= (prows||its.length)? prows+its.map(cardHTML).join('') : '<div class="empty" style="padding:20px">Nothing lands on this day.</div>';
   h+='<button class="ghost" onclick="closeOv(\'ov-day\');openAdd(\''+ds+'\')">+ Log a work order for this day</button>';
   return h;
 }
@@ -879,7 +988,7 @@ function openAdd(prefDate){
   document.getElementById('a-due').value='';
   segSet('a-source','Meeting');
   document.getElementById('a-delete').style.display='none';
-  fillPeopleList();
+  fillPeopleList(); fillProjOptions('');
   openOv('ov-add');
   setTimeout(()=>document.getElementById('a-wonum').focus(),150);
 }
@@ -901,7 +1010,7 @@ function editFromDetail(){
   document.getElementById('a-due').value=o.dueDate||'';
   segSet('a-source', o.source||'Other');
   document.getElementById('a-delete').style.display='block';
-  fillPeopleList();
+  fillPeopleList(); fillProjOptions(o.projectId||'');
   openOv('ov-add');
 }
 function fillPeopleList(){
@@ -924,7 +1033,8 @@ function saveOrder(){
     assignedTo, priority:document.getElementById('a-pri').value,
     followUp:document.getElementById('a-follow').value||null,
     dueDate:document.getElementById('a-due').value||null,
-    source:segVal('a-source')||'Other'
+    source:segVal('a-source')||'Other',
+    projectId:document.getElementById('a-proj').value||''
   };
   if(editId){
     const o=findOrder(editId); if(!o) return;
@@ -958,6 +1068,7 @@ function openDetail(id){
   document.getElementById('d-detailtext').textContent=o.details||'';
   document.getElementById('d-detailtext').style.display=o.details?'block':'none';
   let chips='';
+  const _pj=findProj(o.projectId); if(_pj) chips+='<span class="chip proj">'+esc(_pj.name)+'</span>';
   if(locStr(o)) chips+='<span class="chip">&#128205; '+esc(locStr(o))+'</span>';
   if(o.assignedTo) chips+='<span class="chip person">'+esc(o.assignedTo)+'</span>';
   if(o.requestedBy) chips+='<span class="chip">for '+esc(o.requestedBy)+'</span>';
@@ -1016,7 +1127,8 @@ function addUpdate(){
 
 /* ================= Nudges ================= */
 function contactFor(name){ return state.people.find(p=>p.name.toLowerCase()===String(name).toLowerCase()); }
-function buildNudge(name, items){
+function buildNudge(name, items, tasks){
+  tasks=tasks||[];
   const lines=items.map(o=>{
     let l='• '+displayTitle(o);
     const loc=locStr(o); if(loc) l+=' ('+loc+')';
@@ -1024,16 +1136,18 @@ function buildNudge(name, items){
     else if(o.followUp) l+=' (checking in '+fmtDate(o.followUp)+')';
     return l;
   });
+  tasks.forEach(x=>{ lines.push('\u2022 '+x.t.name+' ['+x.p.name+']'); });
   const first=String(name).split(/\s+/)[0];
-  return 'Hey '+first+', quick check-in on '+(items.length===1?'this one':'these')+':\n\n'+lines.join('\n')+'\n\nCan you shoot me a status when you get a minute? I get asked about these in the morning meeting. Thanks!';
+  return 'Hey '+first+', quick check-in on '+(lines.length===1?'this one':'these')+':\n\n'+lines.join('\n')+'\n\nCan you shoot me a status when you get a minute? I get asked about these in the morning meeting. Thanks!';
 }
 function openNudgePersonEnc(enc){ openNudgePerson(decodeURIComponent(enc)); }
 function openNudgePerson(name){
   const items=sortOrders(openOrders().filter(o=>o.assignedTo===name));
-  if(!items.length){ toast('Nothing open for '+name); return; }
+  const tasks=personTasks(name);
+  if(!items.length && !tasks.length){ toast('Nothing open for '+name); return; }
   nudgeCtx={ name };
   document.getElementById('n-title').textContent='Remind '+name;
-  document.getElementById('n-msg').value=buildNudge(name, items);
+  document.getElementById('n-msg').value=buildNudge(name, items, tasks);
   const c=contactFor(name);
   document.getElementById('n-contactnote').innerHTML = c && (c.phone||c.email)
     ? 'Sending to: '+esc(c.phone||'')+(c.phone&&c.email?' · ':'')+esc(c.email||'')
@@ -1108,6 +1222,207 @@ function toggleClosed(){
   render();
 }
 
+/* ================= Projects ================= */
+let projId=null, projEditId=null;
+const HEALTH_LABEL={ontrack:'On track',atrisk:'At risk',stalled:'Stalled',done:'Complete'};
+function activeProjects(){ return state.projects.filter(p=>p.health!=='done'); }
+function findProj(id){ return id? state.projects.find(p=>p.id===id) : null; }
+function projOpenWOs(pid){ return openOrders().filter(o=>o.projectId===pid); }
+function projLastUpdate(p){ const u=p.updates||[]; return u.length?u[u.length-1]:null; }
+function projChip(o){ const pj=findProj(o.projectId); return pj? '<span class="chip proj">'+esc(pj.name)+'</span>' : ''; }
+function projBlob(p){ return [p.name,p.description,p.owner,(p.milestones||[]).map(m=>m.name).join(' '),(p.tasks||[]).map(t=>t.name+' '+(t.owner||'')).join(' '),(p.updates||[]).map(u=>u.text).join(' ')].join(' ').toLowerCase(); }
+function nextMilestone(p){ const ms=(p.milestones||[]).filter(m=>!m.done&&m.date).sort((a,b)=>a.date<b.date?-1:1); return ms[0]||null; }
+function projEntriesOn(ds){
+  const out=[];
+  state.projects.forEach(p=>{
+    (p.milestones||[]).forEach(m=>{ if(m.date===ds) out.push({pid:p.id, done:!!m.done, label:(m.done?'\u2713 ':'')+m.name+' \u00b7 '+p.name, full:p.name+' \u2014 milestone: '+m.name}); });
+    if(p.targetDate===ds && p.health!=='done') out.push({pid:p.id, done:false, label:'\uD83C\uDFC1 Target \u00b7 '+p.name, full:p.name+' \u2014 target completion'});
+  });
+  return out;
+}
+function fabClick(){ if(currentView==='projects') openProjAdd(); else openAdd(); }
+function projCardHTML(p){
+  const ms=p.milestones||[];
+  const done=ms.filter(m=>m.done).length;
+  const nm=nextMilestone(p);
+  const wos=projOpenWOs(p.id).length;
+  const tt=(p.tasks||[]).length; const tdone=(p.tasks||[]).filter(t=>t.done).length;
+  const lu=projLastUpdate(p);
+  const fu=daysDiff(p.followUp);
+  const fuChip=(p.health!=='done'&&p.followUp)? '<span class="chip due '+(fu>0?'late':fu===0?'today':'')+'">&#9200; '+(fu>0?'Check-in '+fu+'d overdue':fu===0?'Check in today':'Check in '+fmtDate(p.followUp))+'</span>' : '';
+  return '<div class="card h-'+p.health+'" onclick="openProj(\''+p.id+'\')">'
+    +'<div class="titlerow"><div class="t">'+esc(p.name)+'</div></div>'
+    +'<div class="metarow">'
+    +'<span class="chip stamp '+p.health+'">'+HEALTH_LABEL[p.health]+'</span>'
+    +(p.owner?'<span class="chip person">'+esc(p.owner)+'</span>':'')
+    +fuChip
+    +(p.targetDate?'<span class="chip">&#127937; Target '+fmtDate(p.targetDate)+'</span>':'')
+    +(wos?'<span class="chip proj">'+wos+' open item'+(wos>1?'s':'')+'</span>':'')
+    +(tt?'<span class="chip proj">&#9745; '+tdone+'/'+tt+' tasks</span>':'')
+    +'</div>'
+    +(ms.length?'<div class="pbarrow"><div class="pbar"><i style="width:'+Math.round(done/ms.length*100)+'%"></i></div><span>'+done+'/'+ms.length+' milestones</span></div>':'')
+    +(nm?'<div class="lastupd"><b>Next milestone:</b> '+esc(nm.name)+' \u2014 '+fmtDate(nm.date)+'</div>':'')
+    +(lu?'<div class="lastupd"><b>'+fmtWhen(lu.ts)+':</b> '+esc(lu.text)+'</div>':'')
+    +'</div>';
+}
+function renderProjects(){
+  if(!state.projects.length) return emptyHTML('&#127959;','No projects yet. Hit <b>+</b> to add your first major project,<br>then link work orders to it from the log form.');
+  const act=activeProjects();
+  const doneP=state.projects.filter(p=>p.health==='done');
+  const sev={stalled:0,atrisk:1,ontrack:2};
+  const sorted=act.slice().sort((a,b)=>{ const d=(sev[a.health]!==undefined?sev[a.health]:3)-(sev[b.health]!==undefined?sev[b.health]:3); if(d) return d; return (a.targetDate||'9999')<(b.targetDate||'9999')?-1:1; });
+  let h='';
+  if(sorted.length) h+='<div class="sect"><div class="eyebrow"><span class="num">'+sorted.length+'</span>Active projects<span class="rule"></span></div>'+sorted.map(projCardHTML).join('')+'</div>';
+  if(doneP.length) h+='<div class="sect"><div class="eyebrow good"><span class="num">'+doneP.length+'</span>Complete<span class="rule"></span></div>'+doneP.map(projCardHTML).join('')+'</div>';
+  return h;
+}
+function projMeetRows(q){
+  let list=activeProjects();
+  if(q) list=list.filter(p=>projBlob(p).indexOf(q)>-1);
+  if(!list.length) return '';
+  const sev={stalled:0,atrisk:1,ontrack:2};
+  list=list.slice().sort((a,b)=>(sev[a.health]!==undefined?sev[a.health]:3)-(sev[b.health]!==undefined?sev[b.health]:3));
+  return '<div class="eyebrow" style="color:var(--purp);margin-top:2px"><span class="num" style="background:var(--purp-bg);color:var(--purp)">'+list.length+'</span>Major projects<span class="rule"></span></div>'
+    + list.map(p=>{
+      const lu=projLastUpdate(p);
+      const nm=nextMilestone(p);
+      const tt=(p.tasks||[]).length; const td=(p.tasks||[]).filter(t=>t.done).length;
+      const say= lu? esc(lu.text)+' <span style="color:var(--muted)">('+fmtWhen(lu.ts)+')</span>' : (nm? 'Working toward: '+esc(nm.name)+(nm.date?' by '+fmtDate(nm.date):'') : 'No update logged yet.');
+      const bcolor= p.health==='ontrack'?'var(--green)': p.health==='atrisk'?'var(--amber)':'var(--red)';
+      return '<div class="meetrow" style="border-left-color:'+bcolor+'" onclick="openProj(\''+p.id+'\')">'
+        +'<div class="t">'+esc(p.name)+'</div>'
+        +'<div class="say"><span class="lbl">If asked, say</span>'+say+'</div>'
+        +'<div class="metarow"><span class="chip stamp '+p.health+'">'+HEALTH_LABEL[p.health]+'</span>'
+        +(p.owner?'<span class="chip person">'+esc(p.owner)+'</span>':'')
+        +(nm?'<span class="chip proj">Next: '+esc(nm.name)+(nm.date?' \u00b7 '+fmtDate(nm.date):'')+'</span>':'')
+        +(tt?'<span class="chip proj">&#9745; '+td+'/'+tt+' tasks</span>':'')
+        +(p.targetDate?'<span class="chip">&#127937; '+fmtDate(p.targetDate)+'</span>':'')
+        +'</div></div>';
+    }).join('');
+}
+function openProjAdd(){
+  projEditId=null;
+  document.getElementById('pa-title').textContent='New Project';
+  ['pa-name','pa-desc','pa-owner','pa-target'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('pa-follow').value=addDaysStr(todayStr(),1);
+  document.getElementById('pa-delete').style.display='none';
+  openOv('ov-projadd');
+  setTimeout(()=>document.getElementById('pa-name').focus(),150);
+}
+function editProj(){
+  const p=findProj(projId); if(!p) return;
+  projEditId=p.id;
+  closeOv('ov-proj');
+  document.getElementById('pa-title').textContent='Edit Project';
+  document.getElementById('pa-name').value=p.name;
+  document.getElementById('pa-desc').value=p.description||'';
+  document.getElementById('pa-owner').value=p.owner||'';
+  document.getElementById('pa-follow').value=p.followUp||'';
+  document.getElementById('pa-target').value=p.targetDate||'';
+  document.getElementById('pa-delete').style.display='block';
+  openOv('ov-projadd');
+}
+function saveProj(){
+  const name=document.getElementById('pa-name').value.trim();
+  if(!name){ toast('Give the project a name'); return; }
+  const vals={ name, description:document.getElementById('pa-desc').value.trim(), owner:document.getElementById('pa-owner').value.trim(), followUp:document.getElementById('pa-follow').value||null, targetDate:document.getElementById('pa-target').value||null };
+  if(projEditId){ const p=findProj(projEditId); if(p) Object.assign(p, vals); }
+  else state.projects.push(Object.assign({ id:'pj'+Date.now()+Math.floor(Math.random()*999), health:'ontrack', milestones:[], updates:[], createdAt:Date.now() }, vals));
+  persist(); render(); closeOv('ov-projadd'); toast(projEditId?'Project updated':'Project created');
+  projEditId=null;
+}
+function deleteProj(){
+  if(!projEditId) return;
+  if(!confirm('Delete this project? Linked work orders stay; they just lose the project tag.')) return;
+  state.orders.forEach(o=>{ if(o.projectId===projEditId) o.projectId=''; });
+  state.projects=state.projects.filter(p=>p.id!==projEditId);
+  projEditId=null; persist(); render(); closeOv('ov-projadd'); toast('Project deleted');
+}
+function openProj(id){
+  closeOv('ov-day'); closeOv('ov-search');
+  projId=id; const p=findProj(id); if(!p) return;
+  document.getElementById('pj-name').textContent=p.name;
+  document.getElementById('pj-desc').textContent=p.description||'';
+  document.getElementById('pj-desc').style.display=p.description?'block':'none';
+  let chips='';
+  if(p.owner) chips+='<span class="chip person">'+esc(p.owner)+'</span>';
+  if(p.targetDate) chips+='<span class="chip">&#127937; Target '+fmtDate(p.targetDate)+'</span>';
+  chips+='<span class="chip">Started '+fmtWhen(p.createdAt)+'</span>';
+  document.getElementById('pj-chips').innerHTML=chips;
+  segSet('pj-health', p.health);
+  document.getElementById('pj-follow').value=p.followUp||'';
+  document.getElementById('pj-target').value=p.targetDate||'';
+  fillPeopleList();
+  renderMilestones(p); renderProjTasks(p); renderProjWOs(p); renderProjUpdates(p);
+  document.getElementById('pj-newupd').value='';
+  document.getElementById('pj-msname').value=''; document.getElementById('pj-msdate').value='';
+  document.getElementById('pj-tname').value=''; document.getElementById('pj-towner').value='';
+  openOv('ov-proj');
+}
+function setProjHealth(hh){ const p=findProj(projId); if(!p) return; p.health=hh; segSet('pj-health',hh); persist(); render(); if(hh==='done') toast('Project marked complete'); }
+function setProjFollow(v){ const p=findProj(projId); if(!p) return; p.followUp=v||null; persist(); render(); }
+function setProjTarget(v){ const p=findProj(projId); if(!p) return; p.targetDate=v||null; persist(); render(); }
+function renderMilestones(p){
+  const ms=p.milestones||[];
+  const done=ms.filter(m=>m.done).length;
+  document.getElementById('pj-msprog').textContent= ms.length? '\u2014 '+done+' of '+ms.length+' done':'';
+  document.getElementById('pj-ms').innerHTML= ms.length? ms.map((m,i)=>'<div class="ms-row'+(m.done?' done':'')+'" onclick="toggleMilestone('+i+')"><span class="ms-check">'+(m.done?'\u2713':'')+'</span><span class="ms-name">'+esc(m.name)+'</span><span class="ms-date">'+(m.date?fmtDate(m.date):'')+'</span><button class="qbtn" style="padding:2px 9px" onclick="event.stopPropagation();removeMilestone('+i+')">&#10005;</button></div>').join('')
+    : '<div style="font-size:13px;color:var(--muted);padding:4px 0">No milestones yet \u2014 break the project into checkpoints below.</div>';
+}
+function addMilestone(){
+  const p=findProj(projId); if(!p) return;
+  const name=document.getElementById('pj-msname').value.trim(); if(!name){ toast('Name the milestone'); return; }
+  (p.milestones=p.milestones||[]).push({ id:'ms'+Date.now(), name, date:document.getElementById('pj-msdate').value||null, done:false });
+  p.milestones.sort((a,b)=>(a.date||'9999')<(b.date||'9999')?-1:1);
+  document.getElementById('pj-msname').value=''; document.getElementById('pj-msdate').value='';
+  renderMilestones(p); persist(); render();
+}
+function toggleMilestone(i){ const p=findProj(projId); if(!p||!p.milestones||!p.milestones[i]) return; p.milestones[i].done=!p.milestones[i].done; renderMilestones(p); persist(); render(); }
+function removeMilestone(i){ const p=findProj(projId); if(!p||!p.milestones) return; p.milestones.splice(i,1); renderMilestones(p); persist(); render(); }
+function renderProjTasks(p){
+  const ts=p.tasks||[];
+  const done=ts.filter(t=>t.done).length;
+  document.getElementById('pj-tprog').textContent= ts.length? '\u2014 '+done+' of '+ts.length+' done':'';
+  document.getElementById('pj-tasks').innerHTML= ts.length? ts.map((t,i)=>'<div class="ms-row'+(t.done?' done':'')+'" onclick="toggleProjTask('+i+')"><span class="ms-check">'+(t.done?'\u2713':'')+'</span><span class="ms-name">'+esc(t.name)+'</span>'+(t.owner?'<span class="chip person" style="font-size:11px">'+esc(t.owner)+'</span>':'')+'<button class="qbtn" style="padding:2px 9px" onclick="event.stopPropagation();removeProjTask('+i+')">&#10005;</button></div>').join('')
+    : '<div style="font-size:13px;color:var(--muted);padding:4px 0">No tasks yet \u2014 list the to-dos that move this project, and hand them out.</div>';
+}
+function addProjTask(){
+  const p=findProj(projId); if(!p) return;
+  const name=document.getElementById('pj-tname').value.trim(); if(!name){ toast('Name the task'); return; }
+  const owner=document.getElementById('pj-towner').value.trim();
+  (p.tasks=p.tasks||[]).push({ id:'t'+Date.now(), name, owner, done:false, createdAt:Date.now() });
+  document.getElementById('pj-tname').value=''; document.getElementById('pj-towner').value='';
+  renderProjTasks(p); persist(); render();
+  if(owner) toast('Task added \u2014 '+owner+' owns it');
+}
+function toggleProjTask(i){ const p=findProj(projId); if(!p||!p.tasks||!p.tasks[i]) return; p.tasks[i].done=!p.tasks[i].done; renderProjTasks(p); persist(); render(); }
+function removeProjTask(i){ const p=findProj(projId); if(!p||!p.tasks) return; p.tasks.splice(i,1); renderProjTasks(p); persist(); render(); }
+function personTasks(nm){
+  const out=[];
+  state.projects.forEach(p=>{ if(p.health==='done') return; (p.tasks||[]).forEach(t=>{ if(!t.done && t.owner && t.owner.toLowerCase()===String(nm).toLowerCase()) out.push({t:t, p:p}); }); });
+  return out;
+}
+function renderProjWOs(p){
+  const wos=sortOrders(projOpenWOs(p.id));
+  document.getElementById('pj-wos').innerHTML= wos.length? wos.map(o=>'<div class="pitem" onclick="closeOv(\'ov-proj\');openDetail(\''+o.id+'\')"><span class="age'+(isOverdue(o)?' late':'')+'">'+(ageDays(o.createdAt)===0?'today':ageDays(o.createdAt)+'d')+'</span><span class="pt">'+esc(displayTitle(o))+'</span><span class="chip stamp '+o.status+'" style="font-size:11px">'+STATUS_LABEL[o.status]+'</span></div>').join('')
+    : '<div style="font-size:13px;color:var(--muted);padding:4px 0">None yet. Pick this project in the work order log form to link items here.</div>';
+}
+function renderProjUpdates(p){
+  const u=p.updates||[];
+  document.getElementById('pj-upds').innerHTML= u.length? u.slice().reverse().map(x=>'<div class="updline"><span class="when">'+fmtWhen(x.ts)+'</span><span>'+esc(x.text)+'</span></div>').join('') : '<div style="font-size:13px;color:var(--muted);padding:6px 0">No updates yet.</div>';
+}
+function addProjUpdate(){
+  const p=findProj(projId); if(!p) return;
+  const inp=document.getElementById('pj-newupd'); const txt=inp.value.trim(); if(!txt) return;
+  (p.updates=p.updates||[]).push({ts:Date.now(),text:txt});
+  inp.value=''; renderProjUpdates(p); persist(); render();
+}
+function fillProjOptions(val){
+  const sel=document.getElementById('a-proj');
+  sel.innerHTML='<option value="">\u2014 None \u2014</option>'+state.projects.filter(p=>p.health!=='done'||p.id===val).map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('');
+  sel.value=val||'';
+}
+
 /* ================= Global search ================= */
 function orderBlob(o){ return [o.title,o.woNum,o.building,o.floor,o.room,o.details,o.assignedTo,o.requestedBy,o.source,(o.updates||[]).map(u=>u.text).join(' ')].join(' ').toLowerCase(); }
 function searchHint(){ return '<div style="font-size:13px;color:var(--muted);text-align:center;padding:18px 0;line-height:1.6">Searches everything \u2014 open and closed items,<br>including update notes.</div>'; }
@@ -1125,7 +1440,9 @@ function runSearch(){
   const hits=state.orders.filter(o=>orderBlob(o).indexOf(q)>-1);
   const open=sortOrders(hits.filter(o=>o.status!=='closed'));
   const closed=hits.filter(o=>o.status==='closed').sort((a,b)=>(b.closedAt||0)-(a.closedAt||0));
+  const pj=state.projects.filter(pp=>projBlob(pp).indexOf(q)>-1);
   let h='';
+  if(pj.length) h+='<div class="eyebrow" style="color:var(--purp)"><span class="num" style="background:var(--purp-bg);color:var(--purp)">'+pj.length+'</span>Projects<span class="rule"></span></div>'+pj.map(projCardHTML).join('');
   if(open.length) h+=open.map(cardHTML).join('');
   if(closed.length) h+='<div class="eyebrow" style="margin-top:12px"><span class="num">'+closed.length+'</span>Closed<span class="rule"></span></div>'+closed.map(cardHTML).join('');
   el.innerHTML=h||'<div class="empty" style="padding:20px">No matches for \u201c'+esc(q)+'\u201d.</div>';
