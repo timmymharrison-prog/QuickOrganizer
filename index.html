@@ -96,6 +96,10 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 .eyebrow.warm{color:var(--amber)}.eyebrow.warm .num{background:var(--amber-bg);color:var(--amber)}
 .eyebrow.good{color:var(--green)}.eyebrow.good .num{background:var(--green-bg);color:var(--green)}
 .eyebrow .rule{flex:1;height:1px;background:var(--line)}
+.eyebrow.click{cursor:pointer;user-select:none;-webkit-user-select:none}
+.eyebrow.click:hover{color:var(--ink)}
+.eyebrow .caret{font-size:12px;line-height:1}
+.eyebrow .showhint{font-size:10px;letter-spacing:.06em;font-weight:600;opacity:.75}
 
 /* ---------- Cards ---------- */
 .card{
@@ -621,6 +625,7 @@ let detailId = null;
 let editId = null;
 let nudgeCtx = null;
 let showClosed = false;
+let upCollapsed = false;
 let applyingRemote = false;
 let saveTimer = null;
 
@@ -699,6 +704,7 @@ function persist(){
 function boot(){
   workspace = lsGet('wot-workspace');
   showClosed = lsGet('wot-showclosed')==='1';
+  upCollapsed = lsGet('wot-upcollapsed')==='1';
   if(!workspace){
     document.getElementById('setup').classList.add('open');
     return;
@@ -797,7 +803,10 @@ function renderToday(){
   if(late.length){ h+='<div class="sect"><div class="eyebrow hot"><span class="num">'+late.length+'</span>Past follow-up — chase now<span class="rule"></span></div>'+late.map(cardHTML).join('')+'</div>'; }
   if(chase.length){ h+='<div class="sect"><div class="eyebrow warm"><span class="num">'+chase.length+'</span>Chase today<span class="rule"></span></div>'+chase.map(cardHTML).join('')+'</div>'; }
   if(report.length){ h+='<div class="sect"><div class="eyebrow good"><span class="num">'+report.length+'</span>Have answers — report at meeting<span class="rule"></span></div>'+report.map(cardHTML).join('')+'</div>'; }
-  if(upcoming.length){ h+='<div class="sect"><div class="eyebrow"><span class="num">'+upcoming.length+'</span>Coming up (next 3 days)<span class="rule"></span></div>'+upcoming.map(cardHTML).join('')+'</div>'; }
+  if(upcoming.length){
+    h+='<div class="sect"><div class="eyebrow click" onclick="toggleUpcoming()"><span class="num">'+upcoming.length+'</span>Coming up (next 3 days) <span class="caret">'+(upCollapsed?'&#9656;':'&#9662;')+'</span><span class="rule"></span><span class="showhint">'+(upCollapsed?'TAP TO SHOW':'TAP TO HIDE')+'</span></div>'
+      +(upCollapsed?'':upcoming.map(cardHTML).join(''))+'</div>';
+  }
   if(!h) h=emptyHTML('&#9989;','All caught up for today. Open items are in <b>All Items</b>.');
   return h;
 }
@@ -1451,6 +1460,11 @@ function runSearch(){
 /* ================= Misc ================= */
 function openOv(id){ document.getElementById(id).classList.add('open'); }
 function closeOv(id){ document.getElementById(id).classList.remove('open'); }
+function toggleUpcoming(){
+  upCollapsed=!upCollapsed;
+  lsSet('wot-upcollapsed', upCollapsed?'1':'0');
+  render();
+}
 let toastTimer=null;
 function toast(msg){
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
