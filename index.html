@@ -6,7 +6,7 @@
 <title>Follow-Up Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <style>
@@ -267,7 +267,7 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
   background:var(--ink);color:#fff;font-size:14px;font-weight:600;padding:11px 18px;border-radius:10px;
   opacity:0;pointer-events:none;transition:.22s;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis;
 }
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
 
 /* ---------- Projects ---------- */
 .chip.proj{background:var(--purp-bg);color:var(--purp)}
@@ -365,6 +365,18 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
   .fab{bottom:calc(74px + env(safe-area-inset-bottom))}
   .toast{bottom:calc(140px + env(safe-area-inset-bottom))}
 }
+/* ---------- Quest Mode ---------- */
+body.quest{--ink:#2B1E52;--ink-2:#372868;--ink-3:#463581;--paper:#F7F0DF;--card:#FFFBEE;--line:#E4D5B4;--text:#3D3050;--muted:#8B7962;--accent:#D9A521;--purp:#8A4FA8;--purp-bg:#F1E7F7;--blue:#5B5AA8;--blue-bg:#EBEAF6;--shadow:0 1px 3px rgba(60,40,90,.12),0 4px 14px rgba(60,40,90,.08)}
+body.quest .brand h1,body.quest .topbar h2,body.quest .eyebrow,body.quest .sheethead h3,body.quest .cv-mon,body.quest .cv-aghead,body.quest .setupcard h2,body.quest .f label,body.quest .dowrow span,body.quest .cv-dow span{font-family:'Cinzel',serif;letter-spacing:.04em}
+body.quest .chip.stamp{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.05em}
+body.quest .avatar{font-family:'Cinzel',serif}
+body.quest .card,body.quest .meetrow,body.quest .persongroup{border-radius:13px}
+body.quest .brand .sub{font-style:italic;letter-spacing:.05em}
+body.quest .fab{border-radius:50%;box-shadow:0 6px 22px rgba(217,165,33,.5)}
+body.quest .say{background:#F5EEDC}
+.spark{position:fixed;z-index:300;pointer-events:none;font-size:15px;animation:sparkfly .72s ease-out forwards}
+@keyframes sparkfly{from{opacity:1;transform:translate(0,0) scale(1)}to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.35)}}
+
 @media(prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
 }
@@ -388,13 +400,13 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 <div class="app">
   <!-- Desktop rail -->
   <nav class="rail">
-    <div class="brand"><h1>Follow-Up<br>Tracker</h1><div class="sub">Work order desk</div></div>
-    <button class="navbtn" data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span>Today<span class="cnt" id="rc-today">0</span></button>
-    <button class="navbtn" data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span>Meeting Mode<span class="cnt" id="rc-meeting">0</span></button>
-    <button class="navbtn" data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span>Calendar</button>
-    <button class="navbtn" data-v="projects" onclick="setView('projects')"><span class="ico">&#127959;</span>Projects<span class="cnt" id="rc-projects">0</span></button>
-    <button class="navbtn" data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span>My Team<span class="cnt" id="rc-people">0</span></button>
-    <button class="navbtn" data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span>All Items<span class="cnt" id="rc-all">0</span></button>
+    <div class="brand"><h1 id="brand-h1">Follow-Up<br>Tracker</h1><div class="sub" id="brand-sub">Work order desk</div></div>
+    <button class="navbtn" data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span><span class="lbltxt">Today</span><span class="cnt" id="rc-today">0</span></button>
+    <button class="navbtn" data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span><span class="lbltxt">Meeting Mode</span><span class="cnt" id="rc-meeting">0</span></button>
+    <button class="navbtn" data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span><span class="lbltxt">Calendar</span></button>
+    <button class="navbtn" data-v="projects" onclick="setView('projects')"><span class="ico">&#127959;</span><span class="lbltxt">Projects</span><span class="cnt" id="rc-projects">0</span></button>
+    <button class="navbtn" data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span><span class="lbltxt">My Team</span><span class="cnt" id="rc-people">0</span></button>
+    <button class="navbtn" data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span><span class="lbltxt">All Items</span><span class="cnt" id="rc-all">0</span></button>
     <div class="spacer"></div>
     <button class="navbtn" onclick="openSettings()"><span class="ico">&#9881;</span>Settings</button>
     <div class="syncline"><span class="dot" id="syncdot"></span><span id="synctext">Connecting…</span></div>
@@ -413,12 +425,12 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
 
 <!-- Mobile bottom bar -->
 <nav class="bottombar">
-  <button data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span>Today<span class="bdg" id="bc-today" style="display:none">0</span></button>
-  <button data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span>Meeting</button>
-  <button data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span>Calendar</button>
-  <button data-v="projects" onclick="setView('projects')"><span class="ico">&#127959;</span>Projects</button>
-  <button data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span>Team</button>
-  <button data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span>All</button>
+  <button data-v="today" onclick="setView('today')"><span class="ico">&#9728;</span><span class="lbltxt">Today</span><span class="bdg" id="bc-today" style="display:none">0</span></button>
+  <button data-v="meeting" onclick="setView('meeting')"><span class="ico">&#128227;</span><span class="lbltxt">Meeting</span></button>
+  <button data-v="cal" onclick="setView('cal')"><span class="ico">&#128197;</span><span class="lbltxt">Calendar</span></button>
+  <button data-v="projects" onclick="setView('projects')"><span class="ico">&#127959;</span><span class="lbltxt">Projects</span></button>
+  <button data-v="people" onclick="setView('people')"><span class="ico">&#128101;</span><span class="lbltxt">Team</span></button>
+  <button data-v="all" onclick="setView('all')"><span class="ico">&#128203;</span><span class="lbltxt">All</span></button>
 </nav>
 
 <button class="fab" onclick="fabClick()" title="Log it">+</button>
@@ -528,7 +540,8 @@ input,select,textarea{font-family:inherit;font-size:15px;color:var(--text)}
       Sync status: <b id="s-syncstate">—</b><br>
       <span id="s-synchelp"></span>
     </div>
-    <button class="ghost" style="margin-top:14px" onclick="toggleClosed()" id="s-showclosed">Show closed items in All view</button>
+    <button class="ghost" style="margin-top:16px;background:var(--purp-bg);color:var(--purp);font-weight:700" id="themebtn" onclick="toggleTheme()">Switch to Quest Mode &#10024;</button>
+    <button class="ghost" style="margin-top:10px" onclick="toggleClosed()" id="s-showclosed">Show closed items in All view</button>
   </div>
 </div>
 
@@ -629,7 +642,37 @@ let upCollapsed = false;
 let applyingRemote = false;
 let saveTimer = null;
 
-const STATUS_LABEL = { new:'New', delegated:'Delegated', waiting:'Waiting on update', ready:'Ready to report', closed:'Closed' };
+let theme='dispatch';
+const COPY={
+ dispatch:{
+  brand:'Follow-Up<br>Tracker', sub:'Work order desk',
+  today:'Today', meeting:'Meeting Mode', cal:'Calendar', projects:'Projects', people:'My Team', all:'All Items',
+  nav:{today:'Today',meeting:'Meeting',cal:'Calendar',projects:'Projects',people:'Team',all:'All'},
+  overdue:'Past follow-up \u2014 chase now', chase:'Chase today', report:'Have answers \u2014 report at meeting', upcoming:'Coming up (next 3 days)', projchase:'Projects to check on',
+  done:'\u2713 Done', bump:'\u21b7 +1 day', nudge:'Send reminder', say:'If asked, say',
+  logTitle:'Log Work Order', editTitle:'Edit Work Order', newProj:'New Project', editProjTitle:'Edit Project',
+  closedToast:'Closed \u2014 tap here to undo',
+  majors:'Major projects', wosec:'Work orders',
+  themeBtn:'Switch to Quest Mode \u2728',
+  status:{new:'New',delegated:'Delegated',waiting:'Waiting on update',ready:'Ready to report',closed:'Closed'},
+  health:{ontrack:'On track',atrisk:'At risk',stalled:'Stalled',done:'Complete'}
+ },
+ quest:{
+  brand:'Quest<br>Ledger', sub:'Keeper of deeds',
+  today:"Today's Quests", meeting:'The Council', cal:'The Almanac', projects:'Campaigns', people:'The Guild', all:'The Ledger',
+  nav:{today:'Quests',meeting:'Council',cal:'Almanac',projects:'Campaigns',people:'Guild',all:'Ledger'},
+  overdue:'Overdue quests \u2014 give chase!', chase:'Quests for today', report:'Victories to proclaim', upcoming:'On the horizon (3 days)', projchase:'Campaigns awaiting counsel',
+  done:'\u2694 Complete', bump:'\u21b7 Rest a day', nudge:'Send a raven', say:'When the council asks',
+  logTitle:'Scribe a New Quest', editTitle:'Amend the Quest', newProj:'Begin a Campaign', editProjTitle:'Amend the Campaign',
+  closedToast:'Quest complete! \u2728 Tap to undo',
+  majors:'Great campaigns', wosec:'Quests',
+  themeBtn:'Return to Dispatch Mode',
+  status:{new:'Unclaimed',delegated:'Dispatched',waiting:'Awaiting word',ready:'Victory at hand',closed:'Completed'},
+  health:{ontrack:'Fair winds',atrisk:'Storm clouds',stalled:'Cursed',done:'Triumphant'}
+ }
+};
+function L(k){ return COPY[theme][k]; }
+let STATUS_LABEL=COPY.dispatch.status;
 
 /* ================= Storage helpers ================= */
 function lsGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
@@ -705,6 +748,8 @@ function boot(){
   workspace = lsGet('wot-workspace');
   showClosed = lsGet('wot-showclosed')==='1';
   upCollapsed = lsGet('wot-upcollapsed')==='1';
+  theme = lsGet('wot-theme')==='quest' ? 'quest' : 'dispatch';
+  applyTheme();
   if(!workspace){
     document.getElementById('setup').classList.add('open');
     return;
@@ -736,8 +781,7 @@ function applyCode(){
 function setView(v){
   currentView=v;
   document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('active', b.dataset.v===v));
-  const titles={ today:'Today', meeting:'Meeting Mode', cal:'Calendar', projects:'Projects', people:'My Team', all:'All Items' };
-  document.getElementById('viewtitle').textContent=titles[v];
+  document.getElementById('viewtitle').textContent=COPY[theme][v];
   render();
   document.getElementById('content').scrollTop=0;
 }
@@ -786,7 +830,9 @@ function cardHTML(o){
     +projChip(o)
     +(locStr(o)?'<span class="chip">&#128205; '+esc(locStr(o))+'</span>':'')
     +(o.source?'<span class="chip">via '+esc(o.source)+'</span>':'')
-    +'</div>'+luHTML+'</div>';
+    +'</div>'+luHTML
+    +(o.status!=='closed'?'<div class="qactions"><button class="qbtn grn" onclick="quickDone(\''+o.id+'\',event)">'+L('done')+'</button><button class="qbtn" onclick="quickBump(\''+o.id+'\',event)">'+L('bump')+'</button></div>':'')
+    +'</div>';
 }
 function emptyHTML(icon, msg){ return '<div class="empty"><div class="big">'+icon+'</div>'+msg+'</div>'; }
 
@@ -799,12 +845,12 @@ function renderToday(){
   const projChase=activeProjects().filter(pp=>{ const dd=daysDiff(pp.followUp); return dd!==null && dd>=0; });
   let h='';
   if(!open.length && !projChase.length) return emptyHTML('&#9728;','Nothing open. When your name gets called or a text comes in,<br>hit <b>+</b> and log it in ten seconds.');
-  if(projChase.length){ h+='<div class="sect"><div class="eyebrow" style="color:var(--purp)"><span class="num" style="background:var(--purp-bg);color:var(--purp)">'+projChase.length+'</span>Projects to check on<span class="rule"></span></div>'+projChase.map(projCardHTML).join('')+'</div>'; }
-  if(late.length){ h+='<div class="sect"><div class="eyebrow hot"><span class="num">'+late.length+'</span>Past follow-up — chase now<span class="rule"></span></div>'+late.map(cardHTML).join('')+'</div>'; }
-  if(chase.length){ h+='<div class="sect"><div class="eyebrow warm"><span class="num">'+chase.length+'</span>Chase today<span class="rule"></span></div>'+chase.map(cardHTML).join('')+'</div>'; }
-  if(report.length){ h+='<div class="sect"><div class="eyebrow good"><span class="num">'+report.length+'</span>Have answers — report at meeting<span class="rule"></span></div>'+report.map(cardHTML).join('')+'</div>'; }
+  if(projChase.length){ h+='<div class="sect"><div class="eyebrow" style="color:var(--purp)"><span class="num" style="background:var(--purp-bg);color:var(--purp)">'+projChase.length+'</span>'+L('projchase')+'<span class="rule"></span></div>'+projChase.map(projCardHTML).join('')+'</div>'; }
+  if(late.length){ h+='<div class="sect"><div class="eyebrow hot"><span class="num">'+late.length+'</span>'+L('overdue')+'<span class="rule"></span></div>'+late.map(cardHTML).join('')+'</div>'; }
+  if(chase.length){ h+='<div class="sect"><div class="eyebrow warm"><span class="num">'+chase.length+'</span>'+L('chase')+'<span class="rule"></span></div>'+chase.map(cardHTML).join('')+'</div>'; }
+  if(report.length){ h+='<div class="sect"><div class="eyebrow good"><span class="num">'+report.length+'</span>'+L('report')+'<span class="rule"></span></div>'+report.map(cardHTML).join('')+'</div>'; }
   if(upcoming.length){
-    h+='<div class="sect"><div class="eyebrow click" onclick="toggleUpcoming()"><span class="num">'+upcoming.length+'</span>Coming up (next 3 days) <span class="caret">'+(upCollapsed?'&#9656;':'&#9662;')+'</span><span class="rule"></span><span class="showhint">'+(upCollapsed?'TAP TO SHOW':'TAP TO HIDE')+'</span></div>'
+    h+='<div class="sect"><div class="eyebrow click" onclick="toggleUpcoming()"><span class="num">'+upcoming.length+'</span>'+L('upcoming')+' <span class="caret">'+(upCollapsed?'&#9656;':'&#9662;')+'</span><span class="rule"></span><span class="showhint">'+(upCollapsed?'TAP TO SHOW':'TAP TO HIDE')+'</span></div>'
       +(upCollapsed?'':upcoming.map(cardHTML).join(''))+'</div>';
   }
   if(!h) h=emptyHTML('&#9989;','All caught up for today. Open items are in <b>All Items</b>.');
@@ -830,7 +876,7 @@ function meetListHTML(list,q){
       : (o.status==='new' ? 'Not delegated yet — assigning it out.' : 'Delegated to '+esc(o.assignedTo||'the team')+', waiting on their update.');
     return '<div class="meetrow s-'+o.status+(late?' overdue':'')+'" onclick="openDetail(\''+o.id+'\')">'
       +'<div class="t">'+esc(displayTitle(o))+'</div>'
-      +'<div class="say"><span class="lbl">If asked, say</span>'+say+'</div>'
+      +'<div class="say"><span class="lbl">'+L('say')+'</span>'+say+'</div>'
       +'<div class="metarow"><span class="chip stamp '+o.status+'">'+STATUS_LABEL[o.status]+'</span>'
       +(o.assignedTo?'<span class="chip person">'+esc(o.assignedTo)+'</span>':'')
       +(o.followUp?'<span class="chip due'+(late?' late':'')+'">Next check: '+fmtDate(o.followUp)+'</span>':'')
@@ -839,7 +885,7 @@ function meetListHTML(list,q){
       +'</div></div>';
   }).join('');
   if(!pr && !wo) return emptyHTML('&#128269;','No matches. Clear the search to see everything.');
-  return pr + (pr&&wo? '<div class="eyebrow" style="margin-top:14px"><span class="num">'+list.length+'</span>Work orders<span class="rule"></span></div>':'') + wo;
+  return pr + (pr&&wo? '<div class="eyebrow" style="margin-top:14px"><span class="num">'+list.length+'</span>'+L('wosec')+'<span class="rule"></span></div>':'') + wo;
 }
 function rerenderMeeting(inp){
   const q=(window._meetQ||'').toLowerCase();
@@ -866,7 +912,7 @@ function renderPeople(){
     const stat=bits.join(' \u00b7 ')+(late?' \u00b7 <span class="late">'+late+' past follow-up</span>':'');
     return '<div class="persongroup"><div class="personhead"><div class="avatar">'+esc(initials)+'</div>'
       +'<div><div class="nm">'+esc(nm)+'</div><div class="st">'+stat+'</div></div>'
-      +'<button class="nudgebtn" onclick="event.stopPropagation();openNudgePersonEnc(\''+encodeURIComponent(nm)+'\')">Send reminder</button></div>'
+      +'<button class="nudgebtn" onclick="event.stopPropagation();openNudgePersonEnc(\''+encodeURIComponent(nm)+'\')">'+L('nudge')+'</button></div>'
       +'<div class="personitems">'
       +items.map(o=>{
         const a=ageDays(o.createdAt); const lt=isOverdue(o);
@@ -983,7 +1029,7 @@ function segSet(id,val){ document.querySelectorAll('#'+id+' button').forEach(b=>
 
 function openAdd(prefDate){
   editId=null;
-  document.getElementById('add-title').textContent='Log Work Order';
+  document.getElementById('add-title').textContent=L('logTitle');
   document.getElementById('a-title').value='';
   document.getElementById('a-wonum').value='';
   document.getElementById('a-bldg').value='';
@@ -1005,7 +1051,7 @@ function editFromDetail(){
   const o=findOrder(detailId); if(!o) return;
   editId=o.id;
   closeOv('ov-detail');
-  document.getElementById('add-title').textContent='Edit Work Order';
+  document.getElementById('add-title').textContent=L('editTitle');
   document.getElementById('a-title').value=o.title||'';
   document.getElementById('a-wonum').value=o.woNum||'';
   document.getElementById('a-bldg').value=o.building||'';
@@ -1233,7 +1279,7 @@ function toggleClosed(){
 
 /* ================= Projects ================= */
 let projId=null, projEditId=null;
-const HEALTH_LABEL={ontrack:'On track',atrisk:'At risk',stalled:'Stalled',done:'Complete'};
+let HEALTH_LABEL=COPY.dispatch.health;
 function activeProjects(){ return state.projects.filter(p=>p.health!=='done'); }
 function findProj(id){ return id? state.projects.find(p=>p.id===id) : null; }
 function projOpenWOs(pid){ return openOrders().filter(o=>o.projectId===pid); }
@@ -1291,7 +1337,7 @@ function projMeetRows(q){
   if(!list.length) return '';
   const sev={stalled:0,atrisk:1,ontrack:2};
   list=list.slice().sort((a,b)=>(sev[a.health]!==undefined?sev[a.health]:3)-(sev[b.health]!==undefined?sev[b.health]:3));
-  return '<div class="eyebrow" style="color:var(--purp);margin-top:2px"><span class="num" style="background:var(--purp-bg);color:var(--purp)">'+list.length+'</span>Major projects<span class="rule"></span></div>'
+  return '<div class="eyebrow" style="color:var(--purp);margin-top:2px"><span class="num" style="background:var(--purp-bg);color:var(--purp)">'+list.length+'</span>'+L('majors')+'<span class="rule"></span></div>'
     + list.map(p=>{
       const lu=projLastUpdate(p);
       const nm=nextMilestone(p);
@@ -1300,7 +1346,7 @@ function projMeetRows(q){
       const bcolor= p.health==='ontrack'?'var(--green)': p.health==='atrisk'?'var(--amber)':'var(--red)';
       return '<div class="meetrow" style="border-left-color:'+bcolor+'" onclick="openProj(\''+p.id+'\')">'
         +'<div class="t">'+esc(p.name)+'</div>'
-        +'<div class="say"><span class="lbl">If asked, say</span>'+say+'</div>'
+        +'<div class="say"><span class="lbl">'+L('say')+'</span>'+say+'</div>'
         +'<div class="metarow"><span class="chip stamp '+p.health+'">'+HEALTH_LABEL[p.health]+'</span>'
         +(p.owner?'<span class="chip person">'+esc(p.owner)+'</span>':'')
         +(nm?'<span class="chip proj">Next: '+esc(nm.name)+(nm.date?' \u00b7 '+fmtDate(nm.date):'')+'</span>':'')
@@ -1311,7 +1357,7 @@ function projMeetRows(q){
 }
 function openProjAdd(){
   projEditId=null;
-  document.getElementById('pa-title').textContent='New Project';
+  document.getElementById('pa-title').textContent=L('newProj');
   ['pa-name','pa-desc','pa-owner','pa-target'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('pa-follow').value=addDaysStr(todayStr(),1);
   document.getElementById('pa-delete').style.display='none';
@@ -1322,7 +1368,7 @@ function editProj(){
   const p=findProj(projId); if(!p) return;
   projEditId=p.id;
   closeOv('ov-proj');
-  document.getElementById('pa-title').textContent='Edit Project';
+  document.getElementById('pa-title').textContent=L('editProjTitle');
   document.getElementById('pa-name').value=p.name;
   document.getElementById('pa-desc').value=p.description||'';
   document.getElementById('pa-owner').value=p.owner||'';
@@ -1460,16 +1506,79 @@ function runSearch(){
 /* ================= Misc ================= */
 function openOv(id){ document.getElementById(id).classList.add('open'); }
 function closeOv(id){ document.getElementById(id).classList.remove('open'); }
+function applyTheme(){
+  document.body.classList.toggle('quest', theme==='quest');
+  STATUS_LABEL=COPY[theme].status;
+  HEALTH_LABEL=COPY[theme].health;
+  document.getElementById('brand-h1').innerHTML=COPY[theme].brand;
+  document.getElementById('brand-sub').textContent=COPY[theme].sub;
+  document.querySelectorAll('.rail [data-v]').forEach(b=>{ const t=b.querySelector('.lbltxt'); if(t) t.textContent=COPY[theme][b.dataset.v]; });
+  document.querySelectorAll('.bottombar [data-v]').forEach(b=>{ const t=b.querySelector('.lbltxt'); if(t) t.textContent=COPY[theme].nav[b.dataset.v]; });
+  document.querySelectorAll('#d-status button').forEach(b=>b.textContent=STATUS_LABEL[b.dataset.x]);
+  document.querySelectorAll('#pj-health button').forEach(b=>b.textContent=HEALTH_LABEL[b.dataset.x]);
+  document.getElementById('viewtitle').textContent=COPY[theme][currentView];
+  document.getElementById('themebtn').textContent=COPY[theme].themeBtn;
+  render();
+}
+function toggleTheme(){
+  theme = theme==='quest' ? 'dispatch' : 'quest';
+  lsSet('wot-theme', theme);
+  applyTheme();
+  toast(theme==='quest' ? 'Welcome, keeper of quests \u2728' : 'Back to business.');
+}
+function sparkle(x,y){
+  const chars=['\u2726','\u2727','\u22c6','\u2728'];
+  const cols=['#D9A521','#8A4FA8','#B5443C','#2E7D5B'];
+  for(let i=0;i<10;i++){
+    const sp=document.createElement('span');
+    sp.className='spark';
+    sp.textContent=chars[Math.floor(Math.random()*chars.length)];
+    sp.style.left=x+'px'; sp.style.top=y+'px';
+    sp.style.setProperty('--dx',(Math.random()*130-65)+'px');
+    sp.style.setProperty('--dy',(-30-Math.random()*95)+'px');
+    sp.style.color=cols[i%4];
+    document.body.appendChild(sp);
+    setTimeout(()=>sp.remove(),760);
+  }
+}
 function toggleUpcoming(){
   upCollapsed=!upCollapsed;
   lsSet('wot-upcollapsed', upCollapsed?'1':'0');
   render();
 }
+let undoId=null, undoPrev=null;
+function quickDone(id,ev){
+  if(ev) ev.stopPropagation();
+  const o=findOrder(id); if(!o) return;
+  const prev=o.status;
+  o.status='closed'; o.closedAt=Date.now();
+  persist(); render();
+  if(theme==='quest'&&ev) sparkle(ev.clientX,ev.clientY);
+  toast(L('closedToast'));
+  undoId=id; undoPrev=prev;
+}
+function quickBump(id,ev){
+  if(ev) ev.stopPropagation();
+  const o=findOrder(id); if(!o) return;
+  const base=(o.followUp && daysDiff(o.followUp)<0)? o.followUp : todayStr();
+  o.followUp=addDaysStr(base,1);
+  persist(); render();
+  toast('Follow-up bumped to '+fmtDate(o.followUp));
+}
 let toastTimer=null;
 function toast(msg){
+  undoId=null; undoPrev=null;
   const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
-  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2400);
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3400);
 }
+document.getElementById('toast').addEventListener('click', function(){
+  if(!undoId) return;
+  const o=findOrder(undoId);
+  if(o){ o.status=undoPrev||'waiting'; o.closedAt=null; persist(); render(); }
+  undoId=null; undoPrev=null;
+  this.classList.remove('show');
+  setTimeout(()=>toast('Reopened'),50);
+});
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){ document.querySelectorAll('.overlay.open').forEach(o=>o.classList.remove('open')); }
 });
